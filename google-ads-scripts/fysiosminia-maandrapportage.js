@@ -177,7 +177,7 @@ function getTopKeywords(startDate, endDate, limit) {
     'SELECT ad_group_criterion.keyword.text, ' +
     '       ad_group_criterion.keyword.match_type, ' +
     '       metrics.impressions, metrics.clicks, metrics.ctr, ' +
-    '       metrics.average_cpc, metrics.conversions ' +
+    '       metrics.average_cpc, metrics.conversions, metrics.all_conversions ' +
     'FROM keyword_view ' +
     "WHERE segments.date BETWEEN '" + startDate + "' AND '" + endDate + "' " +
     "  AND ad_group_criterion.status = 'ENABLED' " +
@@ -199,7 +199,8 @@ function getTopKeywords(startDate, endDate, limit) {
       clicks:      Number(m.clicks) || 0,
       ctr:         Number(m.ctr) || 0,
       avgCpc:      micros(m.averageCpc),
-      conv:        Number(m.conversions) || 0
+      conv:        Number(m.conversions) || 0,
+      allConv:     Number(m.allConversions) || 0
     });
   }
   return out;
@@ -217,7 +218,7 @@ function getConversionsByAction(startDate, endDate) {
   for (var e = 0; e < ex.length; e++) exclude[('' + ex[e]).toLowerCase()] = true;
 
   var query =
-    'SELECT segments.conversion_action_name, metrics.conversions ' +
+    'SELECT segments.conversion_action_name, metrics.conversions, metrics.all_conversions ' +
     'FROM campaign ' +
     "WHERE segments.date BETWEEN '" + startDate + "' AND '" + endDate + "'";
 
@@ -227,15 +228,17 @@ function getConversionsByAction(startDate, endDate) {
     var r = rows.next();
     var name = (r.segments && r.segments.conversionActionName) ? r.segments.conversionActionName : 'Overig';
     if (exclude[name.toLowerCase()]) continue;
-    if (!map[name]) map[name] = { name: name, conv: 0 };
-    map[name].conv += Number(r.metrics.conversions) || 0;
+    if (!map[name]) map[name] = { name: name, conv: 0, allConv: 0 };
+    map[name].conv    += Number(r.metrics.conversions) || 0;
+    map[name].allConv += Number(r.metrics.allConversions) || 0;
   }
 
+  // Toon alle metingen met activiteit (ook acties die alleen onder 'Alle conv.' vallen).
   var list = [];
   for (var k in map) {
-    if (map[k].conv > 0) list.push(map[k]);
+    if (map[k].allConv > 0 || map[k].conv > 0) list.push(map[k]);
   }
-  list.sort(function (a, z) { return z.conv - a.conv; });
+  list.sort(function (a, z) { return z.allConv - a.allConv; });
   return list;
 }
 
@@ -250,14 +253,14 @@ function getMonthlyTrend(current, tz, n) {
     var d = new Date(refY, refM - i, 1);
     var m = { key: Utilities.formatDate(d, tz, 'yyyy-MM'),
               label: maandKort[d.getMonth()] + " '" + ('' + d.getFullYear()).slice(2),
-              cost: 0, conv: 0 };
+              conv: 0, allConv: 0 };
     months.push(m);
     byKey[m.key] = m;
   }
 
   var startDate = Utilities.formatDate(new Date(refY, refM - (n - 1), 1), tz, 'yyyy-MM-dd');
   var query =
-    'SELECT segments.month, metrics.cost_micros, metrics.conversions ' +
+    'SELECT segments.month, metrics.conversions, metrics.all_conversions ' +
     'FROM campaign ' +
     "WHERE segments.date BETWEEN '" + startDate + "' AND '" + current.end + "'";
 
@@ -266,8 +269,8 @@ function getMonthlyTrend(current, tz, n) {
     var r = rows.next();
     var mk = ('' + r.segments.month).substring(0, 7); // yyyy-MM
     if (byKey[mk]) {
-      byKey[mk].cost += micros(r.metrics.costMicros);
-      byKey[mk].conv += Number(r.metrics.conversions) || 0;
+      byKey[mk].conv    += Number(r.metrics.conversions) || 0;
+      byKey[mk].allConv += Number(r.metrics.allConversions) || 0;
     }
   }
   return months;
@@ -356,9 +359,10 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous) 
         td(fmtPercent(k.ctr)) +
         td(fmtCurrency(k.avgCpc)) +
         td(fmtDecimal(k.conv)) +
+        td(fmtDecimal(k.allConv)) +
       '</tr>';
   }).join('') :
-  '<tr><td colspan="6" style="padding:14px;text-align:center;color:' + b.muted + ';">Geen zoekwoorddata voor deze periode.</td></tr>';
+  '<tr><td colspan="7" style="padding:14px;text-align:center;color:' + b.muted + ';">Geen zoekwoorddata voor deze periode.</td></tr>';
 
   // Samenvatting in gewone taal.
   var summaryBlock = CONFIG.show.summary ?
@@ -378,16 +382,16 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous) 
       '<div style="font-size:11px;color:' + b.muted + ';margin:0 0 22px;">Toelichting automatisch afgeleid uit de cijfers; externe factoren (seizoen, concurrentie of wijzigingen in de campagnes) kunnen ook meespelen.</div>';
   }
 
-  // Conversies per actie (Google Ads-conversies).
+  // Conversies per actie (alle Google Ads-metingen: Conv. + Alle conv.).
   var convRowsHtml = convActions.length ? convActions.map(function (a) {
-    return '<tr>' + td(escapeHtml(a.name), 'left') + td(fmtDecimal(a.conv)) + '</tr>';
+    return '<tr>' + td(escapeHtml(a.name), 'left') + td(fmtDecimal(a.conv)) + td(fmtDecimal(a.allConv)) + '</tr>';
   }).join('') :
-  '<tr><td colspan="2" style="padding:14px;text-align:center;color:' + b.muted + ';">Geen conversies in deze periode.</td></tr>';
+  '<tr><td colspan="3" style="padding:14px;text-align:center;color:' + b.muted + ';">Geen conversies in deze periode.</td></tr>';
 
   var convBlock = CONFIG.show.conversionsByAction ?
     '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.orange + ';margin:28px 0 10px;">Conversies per actie</div>' +
     '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:12px;border:1px solid ' + b.border + ';border-radius:8px;overflow:hidden;">' +
-      '<tr style="background:' + b.green + ';">' + thd('Conversieactie', 'left') + thd('Conv.') + '</tr>' +
+      '<tr style="background:' + b.green + ';">' + thd('Conversieactie', 'left') + thd('Conv.') + thd('Alle conv.') + '</tr>' +
       convRowsHtml +
     '</table>' : '';
 
@@ -453,7 +457,7 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous) 
       '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.orange + ';margin:28px 0 10px;">Top ' + CONFIG.keywordLimit + ' zoekwoorden (op klikken)</div>' +
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:12px;border:1px solid ' + b.border + ';border-radius:8px;overflow:hidden;">' +
         '<tr style="background:' + b.green + ';">' +
-          thd('Zoekwoord', 'left') + thd('Vert.') + thd('Klikken') + thd('CTR') + thd('Gem. CPC') + thd('Conv.') +
+          thd('Zoekwoord', 'left') + thd('Vert.') + thd('Klikken') + thd('CTR') + thd('Gem. CPC') + thd('Conv.') + thd('Alle conv.') +
         '</tr>' +
         keywordRows +
       '</table>' +
@@ -594,48 +598,42 @@ function generateInsights(curTot, prevTot, lost) {
   return out;
 }
 
-/** Trend als twee visuele verticale staafgrafieken (conversies + kosten per maand). */
+/**
+ * Trend als visuele lijngrafiek (Conversies + Alle conversies per maand).
+ * De grafiek wordt als afbeelding gerenderd via QuickChart, zodat de lijnen
+ * betrouwbaar zichtbaar zijn in e-mailclients (die eigen tekenwerk/JS blokkeren).
+ */
 function buildTrend(trend) {
   var b = CONFIG.brand;
-  var euro = function (v) { return CONFIG.currencySymbol + ' ' + fmtInt(v); };
+  var labels  = trend.map(function (m) { return m.label; });
+  var conv    = trend.map(function (m) { return round2(m.conv); });
+  var allConv = trend.map(function (m) { return round2(m.allConv); });
+
+  var chart = {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'Conversies',      data: conv,    borderColor: b.green,  backgroundColor: b.green,  fill: false, borderWidth: 3, lineTension: 0.3, pointRadius: 3, pointBackgroundColor: b.green },
+        { label: 'Alle conversies', data: allConv, borderColor: b.orange, backgroundColor: b.orange, fill: false, borderWidth: 3, lineTension: 0.3, pointRadius: 3, pointBackgroundColor: b.orange }
+      ]
+    },
+    options: {
+      legend: { position: 'bottom', labels: { fontSize: 12 } },
+      scales: { yAxes: [{ ticks: { beginAtZero: true } }] }
+    }
+  };
+
+  var url = 'https://quickchart.io/chart?bkg=white&w=600&h=260&c=' + encodeURIComponent(JSON.stringify(chart));
 
   return '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.orange + ';margin:28px 0 10px;">Trend laatste ' + trend.length + ' maanden</div>' +
-    '<div style="overflow-x:auto;">' +
-    '<div style="border:1px solid ' + b.border + ';border-radius:8px;padding:16px 14px;min-width:480px;">' +
-      '<div style="font-size:12px;font-weight:bold;color:' + b.text + ';margin:0 0 4px;">Conversies per maand</div>' +
-      vBarChart(trend, 'conv', b.green, fmtDecimal) +
-      '<div style="border-top:1px solid ' + b.border + ';margin:18px 0 0;"></div>' +
-      '<div style="font-size:12px;font-weight:bold;color:' + b.text + ';margin:16px 0 4px;">Kosten per maand</div>' +
-      vBarChart(trend, 'cost', b.orange, euro) +
-    '</div>' +
+    '<div style="border:1px solid ' + b.border + ';border-radius:8px;padding:12px;text-align:center;">' +
+      '<img src="' + url + '" alt="Trend conversies en alle conversies per maand" width="100%" style="max-width:600px;border:0;outline:none;">' +
     '</div>';
 }
 
-/** Eén verticale staafgrafiek: per maand een staaf met waardelabel en maandlabel. */
-function vBarChart(months, valueKey, color, fmt) {
-  var b = CONFIG.brand;
-  var H = 90; // hoogte grafiekvlak in px
-  var max = 0;
-  for (var i = 0; i < months.length; i++) if (months[i][valueKey] > max) max = months[i][valueKey];
-
-  var bars = months.map(function (m) {
-    var v = m[valueKey] || 0;
-    var h = max ? Math.max(2, Math.round(v / max * H)) : 0;
-    return '<td style="vertical-align:bottom;text-align:center;padding:0 5px;">' +
-             '<div style="font-size:10px;color:' + b.muted + ';margin-bottom:4px;white-space:nowrap;">' + fmt(v) + '</div>' +
-             '<div style="height:' + h + 'px;background:' + color + ';border-radius:5px 5px 0 0;font-size:0;line-height:0;">&nbsp;</div>' +
-           '</td>';
-  }).join('');
-
-  var labels = months.map(function (m) {
-    return '<td style="text-align:center;font-size:10px;color:' + b.muted + ';padding-top:6px;white-space:nowrap;">' + m.label + '</td>';
-  }).join('');
-
-  return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">' +
-           '<tr style="height:' + (H + 18) + 'px;">' + bars + '</tr>' +
-           '<tr>' + labels + '</tr>' +
-         '</table>';
-}
+/** Afronden op 2 decimalen voor de grafiekdata. */
+function round2(v) { return Math.round((Number(v) || 0) * 100) / 100; }
 
 // ===========================================================================
 //  HELPERS  -  datums
