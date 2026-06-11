@@ -18,7 +18,14 @@
 //  INSTELLINGEN  -  pas dit blok aan en verder hoef je niets te wijzigen
 // ===========================================================================
 var CONFIG = {
-  // --- Ontvangers --------------------------------------------------------
+  // --- Test / live -------------------------------------------------------
+  // testMode = true  -> de mail gaat ALLEEN naar testRecipient (nooit naar de klant).
+  //                     Gebruik dit om met "Voorbeeld" rustig de opmaak te checken.
+  // testMode = false -> live: mail gaat naar recipient + cc + bcc.
+  testMode:      true,
+  testRecipient: 'support@seovrienden.nl',
+
+  // --- Ontvangers (gebruikt zodra testMode = false) ----------------------
   recipient: 'terry.bosma@fysiosminia.nl',
   cc:        'support@seovrienden.nl',
   bcc:       '',
@@ -35,7 +42,6 @@ var CONFIG = {
     // Het SEO Vrienden-logo wordt als tekst-wordmark weergegeven (font Coconat,
     // crème op donkergroen), zodat er geen gehoste afbeelding nodig is.
     logoText:  'seovrienden',
-    tagline:   'samen voor online succes',
     logoFont:  "'Coconat', Georgia, 'Times New Roman', serif",
     // Het klantlogo is wel een afbeelding (publiek bereikbare URL).
     clientLogoUrl: 'https://www.fysiosminia.nl/wp-content/uploads/2019/02/Sminia-Logo-1.jpg',
@@ -53,6 +59,10 @@ var CONFIG = {
 
   // --- Rapportage-opties -------------------------------------------------
   keywordLimit: 20,
+  // Filter/sortering van de zoekwoordtabel (bepaalt de output vóór verzenden;
+  // interactief filteren in de mail zelf kan niet, e-mailclients blokkeren dat).
+  keywordSortBy:    'clicks', // 'clicks' | 'impressions' | 'conversions' | 'all_conversions'
+  keywordMinClicks: 0,         // toon alleen zoekwoorden met minimaal dit aantal klikken
   currencySymbol: '€', // wordt overschreven door de accountvaluta indien beschikbaar
 
   // Voor welke metrics is een stijging gunstig (groen) of ongunstig (rood)?
@@ -81,16 +91,22 @@ function main() {
   var html = buildEmail(cur, prev, keywords, current, previous);
   var subject = 'Google Ads maandrapportage ' + CONFIG.clientName + ' - ' + current.label;
 
+  // In testmodus gaat de mail uitsluitend naar de testontvanger (nooit naar de klant).
+  var to  = CONFIG.testMode ? CONFIG.testRecipient : CONFIG.recipient;
+  var cc  = CONFIG.testMode ? '' : CONFIG.cc;
+  var bcc = CONFIG.testMode ? '' : CONFIG.bcc;
+  if (CONFIG.testMode) subject = '[TEST] ' + subject;
+
   MailApp.sendEmail({
-    to:       CONFIG.recipient,
-    cc:       CONFIG.cc || undefined,
-    bcc:      CONFIG.bcc || undefined,
+    to:       to,
+    cc:       cc || undefined,
+    bcc:      bcc || undefined,
     subject:  subject,
     htmlBody: html,
     name:     CONFIG.agencyName
   });
 
-  Logger.log('Rapportage verstuurd naar: ' + CONFIG.recipient + ' (cc: ' + CONFIG.cc + ')');
+  Logger.log((CONFIG.testMode ? 'TESTMODUS - ' : 'LIVE - ') + 'Rapportage verstuurd naar: ' + to);
   Logger.log('Periode: ' + current.label + ' vs ' + previous.label);
 }
 
@@ -139,8 +155,13 @@ function getCampaignData(startDate, endDate) {
   return { list: list, byId: byId };
 }
 
-/** Top N zoekwoorden van de periode, gesorteerd op klikken (alleen actieve). */
+/** Top N zoekwoorden van de periode, gesorteerd/gefilterd volgens CONFIG. */
 function getTopKeywords(startDate, endDate, limit) {
+  var sortable = { clicks: 'metrics.clicks', impressions: 'metrics.impressions',
+                   conversions: 'metrics.conversions', all_conversions: 'metrics.all_conversions' };
+  var orderBy = sortable[CONFIG.keywordSortBy] || 'metrics.clicks';
+  var minClicks = Number(CONFIG.keywordMinClicks) || 0;
+
   var query =
     'SELECT ad_group_criterion.keyword.text, ' +
     '       ad_group_criterion.keyword.match_type, ' +
@@ -151,7 +172,8 @@ function getTopKeywords(startDate, endDate, limit) {
     "  AND ad_group_criterion.status = 'ENABLED' " +
     "  AND campaign.status = 'ENABLED' " +
     '  AND metrics.impressions > 0 ' +
-    'ORDER BY metrics.clicks DESC ' +
+    (minClicks > 0 ? '  AND metrics.clicks >= ' + minClicks + ' ' : '') +
+    'ORDER BY ' + orderBy + ' DESC ' +
     'LIMIT ' + limit;
 
   var out = [];
@@ -275,11 +297,10 @@ function buildEmail(cur, prev, keywords, current, previous) {
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' +
         '<td style="text-align:left;vertical-align:middle;">' +
           '<div style="font-family:' + b.logoFont + ';font-size:30px;font-weight:bold;color:' + b.cream + ';letter-spacing:.5px;line-height:1;">' + escapeHtml(b.logoText) + '</div>' +
-          '<div style="font-family:' + b.logoFont + ';font-size:12px;color:' + b.cream + ';opacity:.85;margin-top:5px;">' + escapeHtml(b.tagline) + '</div>' +
         '</td>' +
         '<td style="text-align:right;vertical-align:middle;">' +
-          '<span style="display:inline-block;background:#FFFFFF;border-radius:8px;padding:8px 10px;">' +
-            '<img src="' + b.clientLogoUrl + '" alt="' + escapeHtml(CONFIG.clientName) + '" height="34" style="display:block;border:0;outline:none;max-height:34px;">' +
+          '<span style="display:inline-block;background:#FFFFFF;border-radius:8px;padding:10px 14px;">' +
+            '<img src="' + b.clientLogoUrl + '" alt="' + escapeHtml(CONFIG.clientName) + '" height="56" style="display:block;border:0;outline:none;max-height:56px;">' +
           '</span>' +
         '</td>' +
       '</tr></table>' +
@@ -321,7 +342,7 @@ function buildEmail(cur, prev, keywords, current, previous) {
         keywordRows +
       '</table>' +
 
-      '<p style="margin:24px 0 0;font-size:13px;line-height:1.6;">Vragen over deze cijfers of ideeën om verder te groeien? Neem gerust contact met ons op.</p>' +
+      '<p style="margin:24px 0 0;font-size:13px;line-height:1.6;">Vragen over deze cijfers of mis je iets? Neem gerust contact met ons op.</p>' +
       '<p style="margin:14px 0 0;font-size:13px;line-height:1.6;">Met vriendelijke groet,<br><strong>' + escapeHtml(CONFIG.agencyName) + '</strong></p>' +
 
     '</td></tr>' +
