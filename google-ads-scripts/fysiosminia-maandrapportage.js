@@ -73,6 +73,10 @@ var CONFIG = {
   // Onderdelen aan/uit zetten.
   show: { summary: true, insights: true, conversionsByAction: true, trend: true },
   insightThreshold: 0.05, // vanaf welk verschil (5%) een KPI in de toelichting wordt genoemd
+  // Herkenning van campagnetypes (op campagnenaam, hoofdletterongevoelig) voor de
+  // vergelijking Branded vs. Generiek in de toelichting.
+  brandedMatch: 'branded',
+  genericMatch: 'generiek',
   currencySymbol: '€', // wordt overschreven door de accountvaluta indien beschikbaar
 
   // Voor welke metrics is een stijging gunstig (groen) of ongunstig (rood)?
@@ -401,6 +405,8 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous, 
   var insightsBlock = '';
   if (CONFIG.show.insights) {
     var insights = generateInsights(curTot, prevTot, weightedSearchLost(cur.list));
+    var segIns = generateSegmentInsight(cur, prev);
+    if (segIns) insights.push(segIns);
     insightsBlock =
       '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.orange + ';margin:0 0 8px;">Analyse &amp; toelichting</div>' +
       '<ul style="margin:0 0 4px;padding-left:18px;font-size:13px;line-height:1.7;">' +
@@ -663,6 +669,56 @@ function generateInsights(curTot, prevTot, lost) {
   return out;
 }
 
+/** Som van conversies van campagnes waarvan de naam 'match' bevat. */
+function sumConvMatch(list, match) {
+  var s = 0;
+  for (var i = 0; i < list.length; i++) {
+    if (('' + list[i].name).toLowerCase().indexOf(match) !== -1) s += list[i].conv;
+  }
+  return s;
+}
+
+/** Ontwikkelingstekst voor conversies (jaar-op-jaar), met afhandeling van nul-basis. */
+function devText(curV, prevV) {
+  var ch = pctChange(curV, prevV);
+  if (ch === null) return (prevV === 0 && curV > 0) ? 'kwamen nieuw op gang' : 'bleven gelijk';
+  if (ch > 0.005)  return 'stegen (' + signPct(ch) + ')';
+  if (ch < -0.005) return 'daalden (' + signPct(ch) + ')';
+  return 'bleven vrijwel gelijk';
+}
+
+/**
+ * Benoemt een relevant verschil in ontwikkeling tussen Generieke en Branded
+ * campagnes (jaar-op-jaar), ook al staat de detailvergelijking alleen op totaal.
+ * Geeft null terug als er geen opvallend verschil is.
+ */
+function generateSegmentInsight(cur, prev) {
+  var TH = Number(CONFIG.insightThreshold) || 0.05;
+  var bm = ('' + (CONFIG.brandedMatch || 'branded')).toLowerCase();
+  var gm = ('' + (CONFIG.genericMatch || 'generiek')).toLowerCase();
+
+  var bCur = sumConvMatch(cur.list, bm), bPrev = sumConvMatch(prev.list, bm);
+  var gCur = sumConvMatch(cur.list, gm), gPrev = sumConvMatch(prev.list, gm);
+  if ((bCur + bPrev) <= 0 || (gCur + gPrev) <= 0) return null; // beide types nodig
+
+  function sign(curV, prevV) {
+    var ch = pctChange(curV, prevV);
+    if (ch === null) return curV > prevV ? 1 : (curV < prevV ? -1 : 0);
+    return ch > TH ? 1 : (ch < -TH ? -1 : 0);
+  }
+  var bSign = sign(bCur, bPrev), gSign = sign(gCur, gPrev);
+  if (bSign === gSign) return null; // geen opvallend verschil in richting
+
+  var zin = 'Verschil per type: de conversies uit generieke campagnes ' + devText(gCur, gPrev) +
+            ', terwijl branded ' + devText(bCur, bPrev) + '.';
+  if (gSign > 0 && bSign < 0) {
+    zin += ' Groei in generiek terwijl branded daalt is doorgaans gunstig: het wijst op meer nieuwe klanten buiten de merknaam om.';
+  } else if (gSign < 0 && bSign > 0) {
+    zin += ' De conversies kwamen daarmee vooral uit merkverkeer (branded).';
+  }
+  return zin;
+}
+
 /** Bouwt de QuickChart-URL voor de trendlijngrafiek (Conversies + Alle conversies). */
 function trendChartUrl(trend) {
   var b = CONFIG.brand;
@@ -680,8 +736,8 @@ function trendChartUrl(trend) {
       scales: { yAxes: [{ ticks: { beginAtZero: true, fontSize: 10 } }], xAxes: [{ ticks: { fontSize: 10 } }] }
     }
   };
-  // Compact formaat, op hoge resolutie (devicePixelRatio) zodat het scherp blijft.
-  return 'https://quickchart.io/chart?bkg=white&w=480&h=190&devicePixelRatio=2&c=' + encodeURIComponent(JSON.stringify(chart));
+  // Volle breedte (uitgelijnd met de tabellen), op hoge resolutie zodat het scherp blijft.
+  return 'https://quickchart.io/chart?bkg=white&w=720&h=280&devicePixelRatio=2&c=' + encodeURIComponent(JSON.stringify(chart));
 }
 
 /**
@@ -694,8 +750,8 @@ function buildTrend(trend, useCid) {
   var src = useCid ? 'cid:trendchart' : trendChartUrl(trend);
 
   return '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.orange + ';margin:28px 0 10px;">Trend laatste ' + trend.length + ' maanden</div>' +
-    '<div style="border:1px solid ' + b.border + ';border-radius:8px;padding:12px;text-align:center;">' +
-      '<img src="' + src + '" alt="Trend conversies en alle conversies per maand" width="480" style="width:100%;max-width:480px;height:auto;border:0;outline:none;">' +
+    '<div style="border:1px solid ' + b.border + ';border-radius:8px;padding:12px;">' +
+      '<img src="' + src + '" alt="Trend conversies en alle conversies per maand" width="720" style="display:block;width:100%;height:auto;border:0;outline:none;">' +
     '</div>';
 }
 
