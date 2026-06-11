@@ -32,8 +32,12 @@ var CONFIG = {
 
   // --- Huisstijl SEO Vrienden -------------------------------------------
   brand: {
-    // Logo's worden als afbeelding in de mail geladen: gebruik publiek bereikbare URL's.
-    agencyLogoUrl: 'VUL-HIER-DE-DIRECTE-URL-VAN-HET-SEO-VRIENDEN-LOGO-IN.png', // <-- INVULLEN (gehoste afbeelding)
+    // Het SEO Vrienden-logo wordt als tekst-wordmark weergegeven (font Coconat,
+    // crème op donkergroen), zodat er geen gehoste afbeelding nodig is.
+    logoText:  'seovrienden',
+    tagline:   'samen voor online succes',
+    logoFont:  "'Coconat', Georgia, 'Times New Roman', serif",
+    // Het klantlogo is wel een afbeelding (publiek bereikbare URL).
     clientLogoUrl: 'https://www.fysiosminia.nl/wp-content/uploads/2019/02/Sminia-Logo-1.jpg',
 
     orange:  '#E94F1C', // accent (sectiekoppen, links)
@@ -266,18 +270,21 @@ function buildEmail(cur, prev, keywords, current, previous) {
   // Kaart
   '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border-radius:12px;overflow:hidden;border:1px solid ' + b.border + ';">' +
 
-    // Header (logo's op witte achtergrond + oranje accentlijn)
-    '<tr><td style="padding:22px 26px 0;">' +
+    // Header: donkergroen met crème tekst-wordmark + klantlogo, oranje accentlijn
+    '<tr><td style="background:' + b.green + ';padding:22px 26px;">' +
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' +
         '<td style="text-align:left;vertical-align:middle;">' +
-          '<img src="' + b.agencyLogoUrl + '" alt="' + escapeHtml(CONFIG.agencyName) + '" height="34" style="display:block;border:0;outline:none;max-height:34px;">' +
+          '<div style="font-family:' + b.logoFont + ';font-size:30px;font-weight:bold;color:' + b.cream + ';letter-spacing:.5px;line-height:1;">' + escapeHtml(b.logoText) + '</div>' +
+          '<div style="font-family:' + b.logoFont + ';font-size:12px;color:' + b.cream + ';opacity:.85;margin-top:5px;">' + escapeHtml(b.tagline) + '</div>' +
         '</td>' +
         '<td style="text-align:right;vertical-align:middle;">' +
-          '<img src="' + b.clientLogoUrl + '" alt="' + escapeHtml(CONFIG.clientName) + '" height="40" style="display:inline-block;border:0;outline:none;max-height:40px;">' +
+          '<span style="display:inline-block;background:#FFFFFF;border-radius:8px;padding:8px 10px;">' +
+            '<img src="' + b.clientLogoUrl + '" alt="' + escapeHtml(CONFIG.clientName) + '" height="34" style="display:block;border:0;outline:none;max-height:34px;">' +
+          '</span>' +
         '</td>' +
       '</tr></table>' +
-      '<div style="height:3px;background:' + b.orange + ';border-radius:3px;margin:16px 0 0;"></div>' +
     '</td></tr>' +
+    '<tr><td style="height:4px;background:' + b.orange + ';font-size:0;line-height:0;">&nbsp;</td></tr>' +
 
     // Titel
     '<tr><td style="padding:18px 26px 0;">' +
