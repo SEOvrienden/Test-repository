@@ -42,6 +42,25 @@ klikken, CTR, gem. CPC, conversies, alle conversies.
 
 > Let op: dit zijn **zoekwoorden** (keyword_view), geen zoektermen.
 
+**Extra onderdelen** (aan/uit via `CONFIG.show`):
+
+- **Samenvatting in gewone taal** bovenaan (conversies, kosten/conversie, trend t.o.v. vorige maand).
+- **Conversies per actie** (bv. telefoongesprekken, formulieren, routebeschrijving).
+- **Trend laatste 6 maanden** als mini-staafgrafiek (kosten + conversies).
+
+## Test vs. live
+
+In `CONFIG` staat bovenaan een `testMode`:
+
+- `testMode: true` (standaard) → de mail gaat **uitsluitend** naar `testRecipient`
+  (`support@seovrienden.nl`), met `[TEST]` in de onderwerpregel. Ook bij **Voorbeeld**.
+  De klant ontvangt dus niets.
+- `testMode: false` → live: de mail gaat naar `recipient` + `cc` + `bcc`.
+
+> Let op: Google Ads verstuurt e-mail óók tijdens een "Voorbeeld"-run (er is geen
+> droogloop voor e-mail). De `testMode`-vlag is dus je beveiliging: laat 'm op
+> `true` staan tot je echt live wilt.
+
 ## Gemaakte keuzes (afgestemd)
 
 - **Periode:** afgelopen kalendermaand, vergelijking met de maand ervoor op de totaalregel.
