@@ -616,12 +616,30 @@ function generateInsights(curTot, prevTot, lost) {
              fmtPercent(Math.abs(convCh)) + ', ' + driver + '.');
   }
 
+  // 1b) Primaire vs. secundaire conversies (verschuiving in type actie).
+  var secCur = curTot.allConv - curTot.conv, secPrev = prevTot.allConv - prevTot.conv;
+  var priCh = pctChange(curTot.conv, prevTot.conv);
+  var secCh = pctChange(secCur, secPrev);
+  if (priCh !== null && secCh !== null && (secCur + secPrev) > 0) {
+    var priSign = priCh > 0.005 ? 1 : (priCh < -0.005 ? -1 : 0);
+    var secSign = secCh > 0.005 ? 1 : (secCh < -0.005 ? -1 : 0);
+    var notable = Math.max(Math.abs(priCh), Math.abs(secCh)) >= TH;
+    if (priSign !== 0 && secSign !== 0 && priSign !== secSign && notable) {
+      var zin1b = 'De primaire conversies ' + devText(curTot.conv, prevTot.conv) +
+                  ', terwijl de secundaire conversies (zoals telefoon- of mailklikken) ' + devText(secCur, secPrev) + '.';
+      if (secSign > 0 && priSign < 0) zin1b += ' Bezoekers kozen dus vaker voor direct contact (bv. bellen) dan voor het formulier.';
+      else                            zin1b += ' Bezoekers vulden dus vaker het formulier in dan dat ze direct contact zochten.';
+      out.push(zin1b);
+    }
+  }
+
   // 2) Klikken: vertoningen (zichtbaarheid) vs. CTR (aantrekkelijkheid).
   if (clicksCh !== null && Math.abs(clicksCh) >= TH) {
     var aImpr = (imprCh === null) ? 0 : Math.abs(imprCh);
     var aCtr  = (ctrCh === null) ? 0 : Math.abs(ctrCh);
+    var z;
     if (aImpr >= aCtr) {
-      var z = 'De klikken volgden vooral het aantal vertoningen (' + signPct(imprCh) + ').';
+      z = 'De klikken volgden vooral het aantal vertoningen (' + signPct(imprCh) + ').';
       if (imprCh < 0 && lost && lost.budget >= 0.10) {
         z += ' Een deel van de vertoningen ging verloren door budget (gemiddeld ' +
              fmtPercent(lost.budget) + ' verloren door budget) – hier liggen groeikansen.';
@@ -629,11 +647,15 @@ function generateInsights(curTot, prevTot, lost) {
         z += ' De zichtbaarheid werd geremd door de advertentiepositie (gemiddeld ' +
              fmtPercent(lost.rank) + ' verloren door rangschikking).';
       }
-      out.push(z);
     } else {
-      out.push('De verandering in klikken kwam vooral door een ' +
-               (ctrCh < 0 ? 'lagere' : 'hogere') + ' CTR (' + signPct(ctrCh) + ').');
+      z = 'De verandering in klikken kwam vooral door een ' +
+          (ctrCh < 0 ? 'lagere' : 'hogere') + ' CTR (' + signPct(ctrCh) + ').';
     }
+    // Budget-mechanica: een hogere CPC levert bij gelijk budget minder klikken op.
+    if (clicksCh < 0 && cpcCh !== null && cpcCh > TH) {
+      z += ' Daarnaast leverde de hogere gem. CPC (' + signPct(cpcCh) + ') minder klikken per euro op.';
+    }
+    out.push(z);
   }
 
   // 3) Kosten per conversie = gem. CPC / conversiepercentage.
@@ -679,12 +701,13 @@ function sumConvMatch(list, match) {
 }
 
 /** Ontwikkelingstekst voor conversies (jaar-op-jaar), met afhandeling van nul-basis. */
-function devText(curV, prevV) {
+function devText(curV, prevV, th) {
+  th = th || 0.005;
   var ch = pctChange(curV, prevV);
   if (ch === null) return (prevV === 0 && curV > 0) ? 'kwamen nieuw op gang' : 'bleven gelijk';
-  if (ch > 0.005)  return 'stegen (' + signPct(ch) + ')';
-  if (ch < -0.005) return 'daalden (' + signPct(ch) + ')';
-  return 'bleven vrijwel gelijk';
+  if (ch > th)  return 'stegen (' + signPct(ch) + ')';
+  if (ch < -th) return 'daalden (' + signPct(ch) + ')';
+  return 'bleven vrijwel gelijk (' + signPct(ch) + ')';
 }
 
 /**
@@ -701,22 +724,53 @@ function generateSegmentInsight(cur, prev) {
   var gCur = sumConvMatch(cur.list, gm), gPrev = sumConvMatch(prev.list, gm);
   if ((bCur + bPrev) <= 0 || (gCur + gPrev) <= 0) return null; // beide types nodig
 
-  function sign(curV, prevV) {
-    var ch = pctChange(curV, prevV);
+  var bCh = pctChange(bCur, bPrev), gCh = pctChange(gCur, gPrev);
+  function sign(ch, curV, prevV) {
     if (ch === null) return curV > prevV ? 1 : (curV < prevV ? -1 : 0);
     return ch > TH ? 1 : (ch < -TH ? -1 : 0);
   }
-  var bSign = sign(bCur, bPrev), gSign = sign(gCur, gPrev);
-  if (bSign === gSign) return null; // geen opvallend verschil in richting
+  function mag(ch, curV, prevV) { return ch === null ? (curV !== prevV ? 1 : 0) : Math.abs(ch); }
+  var bSign = sign(bCh, bCur, bPrev), gSign = sign(gCh, gCur, gPrev);
+  var bMag = mag(bCh, bCur, bPrev), gMag = mag(gCh, gCur, gPrev);
+  var diff = Math.abs((gCh == null ? 0 : gCh) - (bCh == null ? 0 : bCh));
 
-  var zin = 'Verschil per type: de conversies uit generieke campagnes ' + devText(gCur, gPrev) +
-            ', terwijl branded ' + devText(bCur, bPrev) + '.';
-  if (gSign > 0 && bSign < 0) {
-    zin += ' Groei in generiek terwijl branded daalt is doorgaans gunstig: het wijst op meer nieuwe klanten buiten de merknaam om.';
-  } else if (gSign < 0 && bSign > 0) {
+  // Alleen melden als de typen meetbaar anders bewegen.
+  if (bSign === gSign && diff < TH) return null;
+  if (Math.max(bMag, gMag) < TH && diff < TH) return null;
+
+  // Kostencontext (totaal) als nuance.
+  var costCh = pctChange(sumCost(cur.list), sumCost(prev.list));
+  var costClause = (costCh !== null && costCh < -TH)
+    ? ', zeker met de iets lagere advertentie-uitgaven (' + signPct(costCh) + ')' : '';
+
+  var zin = 'Verschil per type: de generieke conversies ' + devText(gCur, gPrev, TH) +
+            ', terwijl branded ' + devText(bCur, bPrev, TH) + '.';
+
+  if (gSign >= 0 && bSign < 0) {
+    zin += (gSign > 0
+      ? ' Positief: generiek groeide en de daling zat vooral bij branded'
+      : ' Positief: de daling zat vooral bij branded, terwijl generiek op peil bleef') +
+      costClause + '. Branded zijn vaak bestaande klanten; generiek trekt juist nieuwe klanten aan.';
+  } else if (gSign < 0 && bSign < 0) {
+    if (gMag + 0.0001 < bMag) zin += ' De daling zat vooral bij branded; generiek hield relatief beter stand' + costClause + '.';
+    else if (bMag + 0.0001 < gMag) zin += ' De daling zat vooral bij generiek; branded hield relatief beter stand.';
+  } else if (gSign < 0 && bSign >= 0) {
     zin += ' De conversies kwamen daarmee vooral uit merkverkeer (branded).';
+  } else if (gSign > 0 && bSign > 0) {
+    zin += (gMag >= bMag
+      ? ' De groei kwam vooral uit generiek, wat duidt op nieuwe klanten.'
+      : ' De groei kwam vooral uit branded.');
+  } else if (gSign > 0 && bSign === 0) {
+    zin += ' Vooral generiek groeide, wat duidt op nieuwe klanten.';
   }
   return zin;
+}
+
+/** Som van de kosten van een campagnelijst. */
+function sumCost(list) {
+  var s = 0;
+  for (var i = 0; i < list.length; i++) s += list[i].cost || 0;
+  return s;
 }
 
 /** Bouwt de QuickChart-URL voor de trendlijngrafiek (Conversies + Alle conversies). */
