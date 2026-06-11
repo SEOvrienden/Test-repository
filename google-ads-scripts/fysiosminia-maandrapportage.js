@@ -33,9 +33,14 @@ var CONFIG = {
   // --- Klant / afzender --------------------------------------------------
   clientName:  'Fysiotherapie Sminia',
   clientUrl:   'https://www.fysiosminia.nl/',
-  agencyName:  'SEO Vrienden',
-  agencyUrl:   'https://seovrienden.nl/',
+  agencyName:  'SEO vrienden',
+  agencyUrl:   'https://www.seovrienden.nl',
+  agencyUrlLabel: 'www.seovrienden.nl',
   agencyEmail: 'support@seovrienden.nl',
+  agencyAddr1: 'Bruynvisweg 18',
+  agencyAddr2: '1531 AZ Wormer',
+  agencyPhone:    '+31 (0)75 369 00 27', // weergave
+  agencyPhoneTel: '+31753690027',         // voor de tel:-link
 
   // --- Huisstijl SEO Vrienden -------------------------------------------
   brand: {
@@ -434,22 +439,27 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous, 
 
   return '' +
 '<!DOCTYPE html><html><head><meta charset="utf-8">' +
-'<meta name="viewport" content="width=device-width, initial-scale=1.0"></head>' +
+'<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+'<style>@media only screen and (max-width:600px){' +
+'.wrap{padding:8px !important;}' +
+'.px{padding-left:16px !important;padding-right:16px !important;}' +
+'}</style>' +
+'</head>' +
 '<body style="margin:0;padding:0;background:' + b.bg + ';">' +
-'<div style="font-family:Arial,Helvetica,sans-serif;color:' + b.text + ';max-width:760px;margin:0 auto;background:' + b.bg + ';padding:16px;">' +
+'<div class="wrap" style="font-family:Arial,Helvetica,sans-serif;color:' + b.text + ';max-width:760px;margin:0 auto;background:' + b.bg + ';padding:16px;">' +
 
   // Kaart
   '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border-radius:12px;overflow:hidden;border:1px solid ' + b.border + ';">' +
 
     // Header: groene balk met crème wordmark + slogan, oranje accentlijn
-    '<tr><td style="background:' + b.green + ';padding:22px 26px;text-align:left;">' +
+    '<tr><td class="px" style="background:' + b.green + ';padding:22px 26px;text-align:left;">' +
       '<div style="font-family:' + b.logoFont + ';font-size:32px;font-weight:bold;color:' + b.cream + ';letter-spacing:.5px;line-height:1;">' + escapeHtml(b.logoText) + '</div>' +
       (b.tagline ? '<div style="font-family:' + b.logoFont + ';font-size:13px;color:' + b.cream + ';opacity:.9;margin-top:6px;">' + escapeHtml(b.tagline) + '</div>' : '') +
     '</td></tr>' +
     '<tr><td style="height:4px;background:' + b.orange + ';font-size:0;line-height:0;">&nbsp;</td></tr>' +
 
     // Titelregel met klantlogo op witte achtergrond
-    '<tr><td style="padding:20px 26px 0;">' +
+    '<tr><td class="px" style="padding:20px 26px 0;">' +
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' +
         '<td style="vertical-align:middle;">' +
           '<div style="color:' + b.green + ';font-size:21px;font-weight:bold;">Google Ads maandrapportage</div>' +
@@ -462,7 +472,7 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous, 
     '</td></tr>' +
 
     // Body
-    '<tr><td style="padding:18px 26px 26px;">' +
+    '<tr><td class="px" style="padding:18px 26px 26px;">' +
 
       '<p style="margin:0 0 18px;font-size:14px;line-height:1.6;">Beste Terry,</p>' +
       '<p style="margin:0 0 22px;font-size:14px;line-height:1.6;">Hierbij een kort overzicht van de prestaties van jullie Google Ads-account over <strong>' + current.label + '</strong>, per campagne. In de totaalregel zie je de vergelijking met dezelfde maand vorig jaar (' + previous.label + ').</p>' +
@@ -497,14 +507,21 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous, 
       '</table>' +
 
       '<p style="margin:24px 0 0;font-size:13px;line-height:1.6;">Vragen over deze cijfers of mis je iets? Neem gerust contact met ons op.</p>' +
-      '<p style="margin:14px 0 0;font-size:13px;line-height:1.6;">Met vriendelijke groet,<br><strong>' + escapeHtml(CONFIG.agencyName) + '</strong></p>' +
+      '<p style="margin:18px 0 6px;font-size:13px;line-height:1.6;">Met vriendelijke groet,</p>' +
+      '<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="font-size:13px;line-height:1.7;color:' + b.text + ';">' +
+        '<strong style="color:' + b.green + ';">' + escapeHtml(CONFIG.agencyName) + '</strong><br>' +
+        escapeHtml(CONFIG.agencyAddr1) + '<br>' + escapeHtml(CONFIG.agencyAddr2) + '<br>' +
+        '<span style="color:' + b.muted + ';">T:</span> <a href="tel:' + CONFIG.agencyPhoneTel + '" style="color:' + b.orange + ';text-decoration:none;">' + escapeHtml(CONFIG.agencyPhone) + '</a><br>' +
+        '<span style="color:' + b.muted + ';">E:</span> <a href="mailto:' + CONFIG.agencyEmail + '" style="color:' + b.orange + ';text-decoration:none;">' + escapeHtml(CONFIG.agencyEmail) + '</a><br>' +
+        '<span style="color:' + b.muted + ';">I:</span> <a href="' + CONFIG.agencyUrl + '" style="color:' + b.orange + ';text-decoration:none;">' + escapeHtml(CONFIG.agencyUrlLabel) + '</a>' +
+      '</td></tr></table>' +
 
     '</td></tr>' +
   '</table>' +
 
   // Footer
   '<div style="text-align:center;color:' + b.muted + ';font-size:11px;line-height:1.6;padding:18px 10px;">' +
-    escapeHtml(CONFIG.agencyName) + ' &middot; <a href="' + CONFIG.agencyUrl + '" style="color:' + b.orange + ';text-decoration:none;">seovrienden.nl</a> &middot; ' +
+    escapeHtml(CONFIG.agencyName) + ' &middot; <a href="' + CONFIG.agencyUrl + '" style="color:' + b.orange + ';text-decoration:none;">' + escapeHtml(CONFIG.agencyUrlLabel) + '</a> &middot; ' +
     '<a href="mailto:' + CONFIG.agencyEmail + '" style="color:' + b.orange + ';text-decoration:none;">' + CONFIG.agencyEmail + '</a><br>' +
     'Deze rapportage is automatisch gegenereerd vanuit Google Ads.' +
   '</div>' +
