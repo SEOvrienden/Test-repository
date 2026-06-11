@@ -45,6 +45,10 @@ klikken, CTR, gem. CPC, conversies, alle conversies.
 **Extra onderdelen** (aan/uit via `CONFIG.show`):
 
 - **Samenvatting in gewone taal** bovenaan (conversies, kosten/conversie, trend t.o.v. vorige maand).
+- **Analyse & toelichting**: verklaart verschuivingen uit de KPI-verbanden, bv. een daling
+  in conversies herleid naar minder klikken of een lager conversiepercentage, en minder
+  vertoningen herleid naar verloren vertoningen door budget/rangschikking. Drempel instelbaar
+  via `CONFIG.insightThreshold`. Het verklaart het *mechanisme*, niet de externe oorzaak.
 - **Conversies per actie** (bv. telefoongesprekken, formulieren, routebeschrijving).
 - **Trend laatste 6 maanden** als mini-staafgrafiek (kosten + conversies).
 

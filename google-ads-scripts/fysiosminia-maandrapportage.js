@@ -65,7 +65,8 @@ var CONFIG = {
   keywordMinClicks: 0,         // toon alleen zoekwoorden met minimaal dit aantal klikken
   trendMonths:      6,          // aantal maanden in de trendgrafiek
   // Onderdelen aan/uit zetten.
-  show: { summary: true, conversionsByAction: true, trend: true },
+  show: { summary: true, insights: true, conversionsByAction: true, trend: true },
+  insightThreshold: 0.05, // vanaf welk verschil (5%) een KPI in de toelichting wordt genoemd
   currencySymbol: '€', // wordt overschreven door de accountvaluta indien beschikbaar
 
   // Voor welke metrics is een stijging gunstig (groen) of ongunstig (rood)?
@@ -129,7 +130,9 @@ function getCampaignData(startDate, endDate) {
     'SELECT campaign.id, campaign.name, campaign.advertising_channel_type, ' +
     '       metrics.cost_micros, metrics.impressions, metrics.clicks, ' +
     '       metrics.all_conversions, metrics.conversions, ' +
-    '       metrics.search_impression_share ' +
+    '       metrics.search_impression_share, ' +
+    '       metrics.search_budget_lost_impression_share, ' +
+    '       metrics.search_rank_lost_impression_share ' +
     'FROM campaign ' +
     "WHERE segments.date BETWEEN '" + startDate + "' AND '" + endDate + "' " +
     '  AND metrics.impressions > 0';
@@ -140,8 +143,6 @@ function getCampaignData(startDate, endDate) {
     var r = rows.next();
     var m = r.metrics;
     var isSearch = r.campaign && r.campaign.advertisingChannelType === 'SEARCH';
-    var sisRaw = (m.searchImpressionShare === undefined || m.searchImpressionShare === null)
-      ? null : Number(m.searchImpressionShare);
 
     var raw = {
       id:          r.campaign.id,
@@ -152,7 +153,9 @@ function getCampaignData(startDate, endDate) {
       clicks:      Number(m.clicks) || 0,
       allConv:     Number(m.allConversions) || 0,
       conv:        Number(m.conversions) || 0,
-      searchIs:    isSearch ? sisRaw : null   // alleen zinvol voor zoekcampagnes
+      searchIs:    isSearch ? numOrNull(m.searchImpressionShare) : null, // alleen zinvol voor zoekcampagnes
+      budgetLost:  isSearch ? numOrNull(m.searchBudgetLostImpressionShare) : null,
+      rankLost:    isSearch ? numOrNull(m.searchRankLostImpressionShare) : null
     };
     list.push(raw);
     byId[raw.id] = raw;
@@ -355,6 +358,18 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous) 
       buildSummary(curTot, prevTot, current, previous) +
     '</div>' : '';
 
+  // Analyse & toelichting (verklaring uit KPI-verbanden).
+  var insightsBlock = '';
+  if (CONFIG.show.insights) {
+    var insights = generateInsights(curTot, prevTot, weightedSearchLost(cur.list));
+    insightsBlock =
+      '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.orange + ';margin:0 0 8px;">Analyse &amp; toelichting</div>' +
+      '<ul style="margin:0 0 4px;padding-left:18px;font-size:13px;line-height:1.7;">' +
+        insights.map(function (t) { return '<li>' + t + '</li>'; }).join('') +
+      '</ul>' +
+      '<div style="font-size:11px;color:' + b.muted + ';margin:0 0 22px;">Toelichting automatisch afgeleid uit de cijfers; externe factoren (seizoen, concurrentie of wijzigingen in de campagnes) kunnen ook meespelen.</div>';
+  }
+
   // Conversies per actie.
   var convRowsHtml = convActions.length ? convActions.map(function (a) {
     return '<tr>' + td(escapeHtml(a.name), 'left') + td(fmtDecimal(a.conv)) + td(fmtDecimal(a.allConv)) + '</tr>';
@@ -408,6 +423,7 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous) 
       '<p style="margin:0 0 22px;font-size:14px;line-height:1.6;">Hierbij een kort overzicht van de prestaties van jullie Google Ads-account over <strong>' + current.label + '</strong>, per campagne. In de totaalregel zie je de vergelijking met ' + previous.label + '.</p>' +
 
       summaryBlock +
+      insightsBlock +
 
       // Per campagne
       '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.orange + ';margin:0 0 10px;">Resultaten per campagne</div>' +
@@ -490,6 +506,85 @@ function buildSummary(curTot, prevTot, current, previous) {
            fmtInt(curTot.clicks) + ' klikken (CTR ' + fmtPercent(curTot.ctr) + ').';
 
   return s1 + s2 + s3;
+}
+
+/** Impressie-gewogen verloren zoekvertoningspercentage (budget/rang) over zoekcampagnes. */
+function weightedSearchLost(list) {
+  var wB = 0, wR = 0, imp = 0;
+  for (var i = 0; i < list.length; i++) {
+    var c = list[i];
+    if (c.isSearch && c.impressions > 0) {
+      if (c.budgetLost !== null) wB += c.budgetLost * c.impressions;
+      if (c.rankLost   !== null) wR += c.rankLost   * c.impressions;
+      imp += c.impressions;
+    }
+  }
+  return imp ? { budget: wB / imp, rank: wR / imp } : { budget: 0, rank: 0 };
+}
+
+/**
+ * Leidt een verklarende toelichting af uit de KPI-verbanden.
+ * Verklaart het mechanisme (bv. minder klikken vs. lager conversiepercentage),
+ * niet de externe oorzaak. Geeft een lijst zinnen terug.
+ */
+function generateInsights(curTot, prevTot, lost) {
+  var TH = Number(CONFIG.insightThreshold) || 0.05;
+  var out = [];
+
+  var convCh     = pctChange(curTot.conv,        prevTot.conv);
+  var clicksCh   = pctChange(curTot.clicks,      prevTot.clicks);
+  var ctrCh      = pctChange(curTot.ctr,         prevTot.ctr);
+  var imprCh     = pctChange(curTot.impressions, prevTot.impressions);
+  var cpcCh      = pctChange(curTot.avgCpc,      prevTot.avgCpc);
+  var convRateCh = pctChange(curTot.convRate,    prevTot.convRate);
+  var cpaCh      = pctChange(curTot.costPerConv, prevTot.costPerConv);
+
+  // 1) Conversies: verkeer (klikken) vs. rendement (conversiepercentage).
+  if (convCh !== null && Math.abs(convCh) >= TH) {
+    var aClicks = (clicksCh === null) ? 0 : Math.abs(clicksCh);
+    var aRate   = (convRateCh === null) ? 0 : Math.abs(convRateCh);
+    var driver = (aClicks >= aRate)
+      ? 'vooral door ' + (clicksCh < 0 ? 'minder' : 'meer') + ' klikken (' + signPct(clicksCh) + ')'
+      : 'vooral door een ' + (convRateCh < 0 ? 'lager' : 'hoger') + ' conversiepercentage (' + signPct(convRateCh) + ')';
+    out.push('Het aantal conversies ' + (convCh < 0 ? 'daalde' : 'steeg') + ' met ' +
+             fmtPercent(Math.abs(convCh)) + ', ' + driver + '.');
+  }
+
+  // 2) Klikken: vertoningen (zichtbaarheid) vs. CTR (aantrekkelijkheid).
+  if (clicksCh !== null && Math.abs(clicksCh) >= TH) {
+    var aImpr = (imprCh === null) ? 0 : Math.abs(imprCh);
+    var aCtr  = (ctrCh === null) ? 0 : Math.abs(ctrCh);
+    if (aImpr >= aCtr) {
+      var z = 'De klikken volgden vooral het aantal vertoningen (' + signPct(imprCh) + ').';
+      if (imprCh < 0 && lost && lost.budget >= 0.10) {
+        z += ' Een deel van de vertoningen ging verloren door budget (gemiddeld ' +
+             fmtPercent(lost.budget) + ' verloren door budget) – hier liggen groeikansen.';
+      } else if (imprCh < 0 && lost && lost.rank >= 0.10) {
+        z += ' De zichtbaarheid werd geremd door de advertentiepositie (gemiddeld ' +
+             fmtPercent(lost.rank) + ' verloren door rangschikking).';
+      }
+      out.push(z);
+    } else {
+      out.push('De verandering in klikken kwam vooral door een ' +
+               (ctrCh < 0 ? 'lagere' : 'hogere') + ' CTR (' + signPct(ctrCh) + ').');
+    }
+  }
+
+  // 3) Kosten per conversie: CPC vs. conversiepercentage.
+  if (cpaCh !== null && Math.abs(cpaCh) >= TH) {
+    var reden = [];
+    if (cpcCh !== null && Math.abs(cpcCh) >= TH)
+      reden.push('de gem. CPC ' + (cpcCh < 0 ? 'daalde' : 'steeg') + ' (' + signPct(cpcCh) + ')');
+    if (convRateCh !== null && Math.abs(convRateCh) >= TH)
+      reden.push('het conversiepercentage ' + (convRateCh < 0 ? 'daalde' : 'steeg') + ' (' + signPct(convRateCh) + ')');
+    out.push('De kosten per conversie ' + (cpaCh < 0 ? 'daalden' : 'stegen') + ' met ' +
+             fmtPercent(Math.abs(cpaCh)) + (reden.length ? ' doordat ' + reden.join(' en ') : '') + '.');
+  }
+
+  if (!out.length) {
+    out.push('De prestaties waren stabiel ten opzichte van vorige maand; geen opvallende verschuivingen.');
+  }
+  return out;
 }
 
 /** Mini-staafgrafiek: kosten (oranje) en conversies (groen) per maand. */
@@ -636,6 +731,17 @@ function currencySymbolFor(code) {
 
 function lowerFirst(s) {
   return ('' + s).charAt(0).toLowerCase() + ('' + s).slice(1);
+}
+
+/** Getal of null als de waarde ontbreekt. */
+function numOrNull(v) {
+  return (v === undefined || v === null) ? null : Number(v);
+}
+
+/** Percentage met expliciet teken, bv. "+5,0%" of "-12,3%". */
+function signPct(x) {
+  if (x === null) return '–';
+  return (x < 0 ? '-' : '+') + fmtPercent(Math.abs(x));
 }
 
 function escapeHtml(s) {
