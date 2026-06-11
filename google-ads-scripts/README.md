@@ -55,19 +55,14 @@ klikken, CTR, gem. CPC, conversies, alle conversies.
 
 1. Google Ads → **Extra & instellingen → Bulkacties → Scripts** → **+**.
 2. Plak de inhoud van `fysiosminia-maandrapportage.js`.
-3. Pas bovenin het `CONFIG`-blok één ding aan:
-   - `logo-tekst (geen externe afbeelding meer nodig)
-     (publiek bereikbare afbeelding; bv. een bestand op seovrienden.nl).
-4. **Voorbeeld** → bekijk het logboek en de testmail.
-5. **Opslaan** → bij **Frequentie** stel je zelf in hoe vaak het draait
+3. **Voorbeeld** → bekijk het logboek en de testmail.
+4. **Opslaan** → bij **Frequentie** stel je zelf in hoe vaak het draait
    (bv. maandelijks, de 1e rond 08:00).
 
-### Nog in te vullen
-
-- [ ] `logo-tekst (geen externe afbeelding meer nodig)
-      Een logo in een mail moet een gehoste afbeelding (URL) zijn; de afbeelding
-      uit de chat kan niet rechtstreeks worden ingesloten. Het Sminia-logo zit er
-      al in via een publieke URL.
+Niets meer in te vullen: ontvangers, huisstijl en logo's staan al goed.
+Het SEO Vrienden-logo wordt als tekst-wordmark ("seovrienden", font Coconat met
+fallback, crème op donkergroen) getoond, dus er is geen gehoste afbeelding nodig.
+Het Sminia-logo zit erin via een publieke URL.
 
 ## Opmerkingen
 
