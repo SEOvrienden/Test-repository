@@ -630,15 +630,31 @@ function generateInsights(curTot, prevTot, lost) {
     }
   }
 
-  // 3) Kosten per conversie: CPC vs. conversiepercentage.
+  // 3) Kosten per conversie = gem. CPC / conversiepercentage.
+  //    CPC omhoog -> CPA omhoog ; conversiepercentage omhoog -> CPA omlaag.
+  //    We scheiden factoren die in dezelfde richting duwen (oorzaak) van factoren
+  //    die juist tegenwerken (dempend), zodat de uitleg klopt.
   if (cpaCh !== null && Math.abs(cpaCh) >= TH) {
-    var reden = [];
-    if (cpcCh !== null && Math.abs(cpcCh) >= TH)
-      reden.push('de gem. CPC ' + (cpcCh < 0 ? 'daalde' : 'steeg') + ' (' + signPct(cpcCh) + ')');
-    if (convRateCh !== null && Math.abs(convRateCh) >= TH)
-      reden.push('het conversiepercentage ' + (convRateCh < 0 ? 'daalde' : 'steeg') + ' (' + signPct(convRateCh) + ')');
-    out.push('De kosten per conversie ' + (cpaCh < 0 ? 'daalden' : 'stegen') + ' met ' +
-             fmtPercent(Math.abs(cpaCh)) + (reden.length ? ' doordat ' + reden.join(' en ') : '') + '.');
+    var up = cpaCh > 0;
+    var drivers = [], counters = [];
+
+    if (cpcCh !== null && Math.abs(cpcCh) >= TH) {
+      var cpcUp = cpcCh > 0; // hogere CPC duwt CPA omhoog
+      if (cpcUp === up) drivers.push('de gem. CPC ' + (cpcUp ? 'steeg' : 'daalde') + ' (' + signPct(cpcCh) + ')');
+      else              counters.push('de ' + (cpcUp ? 'hogere' : 'lagere') + ' gem. CPC (' + signPct(cpcCh) + ')');
+    }
+    if (convRateCh !== null && Math.abs(convRateCh) >= TH) {
+      var cvrUp = convRateCh > 0;     // hoger conversiepercentage duwt CPA omlaag
+      var cvrPushesUp = !cvrUp;       // dus CPA-richting is omgekeerd aan het percentage
+      if (cvrPushesUp === up) drivers.push('het conversiepercentage ' + (cvrUp ? 'steeg' : 'daalde') + ' (' + signPct(convRateCh) + ')');
+      else                    counters.push('het ' + (cvrUp ? 'hogere' : 'lagere') + ' conversiepercentage (' + signPct(convRateCh) + ')');
+    }
+
+    var s = 'De kosten per conversie ' + (up ? 'stegen' : 'daalden') + ' met ' + fmtPercent(Math.abs(cpaCh));
+    if (drivers.length) s += ', doordat ' + joinNl(drivers);
+    s += '.';
+    if (counters.length) s += ' ' + capFirst(joinNl(counters)) + ' ' + (counters.length > 1 ? 'temperden' : 'temperde') + ' dit deels.';
+    out.push(s);
   }
 
   if (!out.length) {
@@ -791,6 +807,11 @@ function currencySymbolFor(code) {
 
 function lowerFirst(s) {
   return ('' + s).charAt(0).toLowerCase() + ('' + s).slice(1);
+}
+
+/** Eerste letter een hoofdletter. */
+function capFirst(s) {
+  return ('' + s).charAt(0).toUpperCase() + ('' + s).slice(1);
 }
 
 /** Voegt een lijst samen als "a, b en c". */
