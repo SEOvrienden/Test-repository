@@ -379,7 +379,7 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous) 
       '<ul style="margin:0 0 4px;padding-left:18px;font-size:13px;line-height:1.7;">' +
         insights.map(function (t) { return '<li>' + t + '</li>'; }).join('') +
       '</ul>' +
-      '<div style="font-size:11px;color:' + b.muted + ';margin:0 0 22px;">Toelichting automatisch afgeleid uit de cijfers; externe factoren (seizoen, concurrentie of wijzigingen in de campagnes) kunnen ook meespelen.</div>';
+      '<div style="font-size:11px;color:' + b.muted + ';margin:0 0 22px;">Toelichting afgeleid uit de cijfers; externe factoren (seizoen, concurrentie of wijzigingen in de campagnes enz) kunnen ook meespelen. Dit kan eventueel mondeling worden toegelicht.</div>';
   }
 
   // Conversies per actie (alle Google Ads-metingen: Conv. + Alle conv.).
