@@ -655,16 +655,17 @@ function trendChartUrl(trend) {
     data: {
       labels: trend.map(function (m) { return m.label; }),
       datasets: [
-        { label: 'Conversies',      data: trend.map(function (m) { return round2(m.conv); }),    borderColor: b.green,  backgroundColor: b.green,  fill: false, borderWidth: 3, lineTension: 0.3, pointRadius: 3, pointBackgroundColor: b.green },
-        { label: 'Alle conversies', data: trend.map(function (m) { return round2(m.allConv); }), borderColor: b.orange, backgroundColor: b.orange, fill: false, borderWidth: 3, lineTension: 0.3, pointRadius: 3, pointBackgroundColor: b.orange }
+        { label: 'Conversies',      data: trend.map(function (m) { return round2(m.conv); }),    borderColor: b.green,  backgroundColor: b.green,  fill: false, borderWidth: 2, lineTension: 0.3, pointRadius: 2, pointBackgroundColor: b.green },
+        { label: 'Alle conversies', data: trend.map(function (m) { return round2(m.allConv); }), borderColor: b.orange, backgroundColor: b.orange, fill: false, borderWidth: 2, lineTension: 0.3, pointRadius: 2, pointBackgroundColor: b.orange }
       ]
     },
     options: {
-      legend: { position: 'bottom', labels: { fontSize: 12 } },
-      scales: { yAxes: [{ ticks: { beginAtZero: true } }] }
+      legend: { position: 'bottom', labels: { fontSize: 11, boxWidth: 12 } },
+      scales: { yAxes: [{ ticks: { beginAtZero: true, fontSize: 10 } }], xAxes: [{ ticks: { fontSize: 10 } }] }
     }
   };
-  return 'https://quickchart.io/chart?bkg=white&w=600&h=260&c=' + encodeURIComponent(JSON.stringify(chart));
+  // Compact formaat, op hoge resolutie (devicePixelRatio) zodat het scherp blijft.
+  return 'https://quickchart.io/chart?bkg=white&w=480&h=190&devicePixelRatio=2&c=' + encodeURIComponent(JSON.stringify(chart));
 }
 
 /**
@@ -678,7 +679,7 @@ function buildTrend(trend, useCid) {
 
   return '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.orange + ';margin:28px 0 10px;">Trend laatste ' + trend.length + ' maanden</div>' +
     '<div style="border:1px solid ' + b.border + ';border-radius:8px;padding:12px;text-align:center;">' +
-      '<img src="' + src + '" alt="Trend conversies en alle conversies per maand" width="100%" style="max-width:600px;border:0;outline:none;">' +
+      '<img src="' + src + '" alt="Trend conversies en alle conversies per maand" width="480" style="width:100%;max-width:480px;height:auto;border:0;outline:none;">' +
     '</div>';
 }
 
