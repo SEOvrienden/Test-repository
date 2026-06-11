@@ -1,14 +1,16 @@
 /**
  * ============================================================================
- *  Maandrapportage Google Ads  -  Fysio Sminia
+ *  Maandrapportage Google Ads  -  Fysiotherapie Sminia
  *  Gemaakt door SEO Vrienden (https://seovrienden.nl)
  * ----------------------------------------------------------------------------
  *  Stuurt automatisch een korte, branded HTML-mail met de accountprestaties
- *  van de afgelopen kalendermaand, inclusief vergelijking met de maand ervoor
- *  en een top 20 van best presterende zoekwoorden (op klikken).
+ *  van de afgelopen kalendermaand. De cijfers staan PER CAMPAGNE (echte data,
+ *  incl. het werkelijke zoekvertoningspercentage per campagne). Onderaan staat
+ *  een totaalregel met de vergelijking t.o.v. de maand ervoor, plus een top 20
+ *  van best presterende zoekwoorden (op klikken).
  *
- *  Plaatsen: Google Ads  ->  Extra & instellingen  ->  Bulkacties  ->  Scripts
- *  Inplannen: maandelijks, bv. de 1e van de maand rond 08:00 uur.
+ *  Plaatsen: Google Ads -> Extra & instellingen -> Bulkacties -> Scripts
+ *  Frequentie: stel je zelf in bij het inplannen van het script (bv. maandelijks).
  * ============================================================================
  */
 
@@ -17,38 +19,39 @@
 // ===========================================================================
 var CONFIG = {
   // --- Ontvangers --------------------------------------------------------
-  // Komma-gescheiden lijst is toegestaan, bv. 'klant@voorbeeld.nl, info@voorbeeld.nl'
-  recipient: 'VUL-HIER-HET-MAILADRES-VAN-DE-KLANT-IN@voorbeeld.nl', // <-- INVULLEN
+  recipient: 'terry.bosma@fysiosminia.nl',
   cc:        'support@seovrienden.nl',
   bcc:       '',
 
   // --- Klant / afzender --------------------------------------------------
-  clientName:  'Fysio Sminia',
+  clientName:  'Fysiotherapie Sminia',
   clientUrl:   'https://www.fysiosminia.nl/',
   agencyName:  'SEO Vrienden',
   agencyUrl:   'https://seovrienden.nl/',
   agencyEmail: 'support@seovrienden.nl',
 
-  // --- Huisstijl (pas kleuren/logo aan op jullie eigen waarden) ----------
+  // --- Huisstijl SEO Vrienden -------------------------------------------
   brand: {
-    logoUrl:     'https://seovrienden.nl/wp-content/uploads/logo.png', // <-- vervang door directe URL van jullie logo
-    primary:     '#F36F21', // accentkleur (knoppen/koppen) - oranje
-    primaryDark: '#1B2A4A', // donkere kleur (header/footer) - donkerblauw
-    textColor:   '#2B2B2B',
-    mutedColor:  '#6B7280',
-    borderColor: '#E5E7EB',
-    bgColor:     '#F4F5F7',
-    positive:    '#1A8917', // groen voor positieve ontwikkeling
-    negative:    '#C62828'  // rood voor negatieve ontwikkeling
+    // Logo's worden als afbeelding in de mail geladen: gebruik publiek bereikbare URL's.
+    agencyLogoUrl: 'VUL-HIER-DE-DIRECTE-URL-VAN-HET-SEO-VRIENDEN-LOGO-IN.png', // <-- INVULLEN (gehoste afbeelding)
+    clientLogoUrl: 'https://www.fysiosminia.nl/wp-content/uploads/2019/02/Sminia-Logo-1.jpg',
+
+    orange:  '#E94F1C', // accent (sectiekoppen, links)
+    green:   '#004744', // donkergroen (tabelkoppen, footer)
+    cream:   '#F8EED3', // crème/beige (tekst op donkergroen)
+    text:    '#2B2B2B',
+    muted:   '#6B7280',
+    border:  '#E5E7EB',
+    bg:      '#F4F5F7',
+    positive:'#1A8917', // groen voor positieve ontwikkeling
+    negative:'#C62828'  // rood voor negatieve ontwikkeling
   },
 
   // --- Rapportage-opties -------------------------------------------------
-  keywordLimit: 20,           // aantal zoekwoorden in de tabel
-  currencySymbol: '€',   // € ; wordt overschreven door de accountvaluta indien beschikbaar
+  keywordLimit: 20,
+  currencySymbol: '€', // wordt overschreven door de accountvaluta indien beschikbaar
 
-  // Voor welke metrics is "stijging" gunstig (groen) of ongunstig (rood)?
-  // true  = hoger is beter (groen bij stijging)
-  // false = lager is beter (groen bij daling)
+  // Voor welke metrics is een stijging gunstig (groen) of ongunstig (rood)?
   higherIsBetter: {
     cost: false, impressions: true, clicks: true, ctr: true, avgCpc: false,
     allConv: true, conv: true, costPerConv: false, convRate: true, searchIs: true
@@ -64,15 +67,14 @@ function main() {
     CONFIG.currencySymbol = currencySymbolFor(AdsApp.currentAccount().getCurrencyCode());
   } catch (e) { /* val terug op standaard symbool */ }
 
-  var current  = lastMonthRange(tz);          // afgelopen volledige kalendermaand
-  var previous = monthBefore(current, tz);     // de maand daarvoor
+  var current  = lastMonthRange(tz);       // afgelopen volledige kalendermaand
+  var previous = monthBefore(current, tz);  // de maand daarvoor
 
-  var curStats  = getAccountStats(current.start, current.end);
-  var prevStats = getAccountStats(previous.start, previous.end);
-  var keywords  = getTopKeywords(current.start, current.end, CONFIG.keywordLimit);
+  var cur  = getCampaignData(current.start, current.end);
+  var prev = getCampaignData(previous.start, previous.end);
+  var keywords = getTopKeywords(current.start, current.end, CONFIG.keywordLimit);
 
-  var html = buildEmail(curStats, prevStats, keywords, current, previous, tz);
-
+  var html = buildEmail(cur, prev, keywords, current, previous);
   var subject = 'Google Ads maandrapportage ' + CONFIG.clientName + ' - ' + current.label;
 
   MailApp.sendEmail({
@@ -89,73 +91,57 @@ function main() {
 }
 
 // ===========================================================================
-//  DATA OPHALEN
+//  DATA OPHALEN  (alles op campagneniveau, echte data)
 // ===========================================================================
 
 /**
- * Haalt accountbrede cijfers op door alle campagnes te sommeren.
- * Afgeleide metrics (CTR, CPC, etc.) worden uit de totalen herberekend,
- * zodat ze kloppen op accountniveau. Zoekvertoningspercentage wordt
- * impressie-gewogen berekend over uitsluitend zoekcampagnes.
+ * Haalt per campagne de cijfers op voor de opgegeven periode.
+ * Geeft een lijst met ruwe campagnestatistieken terug plus een index op
+ * campagne-id, zodat we per campagne kunnen vergelijken tussen periodes.
  */
-function getAccountStats(startDate, endDate) {
-  var t = {
-    cost: 0, impressions: 0, clicks: 0,
-    allConv: 0, conv: 0,
-    searchImprWeighted: 0, searchImpr: 0
-  };
-
+function getCampaignData(startDate, endDate) {
   var query =
-    'SELECT campaign.advertising_channel_type, ' +
+    'SELECT campaign.id, campaign.name, campaign.advertising_channel_type, ' +
     '       metrics.cost_micros, metrics.impressions, metrics.clicks, ' +
     '       metrics.all_conversions, metrics.conversions, ' +
     '       metrics.search_impression_share ' +
     'FROM campaign ' +
-    "WHERE segments.date BETWEEN '" + startDate + "' AND '" + endDate + "'";
+    "WHERE segments.date BETWEEN '" + startDate + "' AND '" + endDate + "' " +
+    '  AND metrics.impressions > 0';
 
+  var list = [], byId = {};
   var rows = AdsApp.search(query);
   while (rows.hasNext()) {
     var r = rows.next();
     var m = r.metrics;
-    var impr = Number(m.impressions) || 0;
+    var isSearch = r.campaign && r.campaign.advertisingChannelType === 'SEARCH';
+    var sisRaw = (m.searchImpressionShare === undefined || m.searchImpressionShare === null)
+      ? null : Number(m.searchImpressionShare);
 
-    t.cost        += micros(m.costMicros);
-    t.impressions += impr;
-    t.clicks      += Number(m.clicks) || 0;
-    t.allConv     += Number(m.allConversions) || 0;
-    t.conv        += Number(m.conversions) || 0;
-
-    // Zoekvertoningspercentage alleen meewegen voor zoekcampagnes.
-    if (r.campaign && r.campaign.advertisingChannelType === 'SEARCH') {
-      var sis = Number(m.searchImpressionShare);
-      if (!isNaN(sis)) {
-        t.searchImprWeighted += sis * impr;
-        t.searchImpr += impr;
-      }
-    }
+    var raw = {
+      id:          r.campaign.id,
+      name:        r.campaign.name,
+      isSearch:    isSearch,
+      cost:        micros(m.costMicros),
+      impressions: Number(m.impressions) || 0,
+      clicks:      Number(m.clicks) || 0,
+      allConv:     Number(m.allConversions) || 0,
+      conv:        Number(m.conversions) || 0,
+      searchIs:    isSearch ? sisRaw : null   // alleen zinvol voor zoekcampagnes
+    };
+    list.push(raw);
+    byId[raw.id] = raw;
   }
-
-  return {
-    cost:        t.cost,
-    impressions: t.impressions,
-    clicks:      t.clicks,
-    ctr:         t.impressions ? t.clicks / t.impressions : 0,
-    avgCpc:      t.clicks ? t.cost / t.clicks : 0,
-    allConv:     t.allConv,
-    conv:        t.conv,
-    costPerConv: t.conv ? t.cost / t.conv : 0,
-    convRate:    t.clicks ? t.conv / t.clicks : 0,
-    searchIs:    t.searchImpr ? t.searchImprWeighted / t.searchImpr : 0
-  };
+  return { list: list, byId: byId };
 }
 
-/** Top N zoekwoorden van de periode, gesorteerd op klikken. */
+/** Top N zoekwoorden van de periode, gesorteerd op klikken (alleen actieve). */
 function getTopKeywords(startDate, endDate, limit) {
   var query =
     'SELECT ad_group_criterion.keyword.text, ' +
     '       ad_group_criterion.keyword.match_type, ' +
     '       metrics.impressions, metrics.clicks, metrics.ctr, ' +
-    '       metrics.average_cpc, metrics.all_conversions, metrics.conversions ' +
+    '       metrics.average_cpc, metrics.conversions, metrics.all_conversions ' +
     'FROM keyword_view ' +
     "WHERE segments.date BETWEEN '" + startDate + "' AND '" + endDate + "' " +
     "  AND ad_group_criterion.status = 'ENABLED' " +
@@ -170,89 +156,160 @@ function getTopKeywords(startDate, endDate, limit) {
     var r = rows.next();
     var m = r.metrics;
     out.push({
-      text:      r.adGroupCriterion.keyword.text,
-      matchType: matchTypeLabel(r.adGroupCriterion.keyword.matchType),
+      text:        r.adGroupCriterion.keyword.text,
+      matchType:   matchTypeLabel(r.adGroupCriterion.keyword.matchType),
       impressions: Number(m.impressions) || 0,
       clicks:      Number(m.clicks) || 0,
       ctr:         Number(m.ctr) || 0,
       avgCpc:      micros(m.averageCpc),
-      allConv:     Number(m.allConversions) || 0,
-      conv:        Number(m.conversions) || 0
+      conv:        Number(m.conversions) || 0,
+      allConv:     Number(m.allConversions) || 0
     });
   }
   return out;
 }
 
+/** Berekent afgeleide metrics (CTR, CPC, etc.) uit ruwe campagnetotalen. */
+function derive(raw) {
+  return {
+    cost:        raw.cost,
+    impressions: raw.impressions,
+    clicks:      raw.clicks,
+    ctr:         raw.impressions ? raw.clicks / raw.impressions : 0,
+    avgCpc:      raw.clicks ? raw.cost / raw.clicks : 0,
+    allConv:     raw.allConv,
+    conv:        raw.conv,
+    costPerConv: raw.conv ? raw.cost / raw.conv : 0,
+    convRate:    raw.clicks ? raw.conv / raw.clicks : 0,
+    searchIs:    raw.searchIs // null voor totaal/niet-zoekcampagnes
+  };
+}
+
+/** Sommeert een lijst ruwe campagnestatistieken tot één totaal (searchIs = null). */
+function sumRaw(list) {
+  var t = { cost: 0, impressions: 0, clicks: 0, allConv: 0, conv: 0, searchIs: null, isSearch: false };
+  for (var i = 0; i < list.length; i++) {
+    t.cost += list[i].cost; t.impressions += list[i].impressions;
+    t.clicks += list[i].clicks; t.allConv += list[i].allConv; t.conv += list[i].conv;
+  }
+  return t;
+}
+
 // ===========================================================================
 //  E-MAIL OPBOUWEN
 // ===========================================================================
-function buildEmail(cur, prev, keywords, current, previous, tz) {
+function buildEmail(cur, prev, keywords, current, previous) {
   var b = CONFIG.brand;
 
-  // Rijdefinities voor de samenvattingstabel.
-  var rows = [
-    metricRow('Kosten',                       cur.cost,        prev.cost,        'currency', 'cost'),
-    metricRow('Vertoningen',                  cur.impressions, prev.impressions, 'int',      'impressions'),
-    metricRow('Klikken',                      cur.clicks,      prev.clicks,      'int',      'clicks'),
-    metricRow('CTR',                          cur.ctr,         prev.ctr,         'percent',  'ctr'),
-    metricRow('Gem. CPC',                     cur.avgCpc,      prev.avgCpc,      'currency', 'avgCpc'),
-    metricRow('Alle conversies',              cur.allConv,     prev.allConv,     'decimal',  'allConv'),
-    metricRow('Conversies',                   cur.conv,        prev.conv,        'decimal',  'conv'),
-    metricRow('Kosten/conv.',                 cur.costPerConv, prev.costPerConv, 'currency', 'costPerConv'),
-    metricRow('Conversiepercentage',          cur.convRate,    prev.convRate,    'percent',  'convRate'),
-    metricRow('Zoekvertoningspercentage',     cur.searchIs,    prev.searchIs,    'percent',  'searchIs')
-  ].join('');
+  // Campagnes sorteren op kosten (hoog -> laag).
+  var campaigns = cur.list.slice().sort(function (a, z) { return z.cost - a.cost; });
 
+  // Detailregels per campagne (alleen huidige maand, echte data).
+  var campaignRows = campaigns.length ? campaigns.map(function (raw) {
+    var d = derive(raw);
+    return '' +
+      '<tr>' +
+        td(escapeHtml(raw.name), 'left') +
+        td(fmtCurrency(d.cost)) +
+        td(fmtInt(d.impressions)) +
+        td(fmtInt(d.clicks)) +
+        td(fmtPercent(d.ctr)) +
+        td(fmtCurrency(d.avgCpc)) +
+        td(fmtDecimal(d.allConv)) +
+        td(fmtDecimal(d.conv)) +
+        td(fmtCurrency(d.costPerConv)) +
+        td(fmtPercent(d.convRate)) +
+        td(d.searchIs === null ? '&ndash;' : fmtPercent(d.searchIs)) +
+      '</tr>';
+  }).join('') :
+  '<tr><td colspan="11" style="padding:14px;text-align:center;color:' + b.muted + ';">Geen campagnedata voor deze periode.</td></tr>';
+
+  // Totaalregel met vergelijking t.o.v. vorige maand.
+  var curTot  = derive(sumRaw(cur.list));
+  var prevTot = derive(sumRaw(prev.list));
+  var totalRow =
+    '<tr style="background:' + b.bg + ';font-weight:bold;">' +
+      '<td style="padding:10px 10px;border-top:2px solid ' + b.green + ';text-align:left;">Totaal</td>' +
+      totalCell(curTot.cost,        prevTot.cost,        'currency', 'cost') +
+      totalCell(curTot.impressions, prevTot.impressions, 'int',      'impressions') +
+      totalCell(curTot.clicks,      prevTot.clicks,      'int',      'clicks') +
+      totalCell(curTot.ctr,         prevTot.ctr,         'percent',  'ctr') +
+      totalCell(curTot.avgCpc,      prevTot.avgCpc,      'currency', 'avgCpc') +
+      totalCell(curTot.allConv,     prevTot.allConv,     'decimal',  'allConv') +
+      totalCell(curTot.conv,        prevTot.conv,        'decimal',  'conv') +
+      totalCell(curTot.costPerConv, prevTot.costPerConv, 'currency', 'costPerConv') +
+      totalCell(curTot.convRate,    prevTot.convRate,    'percent',  'convRate') +
+      '<td style="padding:10px 10px;border-top:2px solid ' + b.green + ';text-align:right;">&ndash;</td>' +
+    '</tr>';
+
+  // Zoekwoordregels (kolomvolgorde zoals in het Google Ads-rapport).
   var keywordRows = keywords.length ? keywords.map(function (k) {
     return '' +
       '<tr>' +
-        td(escapeHtml(k.text) + ' <span style="color:' + b.mutedColor + ';font-size:11px;">[' + k.matchType + ']</span>', 'left') +
+        td(escapeHtml(k.text) + ' <span style="color:' + b.muted + ';font-size:11px;">[' + k.matchType + ']</span>', 'left') +
         td(fmtInt(k.impressions)) +
         td(fmtInt(k.clicks)) +
         td(fmtPercent(k.ctr)) +
         td(fmtCurrency(k.avgCpc)) +
-        td(fmtDecimal(k.allConv)) +
         td(fmtDecimal(k.conv)) +
+        td(fmtDecimal(k.allConv)) +
       '</tr>';
   }).join('') :
-  '<tr><td colspan="7" style="padding:14px;text-align:center;color:' + b.mutedColor + ';">Geen zoekwoorddata voor deze periode.</td></tr>';
+  '<tr><td colspan="7" style="padding:14px;text-align:center;color:' + b.muted + ';">Geen zoekwoorddata voor deze periode.</td></tr>';
 
   return '' +
 '<!DOCTYPE html><html><head><meta charset="utf-8">' +
 '<meta name="viewport" content="width=device-width, initial-scale=1.0"></head>' +
-'<body style="margin:0;padding:0;background:' + b.bgColor + ';">' +
-'<div style="font-family:Arial,Helvetica,sans-serif;color:' + b.textColor + ';max-width:680px;margin:0 auto;background:' + b.bgColor + ';padding:16px;">' +
+'<body style="margin:0;padding:0;background:' + b.bg + ';">' +
+'<div style="font-family:Arial,Helvetica,sans-serif;color:' + b.text + ';max-width:760px;margin:0 auto;background:' + b.bg + ';padding:16px;">' +
 
-  // Header
-  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:' + b.primaryDark + ';border-radius:12px 12px 0 0;">' +
-    '<tr><td style="padding:24px 28px;">' +
-      '<img src="' + b.logoUrl + '" alt="' + escapeHtml(CONFIG.agencyName) + '" height="34" style="display:block;border:0;outline:none;margin-bottom:10px;max-height:34px;">' +
-      '<div style="color:#FFFFFF;font-size:20px;font-weight:bold;">Google Ads maandrapportage</div>' +
-      '<div style="color:#C9D2E3;font-size:14px;margin-top:4px;">' + escapeHtml(CONFIG.clientName) + ' &middot; ' + current.label + '</div>' +
+  // Kaart
+  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border-radius:12px;overflow:hidden;border:1px solid ' + b.border + ';">' +
+
+    // Header (logo's op witte achtergrond + oranje accentlijn)
+    '<tr><td style="padding:22px 26px 0;">' +
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>' +
+        '<td style="text-align:left;vertical-align:middle;">' +
+          '<img src="' + b.agencyLogoUrl + '" alt="' + escapeHtml(CONFIG.agencyName) + '" height="34" style="display:block;border:0;outline:none;max-height:34px;">' +
+        '</td>' +
+        '<td style="text-align:right;vertical-align:middle;">' +
+          '<img src="' + b.clientLogoUrl + '" alt="' + escapeHtml(CONFIG.clientName) + '" height="40" style="display:inline-block;border:0;outline:none;max-height:40px;">' +
+        '</td>' +
+      '</tr></table>' +
+      '<div style="height:3px;background:' + b.orange + ';border-radius:3px;margin:16px 0 0;"></div>' +
     '</td></tr>' +
-  '</table>' +
 
-  // Body
-  '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFFFF;border-radius:0 0 12px 12px;">' +
-    '<tr><td style="padding:24px 28px;">' +
+    // Titel
+    '<tr><td style="padding:18px 26px 0;">' +
+      '<div style="color:' + b.green + ';font-size:21px;font-weight:bold;">Google Ads maandrapportage</div>' +
+      '<div style="color:' + b.muted + ';font-size:14px;margin-top:4px;">' + escapeHtml(CONFIG.clientName) + ' &middot; ' + current.label + '</div>' +
+    '</td></tr>' +
 
-      '<p style="margin:0 0 18px;font-size:14px;line-height:1.6;">Beste,</p>' +
-      '<p style="margin:0 0 22px;font-size:14px;line-height:1.6;">Hierbij een kort overzicht van de prestaties van jullie Google Ads-account over <strong>' + current.label + '</strong>, vergeleken met ' + previous.label + '.</p>' +
+    // Body
+    '<tr><td style="padding:18px 26px 26px;">' +
 
-      // Samenvatting
-      '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.primary + ';margin:0 0 10px;">Accountoverzicht</div>' +
-      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13px;border:1px solid ' + b.borderColor + ';border-radius:8px;overflow:hidden;">' +
-        '<tr style="background:' + b.bgColor + ';">' +
-          th('Statistiek', 'left') + th(current.shortLabel) + th(previous.shortLabel) + th('Verschil') +
+      '<p style="margin:0 0 18px;font-size:14px;line-height:1.6;">Beste Terry,</p>' +
+      '<p style="margin:0 0 22px;font-size:14px;line-height:1.6;">Hierbij een kort overzicht van de prestaties van jullie Google Ads-account over <strong>' + current.label + '</strong>, per campagne. In de totaalregel zie je de vergelijking met ' + previous.label + '.</p>' +
+
+      // Per campagne
+      '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.orange + ';margin:0 0 10px;">Resultaten per campagne</div>' +
+      '<div style="overflow-x:auto;">' +
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:12px;border:1px solid ' + b.border + ';border-radius:8px;overflow:hidden;min-width:680px;">' +
+        '<tr style="background:' + b.green + ';">' +
+          thd('Campagne', 'left') + thd('Kosten') + thd('Vert.') + thd('Klikken') + thd('CTR') +
+          thd('Gem. CPC') + thd('Alle conv.') + thd('Conv.') + thd('Kosten/conv.') + thd('Conv.%') + thd('Zoekvert.%') +
         '</tr>' +
-        rows +
+        campaignRows +
+        totalRow +
       '</table>' +
+      '</div>' +
+      '<div style="font-size:11px;color:' + b.muted + ';margin-top:6px;">Zoekvertoningspercentage wordt per zoekcampagne getoond; op de totaalregel is dit niet als één getal beschikbaar.</div>' +
 
       // Zoekwoorden
-      '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.primary + ';margin:28px 0 10px;">Top ' + CONFIG.keywordLimit + ' zoekwoorden (op klikken)</div>' +
-      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:12px;border:1px solid ' + b.borderColor + ';border-radius:8px;overflow:hidden;">' +
-        '<tr style="background:' + b.bgColor + ';">' +
-          th('Zoekwoord', 'left') + th('Vert.') + th('Klikken') + th('CTR') + th('Gem. CPC') + th('Alle conv.') + th('Conv.') +
+      '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.orange + ';margin:28px 0 10px;">Top ' + CONFIG.keywordLimit + ' zoekwoorden (op klikken)</div>' +
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:12px;border:1px solid ' + b.border + ';border-radius:8px;overflow:hidden;">' +
+        '<tr style="background:' + b.green + ';">' +
+          thd('Zoekwoord', 'left') + thd('Vert.') + thd('Klikken') + thd('CTR') + thd('Gem. CPC') + thd('Conv.') + thd('Alle conv.') +
         '</tr>' +
         keywordRows +
       '</table>' +
@@ -264,38 +321,32 @@ function buildEmail(cur, prev, keywords, current, previous, tz) {
   '</table>' +
 
   // Footer
-  '<div style="text-align:center;color:' + b.mutedColor + ';font-size:11px;line-height:1.6;padding:18px 10px;">' +
-    escapeHtml(CONFIG.agencyName) + ' &middot; <a href="' + CONFIG.agencyUrl + '" style="color:' + b.primary + ';text-decoration:none;">seovrienden.nl</a> &middot; ' +
-    '<a href="mailto:' + CONFIG.agencyEmail + '" style="color:' + b.primary + ';text-decoration:none;">' + CONFIG.agencyEmail + '</a><br>' +
+  '<div style="text-align:center;color:' + b.muted + ';font-size:11px;line-height:1.6;padding:18px 10px;">' +
+    escapeHtml(CONFIG.agencyName) + ' &middot; <a href="' + CONFIG.agencyUrl + '" style="color:' + b.orange + ';text-decoration:none;">seovrienden.nl</a> &middot; ' +
+    '<a href="mailto:' + CONFIG.agencyEmail + '" style="color:' + b.orange + ';text-decoration:none;">' + CONFIG.agencyEmail + '</a><br>' +
     'Deze rapportage is automatisch gegenereerd vanuit Google Ads.' +
   '</div>' +
 
 '</div></body></html>';
 }
 
-/** Bouwt één rij van de samenvattingstabel met waarde, vorige waarde en gekleurd verschil. */
-function metricRow(label, curVal, prevVal, format, key) {
+/** Cel voor de totaalregel: waarde + klein gekleurd verschil t.o.v. vorige maand. */
+function totalCell(curVal, prevVal, format, key) {
   var b = CONFIG.brand;
   var change = pctChange(curVal, prevVal);
-  var higherBetter = CONFIG.higherIsBetter[key];
-  var color = b.mutedColor;
-  var arrow = '';
+  var color = b.muted, arrow = '';
 
   if (change !== null && Math.abs(change) >= 0.0005) {
-    var good = change > 0 ? higherBetter : !higherBetter;
+    var good = (change > 0) ? CONFIG.higherIsBetter[key] : !CONFIG.higherIsBetter[key];
     color = good ? b.positive : b.negative;
-    arrow = change > 0 ? '▲ ' : '▼ ';
+    arrow = (change > 0) ? '▲ ' : '▼ ';
   }
+  var delta = (change === null) ? '&ndash;' : (arrow + fmtPercent(Math.abs(change)));
 
-  var changeText = (change === null) ? '&ndash;' : (arrow + fmtPercent(Math.abs(change)));
-
-  return '' +
-    '<tr>' +
-      '<td style="padding:9px 12px;border-top:1px solid ' + b.borderColor + ';font-weight:600;">' + label + '</td>' +
-      '<td style="padding:9px 12px;border-top:1px solid ' + b.borderColor + ';text-align:right;">' + fmtValue(curVal, format) + '</td>' +
-      '<td style="padding:9px 12px;border-top:1px solid ' + b.borderColor + ';text-align:right;color:' + b.mutedColor + ';">' + fmtValue(prevVal, format) + '</td>' +
-      '<td style="padding:9px 12px;border-top:1px solid ' + b.borderColor + ';text-align:right;font-weight:600;color:' + color + ';">' + changeText + '</td>' +
-    '</tr>';
+  return '<td style="padding:10px 10px;border-top:2px solid ' + b.green + ';text-align:right;">' +
+           fmtValue(curVal, format) +
+           '<div style="font-size:10px;font-weight:600;color:' + color + ';margin-top:2px;">' + delta + '</div>' +
+         '</td>';
 }
 
 // ===========================================================================
@@ -307,7 +358,6 @@ function lastMonthRange(tz) {
   var now = new Date();
   var y = Number(Utilities.formatDate(now, tz, 'yyyy'));
   var m = Number(Utilities.formatDate(now, tz, 'MM')) - 1; // 0-based maand van vandaag
-  // Ga één maand terug:
   var firstThisMonth = new Date(y, m, 1);
   var start = new Date(firstThisMonth.getFullYear(), firstThisMonth.getMonth() - 1, 1);
   var end   = new Date(firstThisMonth.getFullYear(), firstThisMonth.getMonth(), 0); // laatste dag vorige maand
@@ -325,12 +375,11 @@ function makeRange(start, end, tz) {
   var maanden = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
   var label = maanden[start.getMonth()] + ' ' + start.getFullYear();
   return {
-    startDate:  start,
-    endDate:    end,
-    start:      Utilities.formatDate(start, tz, 'yyyy-MM-dd'),
-    end:        Utilities.formatDate(end, tz, 'yyyy-MM-dd'),
-    label:      label.charAt(0).toUpperCase() + label.slice(1),
-    shortLabel: maanden[start.getMonth()].substring(0, 3) + ' ' + ('' + start.getFullYear()).slice(2)
+    startDate: start,
+    endDate:   end,
+    start:     Utilities.formatDate(start, tz, 'yyyy-MM-dd'),
+    end:       Utilities.formatDate(end, tz, 'yyyy-MM-dd'),
+    label:     label.charAt(0).toUpperCase() + label.slice(1)
   };
 }
 
@@ -340,7 +389,7 @@ function makeRange(start, end, tz) {
 function micros(v) { return (Number(v) || 0) / 1000000; }
 
 function pctChange(cur, prev) {
-  if (!prev) return null;          // geen basis om mee te vergelijken
+  if (!prev) return null; // geen basis om mee te vergelijken
   return (cur - prev) / prev;
 }
 
@@ -356,16 +405,15 @@ function fmtValue(v, format) {
 
 function fmtInt(v)      { return groupThousands(Math.round(Number(v) || 0)); }
 function fmtDecimal(v)  { return decimalsNl(Number(v) || 0, 2); }
-function fmtCurrency(v) { return CONFIG.currencySymbol + ' ' + decimalsNl(Number(v) || 0, 2); }
+function fmtCurrency(v) { return CONFIG.currencySymbol + ' ' + decimalsNl(Number(v) || 0, 2); }
 function fmtPercent(v)  { return decimalsNl((Number(v) || 0) * 100, 2) + '%'; }
 
-/** Getal met 2 decimalen in NL-notatie (punt = duizendtal, komma = decimaal). */
+/** Getal met n decimalen in NL-notatie (punt = duizendtal, komma = decimaal). */
 function decimalsNl(num, decimals) {
   var neg = num < 0;
   var fixed = Math.abs(num).toFixed(decimals);
   var parts = fixed.split('.');
-  var out = groupThousands(parts[0]) + ',' + parts[1];
-  return (neg ? '-' : '') + out;
+  return (neg ? '-' : '') + groupThousands(parts[0]) + ',' + parts[1];
 }
 
 /** Voegt punten toe als duizendtalscheiding. */
@@ -380,12 +428,14 @@ function groupThousands(intValue) {
 // ===========================================================================
 //  HELPERS  -  diversen
 // ===========================================================================
-function th(text, align) {
-  return '<th style="padding:10px 12px;text-align:' + (align || 'right') + ';font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:' + CONFIG.brand.mutedColor + ';font-weight:700;">' + text + '</th>';
+
+/** Tabelkop-cel: crème tekst op donkergroen. */
+function thd(text, align) {
+  return '<th style="padding:10px 10px;text-align:' + (align || 'right') + ';font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:' + CONFIG.brand.cream + ';font-weight:700;white-space:nowrap;">' + text + '</th>';
 }
 
 function td(content, align) {
-  return '<td style="padding:8px 12px;border-top:1px solid ' + CONFIG.brand.borderColor + ';text-align:' + (align || 'right') + ';">' + content + '</td>';
+  return '<td style="padding:8px 10px;border-top:1px solid ' + CONFIG.brand.border + ';text-align:' + (align || 'right') + ';white-space:nowrap;">' + content + '</td>';
 }
 
 function matchTypeLabel(mt) {
