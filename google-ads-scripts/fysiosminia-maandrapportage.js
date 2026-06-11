@@ -407,6 +407,7 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous, 
     var insights = generateInsights(curTot, prevTot, weightedSearchLost(cur.list));
     var segIns = generateSegmentInsight(cur, prev);
     if (segIns) insights.push(segIns);
+    insights.push(positiveTakeaway(curTot, prevTot, weightedSearchLost(cur.list)));
     insightsBlock =
       '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.orange + ';margin:0 0 8px;">Analyse &amp; toelichting</div>' +
       '<ul style="margin:0 0 4px;padding-left:18px;font-size:13px;line-height:1.7;">' +
@@ -689,6 +690,48 @@ function generateInsights(curTot, prevTot, lost) {
     out.push('De prestaties waren stabiel ten opzichte van dezelfde maand vorig jaar; geen opvallende verschuivingen.');
   }
   return out;
+}
+
+/**
+ * Sluit de analyse af met een eerlijke, positieve boodschap: de écht positieve
+ * ontwikkelingen onder elkaar. Is er niets positiefs, dan een constructieve kans
+ * (geen verzonnen positiviteit). Eén korte slotzin.
+ */
+function positiveTakeaway(curTot, prevTot, lost) {
+  var TH = Number(CONFIG.insightThreshold) || 0.05;
+  var pos = [], c;
+  function up(a, b)   { var x = pctChange(a, b); return (x !== null && x > 0.005)  ? x : null; }
+  function down(a, b) { var x = pctChange(a, b); return (x !== null && x < -0.005) ? x : null; }
+
+  if ((c = up(curTot.conv, prevTot.conv))            !== null) pos.push('meer conversies (' + signPct(c) + ')');
+  if ((c = down(curTot.costPerConv, prevTot.costPerConv)) !== null) pos.push('een lagere kosten per conversie (' + signPct(c) + ')');
+  if ((c = up(curTot.convRate, prevTot.convRate))    !== null) pos.push('een hoger conversiepercentage (' + signPct(c) + ')');
+  if ((c = up(curTot.ctr, prevTot.ctr))              !== null) pos.push('een hogere CTR (' + signPct(c) + ')');
+  if ((c = down(curTot.avgCpc, prevTot.avgCpc))      !== null) pos.push('een lagere klikprijs (' + signPct(c) + ')');
+  if ((c = up(curTot.allConv, prevTot.allConv))      !== null) pos.push('meer totale conversies (' + signPct(c) + ')');
+  // Lagere uitgaven alleen als pluspunt als de efficiëntie (kosten/conv.) niet verslechterde.
+  var cpaChk = pctChange(curTot.costPerConv, prevTot.costPerConv);
+  if ((c = down(curTot.cost, prevTot.cost)) !== null && (cpaChk === null || cpaChk <= 0.005)) pos.push('beheerste uitgaven (' + signPct(c) + ')');
+
+  if (pos.length) {
+    return 'Onder de streep: positief is ' + joinNl(pos.slice(0, 3)) + '. Daar bouwen we op voort.';
+  }
+
+  // Geen directe pluspunten: benoem de grootste, concreet aanpakbare kans.
+  var convRateCh = pctChange(curTot.convRate, prevTot.convRate);
+  var ctrCh      = pctChange(curTot.ctr, prevTot.ctr);
+  var cpcCh      = pctChange(curTot.avgCpc, prevTot.avgCpc);
+  var cand = [
+    { m: (convRateCh !== null && convRateCh < -TH) ? Math.abs(convRateCh) : 0, txt: 'het verhogen van het conversiepercentage (landingspagina en aanbod)' },
+    { m: (ctrCh !== null && ctrCh < -TH) ? Math.abs(ctrCh) : 0,               txt: 'relevantere advertenties voor een hogere CTR' },
+    { m: (cpcCh !== null && cpcCh > TH) ? Math.abs(cpcCh) : 0,                txt: 'het beheersen van de klikprijs (CPC)' },
+    { m: (lost && lost.budget >= 0.10) ? lost.budget : 0,                     txt: 'meer budget voor de best presterende campagnes' }
+  ];
+  var best = { m: 0, txt: 'het verder opschalen van wat het beste werkt' };
+  for (var i = 0; i < cand.length; i++) if (cand[i].m > best.m) best = cand[i];
+
+  return 'Onder de streep: de cijfers liggen onder vorig jaar, maar de grootste kans ligt duidelijk in ' +
+         best.txt + '. Daar gaan we de komende periode gericht op sturen.';
 }
 
 /** Som van conversies van campagnes waarvan de naam 'match' bevat. */
