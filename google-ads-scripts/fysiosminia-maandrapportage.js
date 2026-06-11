@@ -367,7 +367,7 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous) 
   // Samenvatting in gewone taal.
   var summaryBlock = CONFIG.show.summary ?
     '<div style="background:' + b.bg + ';border-left:4px solid ' + b.orange + ';border-radius:6px;padding:14px 16px;margin:0 0 22px;font-size:14px;line-height:1.6;">' +
-      buildSummary(curTot, prevTot, current, previous) +
+      buildSummary(curTot, prevTot, current, previous, convActions) +
     '</div>' : '';
 
   // Analyse & toelichting (verklaring uit KPI-verbanden).
@@ -498,7 +498,7 @@ function totalCell(curVal, prevVal, format, key) {
 }
 
 /** Samenvatting in gewone taal op basis van de maandtotalen. */
-function buildSummary(curTot, prevTot, current, previous) {
+function buildSummary(curTot, prevTot, current, previous, convActions) {
   var maandNu  = lowerFirst(current.label);
   var maandVor = lowerFirst(previous.label);
   var change = pctChange(curTot.conv, prevTot.conv);
@@ -513,10 +513,19 @@ function buildSummary(curTot, prevTot, current, previous) {
     else                       s2 = ' Dat is vergelijkbaar met ' + maandVor + '.';
   }
 
+  // Benoem om wat voor conversies het gaat (de gemeten conversieacties).
+  var names = [];
+  var acts = convActions || [];
+  for (var i = 0; i < acts.length && names.length < 6; i++) {
+    if (acts[i].conv > 0) names.push(acts[i].name);
+  }
+  var s4 = names.length ? ' Deze conversies bestaan uit: ' + joinNl(names) + '.' :
+           (curTot.conv ? ' Dit zijn de gemeten Google Ads-conversies.' : '');
+
   var s3 = ' Er werd ' + fmtCurrency(curTot.cost) + ' geïnvesteerd, goed voor ' +
            fmtInt(curTot.clicks) + ' klikken (CTR ' + fmtPercent(curTot.ctr) + ').';
 
-  return s1 + s2 + s3;
+  return s1 + s2 + s4 + s3;
 }
 
 /** Impressie-gewogen verloren zoekvertoningspercentage (budget/rang) over zoekcampagnes. */
@@ -542,6 +551,7 @@ function generateInsights(curTot, prevTot, lost) {
   var TH = Number(CONFIG.insightThreshold) || 0.05;
   var out = [];
 
+  var costCh     = pctChange(curTot.cost,        prevTot.cost);
   var convCh     = pctChange(curTot.conv,        prevTot.conv);
   var clicksCh   = pctChange(curTot.clicks,      prevTot.clicks);
   var ctrCh      = pctChange(curTot.ctr,         prevTot.ctr);
@@ -549,6 +559,18 @@ function generateInsights(curTot, prevTot, lost) {
   var cpcCh      = pctChange(curTot.avgCpc,      prevTot.avgCpc);
   var convRateCh = pctChange(curTot.convRate,    prevTot.convRate);
   var cpaCh      = pctChange(curTot.costPerConv, prevTot.costPerConv);
+
+  // 0) Kosten: altijd vermelden (vergelijking met dezelfde maand vorig jaar).
+  if (costCh !== null) {
+    var kostenTxt = (Math.abs(costCh) < 0.005)
+      ? 'bleven vrijwel gelijk op ' + fmtCurrency(curTot.cost)
+      : (costCh < 0 ? 'daalden' : 'stegen') + ' met ' + fmtPercent(Math.abs(costCh)) +
+        ' naar ' + fmtCurrency(curTot.cost) + ' (was ' + fmtCurrency(prevTot.cost) + ')';
+    out.push('De advertentiekosten ' + kostenTxt + '.');
+  } else {
+    out.push('De advertentiekosten bedroegen ' + fmtCurrency(curTot.cost) +
+             ' (geen vergelijkbare data van vorig jaar).');
+  }
 
   // 1) Conversies: verkeer (klikken) vs. rendement (conversiepercentage).
   if (convCh !== null && Math.abs(convCh) >= TH) {
@@ -740,6 +762,13 @@ function currencySymbolFor(code) {
 
 function lowerFirst(s) {
   return ('' + s).charAt(0).toLowerCase() + ('' + s).slice(1);
+}
+
+/** Voegt een lijst samen als "a, b en c". */
+function joinNl(arr) {
+  if (!arr.length) return '';
+  if (arr.length === 1) return arr[0];
+  return arr.slice(0, -1).join(', ') + ' en ' + arr[arr.length - 1];
 }
 
 /** Getal of null als de waarde ontbreekt. */
