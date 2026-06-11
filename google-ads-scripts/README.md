@@ -26,31 +26,34 @@ de beste vorm:
 | Klikken | Klikken |
 | CTR | Klikfrequentie |
 | Gem. CPC | Gemiddelde kosten per klik |
-| Alle conv. | Alle conversies |
-| Conv. | Conversies |
+| Conv. | Google Ads-conversies |
 | Kosten/conv. | Kosten per conversie |
 | Conv.% | Conversiepercentage |
 | Zoekvert.% | Zoekvertoningspercentage – **werkelijke waarde per zoekcampagne** |
 
-Onderaan een **Totaal**-regel met de vergelijking t.o.v. de vorige maand
-(▲/▼ in groen/rood). Het zoekvertoningspercentage staat bewust alléén per
-campagne (geen account-totaal), omdat dat de enige echte, niet-benaderde waarde is.
+Onderaan een **Totaal**-regel met de vergelijking t.o.v. **dezelfde maand vorig jaar**
+(▲/▼ in groen/rood). Deze jaar-op-jaar-vergelijking corrigeert voor seizoensinvloeden.
+Het zoekvertoningspercentage staat bewust alléén per campagne (geen account-totaal),
+omdat dat de enige echte, niet-benaderde waarde is.
 
-**Top 20 zoekwoorden** (op klikken, alleen actieve zoekwoorden), in de
-kolomvolgorde van het Google Ads-rapport: zoekwoord + matchtype, vertoningen,
-klikken, CTR, gem. CPC, conversies, alle conversies.
+Er worden **alleen Google Ads-conversies** (`metrics.conversions`) getoond, geen GA4-
+totaal. Wil je specifieke acties (bv. GA4-acties) uitsluiten, zet hun exacte naam in
+`CONFIG.excludeConversionActions`.
+
+**Top 20 zoekwoorden** (op klikken, alleen actieve zoekwoorden), kolommen: zoekwoord +
+matchtype, vertoningen, klikken, CTR, gem. CPC, conversies.
 
 > Let op: dit zijn **zoekwoorden** (keyword_view), geen zoektermen.
 
 **Extra onderdelen** (aan/uit via `CONFIG.show`):
 
-- **Samenvatting in gewone taal** bovenaan (conversies, kosten/conversie, trend t.o.v. vorige maand).
+- **Samenvatting in gewone taal** bovenaan (conversies, kosten/conversie, jaar-op-jaar).
 - **Analyse & toelichting**: verklaart verschuivingen uit de KPI-verbanden, bv. een daling
   in conversies herleid naar minder klikken of een lager conversiepercentage, en minder
   vertoningen herleid naar verloren vertoningen door budget/rangschikking. Drempel instelbaar
   via `CONFIG.insightThreshold`. Het verklaart het *mechanisme*, niet de externe oorzaak.
 - **Conversies per actie** (bv. telefoongesprekken, formulieren, routebeschrijving).
-- **Trend laatste 6 maanden** als mini-staafgrafiek (kosten + conversies).
+- **Trend laatste 6 maanden** als visuele verticale staafgrafiek (conversies + kosten).
 
 ## Test vs. live
 
