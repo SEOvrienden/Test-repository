@@ -65,7 +65,10 @@ var CONFIG = {
   keywordSortBy:    'clicks', // 'clicks' | 'impressions' | 'conversions'
   keywordMinClicks: 0,         // toon alleen zoekwoorden met minimaal dit aantal klikken
   trendMonths:      6,          // aantal maanden in de trendgrafiek
-  // Conversieacties die je NIET wilt meenemen (bv. GA4-acties), op exacte naam.
+  // Conversies per actie: toon ALLEEN acties waarvan de naam dit bevat (hoofd-
+  // letterongevoelig). Zo blijven GA4-acties buiten beeld. Leeg = alles tonen.
+  conversionActionNameMustContain: 'Google Ads',
+  // Conversieacties die je daarnaast NIET wilt meenemen, op exacte naam.
   excludeConversionActions: [], // bv. ['GA4 - Aankoop', 'GA4 - Formulier']
   // Onderdelen aan/uit zetten.
   show: { summary: true, insights: true, conversionsByAction: true, trend: true },
@@ -97,7 +100,23 @@ function main() {
   var convActions = CONFIG.show.conversionsByAction ? getConversionsByAction(current.start, current.end) : [];
   var trend = CONFIG.show.trend ? getMonthlyTrend(current, tz, CONFIG.trendMonths) : [];
 
-  var html = buildEmail(cur, prev, keywords, convActions, trend, current, previous);
+  // Afbeeldingen inline meesturen, zodat ze direct zichtbaar zijn (geen
+  // "afbeeldingen weergeven"/downloaden nodig). Lukt het ophalen niet, dan
+  // valt het betreffende beeld terug op de externe URL.
+  var inlineImages = {};
+  var inlineFlags  = { clientLogo: false, trend: false };
+  try {
+    inlineImages.clientlogo = UrlFetchApp.fetch(CONFIG.brand.clientLogoUrl).getBlob().setName('clientlogo');
+    inlineFlags.clientLogo = true;
+  } catch (e) { Logger.log('Klantlogo niet inline geladen: ' + e); }
+  if (CONFIG.show.trend && trend.length) {
+    try {
+      inlineImages.trendchart = UrlFetchApp.fetch(trendChartUrl(trend)).getBlob().setName('trendchart');
+      inlineFlags.trend = true;
+    } catch (e) { Logger.log('Trendgrafiek niet inline geladen: ' + e); }
+  }
+
+  var html = buildEmail(cur, prev, keywords, convActions, trend, current, previous, inlineFlags);
   var subject = 'Google Ads maandrapportage ' + CONFIG.clientName + ' - ' + current.label;
 
   // In testmodus gaat de mail uitsluitend naar de testontvanger (nooit naar de klant).
@@ -107,12 +126,13 @@ function main() {
   if (CONFIG.testMode) subject = '[TEST] ' + subject;
 
   MailApp.sendEmail({
-    to:       to,
-    cc:       cc || undefined,
-    bcc:      bcc || undefined,
-    subject:  subject,
-    htmlBody: html,
-    name:     CONFIG.agencyName
+    to:           to,
+    cc:           cc || undefined,
+    bcc:          bcc || undefined,
+    subject:      subject,
+    htmlBody:     html,
+    inlineImages: inlineImages,
+    name:         CONFIG.agencyName
   });
 
   Logger.log((CONFIG.testMode ? 'TESTMODUS - ' : 'LIVE - ') + 'Rapportage verstuurd naar: ' + to);
@@ -216,6 +236,7 @@ function getConversionsByAction(startDate, endDate) {
   var exclude = {};
   var ex = CONFIG.excludeConversionActions || [];
   for (var e = 0; e < ex.length; e++) exclude[('' + ex[e]).toLowerCase()] = true;
+  var mustContain = ('' + (CONFIG.conversionActionNameMustContain || '')).toLowerCase();
 
   var query =
     'SELECT segments.conversion_action_name, metrics.conversions, metrics.all_conversions ' +
@@ -227,7 +248,9 @@ function getConversionsByAction(startDate, endDate) {
   while (rows.hasNext()) {
     var r = rows.next();
     var name = (r.segments && r.segments.conversionActionName) ? r.segments.conversionActionName : 'Overig';
-    if (exclude[name.toLowerCase()]) continue;
+    var lower = name.toLowerCase();
+    if (exclude[lower]) continue;
+    if (mustContain && lower.indexOf(mustContain) === -1) continue; // alleen Google Ads-acties
     if (!map[name]) map[name] = { name: name, conv: 0, allConv: 0 };
     map[name].conv    += Number(r.metrics.conversions) || 0;
     map[name].allConv += Number(r.metrics.allConversions) || 0;
@@ -305,8 +328,10 @@ function sumRaw(list) {
 // ===========================================================================
 //  E-MAIL OPBOUWEN
 // ===========================================================================
-function buildEmail(cur, prev, keywords, convActions, trend, current, previous) {
+function buildEmail(cur, prev, keywords, convActions, trend, current, previous, inlineFlags) {
   var b = CONFIG.brand;
+  inlineFlags = inlineFlags || {};
+  var clientLogoSrc = inlineFlags.clientLogo ? 'cid:clientlogo' : b.clientLogoUrl;
 
   // Totalen (huidige maand + dezelfde maand vorig jaar) - ook voor de samenvatting.
   var curTot  = derive(sumRaw(cur.list));
@@ -326,13 +351,14 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous) 
         td(fmtInt(d.clicks)) +
         td(fmtPercent(d.ctr)) +
         td(fmtCurrency(d.avgCpc)) +
+        td(fmtDecimal(d.allConv)) +
         td(fmtDecimal(d.conv)) +
         td(fmtCurrency(d.costPerConv)) +
         td(fmtPercent(d.convRate)) +
         td(d.searchIs === null ? '&ndash;' : fmtPercent(d.searchIs)) +
       '</tr>';
   }).join('') :
-  '<tr><td colspan="10" style="padding:14px;text-align:center;color:' + b.muted + ';">Geen campagnedata voor deze periode.</td></tr>';
+  '<tr><td colspan="11" style="padding:14px;text-align:center;color:' + b.muted + ';">Geen campagnedata voor deze periode.</td></tr>';
 
   // Totaalregel met vergelijking t.o.v. dezelfde maand vorig jaar.
   var totalRow =
@@ -343,6 +369,7 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous) 
       totalCell(curTot.clicks,      prevTot.clicks,      'int',      'clicks') +
       totalCell(curTot.ctr,         prevTot.ctr,         'percent',  'ctr') +
       totalCell(curTot.avgCpc,      prevTot.avgCpc,      'currency', 'avgCpc') +
+      totalCell(curTot.allConv,     prevTot.allConv,     'decimal',  'allConv') +
       totalCell(curTot.conv,        prevTot.conv,        'decimal',  'conv') +
       totalCell(curTot.costPerConv, prevTot.costPerConv, 'currency', 'costPerConv') +
       totalCell(curTot.convRate,    prevTot.convRate,    'percent',  'convRate') +
@@ -395,8 +422,8 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous) 
       convRowsHtml +
     '</table>' : '';
 
-  // 6-maanden trend (mini-staafgrafiek).
-  var trendBlock = (CONFIG.show.trend && trend.length) ? buildTrend(trend) : '';
+  // 6-maanden trend (visuele lijngrafiek).
+  var trendBlock = (CONFIG.show.trend && trend.length) ? buildTrend(trend, inlineFlags.trend) : '';
 
   return '' +
 '<!DOCTYPE html><html><head><meta charset="utf-8">' +
@@ -422,7 +449,7 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous) 
           '<div style="color:' + b.muted + ';font-size:14px;margin-top:4px;">' + escapeHtml(CONFIG.clientName) + ' &middot; ' + current.label + '</div>' +
         '</td>' +
         '<td style="vertical-align:middle;text-align:right;width:140px;">' +
-          '<img src="' + b.clientLogoUrl + '" alt="' + escapeHtml(CONFIG.clientName) + '" style="display:inline-block;border:0;outline:none;max-height:58px;max-width:140px;">' +
+          '<img src="' + clientLogoSrc + '" alt="' + escapeHtml(CONFIG.clientName) + '" style="display:inline-block;border:0;outline:none;max-height:58px;max-width:140px;">' +
         '</td>' +
       '</tr></table>' +
     '</td></tr>' +
@@ -442,7 +469,7 @@ function buildEmail(cur, prev, keywords, convActions, trend, current, previous) 
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:12px;border:1px solid ' + b.border + ';border-radius:8px;overflow:hidden;min-width:680px;">' +
         '<tr style="background:' + b.green + ';">' +
           thd('Campagne', 'left') + thd('Kosten') + thd('Vert.') + thd('Klikken') + thd('CTR') +
-          thd('Gem. CPC') + thd('Conv.') + thd('Kosten/conv.') + thd('Conv.%') + thd('Zoekvert.%') +
+          thd('Gem. CPC') + thd('Alle conv.') + thd('Conv.') + thd('Kosten/conv.') + thd('Conv.%') + thd('Zoekvert.%') +
         '</tr>' +
         campaignRows +
         totalRow +
@@ -620,24 +647,16 @@ function generateInsights(curTot, prevTot, lost) {
   return out;
 }
 
-/**
- * Trend als visuele lijngrafiek (Conversies + Alle conversies per maand).
- * De grafiek wordt als afbeelding gerenderd via QuickChart, zodat de lijnen
- * betrouwbaar zichtbaar zijn in e-mailclients (die eigen tekenwerk/JS blokkeren).
- */
-function buildTrend(trend) {
+/** Bouwt de QuickChart-URL voor de trendlijngrafiek (Conversies + Alle conversies). */
+function trendChartUrl(trend) {
   var b = CONFIG.brand;
-  var labels  = trend.map(function (m) { return m.label; });
-  var conv    = trend.map(function (m) { return round2(m.conv); });
-  var allConv = trend.map(function (m) { return round2(m.allConv); });
-
   var chart = {
     type: 'line',
     data: {
-      labels: labels,
+      labels: trend.map(function (m) { return m.label; }),
       datasets: [
-        { label: 'Conversies',      data: conv,    borderColor: b.green,  backgroundColor: b.green,  fill: false, borderWidth: 3, lineTension: 0.3, pointRadius: 3, pointBackgroundColor: b.green },
-        { label: 'Alle conversies', data: allConv, borderColor: b.orange, backgroundColor: b.orange, fill: false, borderWidth: 3, lineTension: 0.3, pointRadius: 3, pointBackgroundColor: b.orange }
+        { label: 'Conversies',      data: trend.map(function (m) { return round2(m.conv); }),    borderColor: b.green,  backgroundColor: b.green,  fill: false, borderWidth: 3, lineTension: 0.3, pointRadius: 3, pointBackgroundColor: b.green },
+        { label: 'Alle conversies', data: trend.map(function (m) { return round2(m.allConv); }), borderColor: b.orange, backgroundColor: b.orange, fill: false, borderWidth: 3, lineTension: 0.3, pointRadius: 3, pointBackgroundColor: b.orange }
       ]
     },
     options: {
@@ -645,12 +664,21 @@ function buildTrend(trend) {
       scales: { yAxes: [{ ticks: { beginAtZero: true } }] }
     }
   };
+  return 'https://quickchart.io/chart?bkg=white&w=600&h=260&c=' + encodeURIComponent(JSON.stringify(chart));
+}
 
-  var url = 'https://quickchart.io/chart?bkg=white&w=600&h=260&c=' + encodeURIComponent(JSON.stringify(chart));
+/**
+ * Trend als visuele lijngrafiek (Conversies + Alle conversies per maand).
+ * Bij voorkeur inline meegestuurd (src = cid:trendchart) zodat de grafiek direct
+ * zichtbaar is; anders valt 'ie terug op de externe QuickChart-URL.
+ */
+function buildTrend(trend, useCid) {
+  var b = CONFIG.brand;
+  var src = useCid ? 'cid:trendchart' : trendChartUrl(trend);
 
   return '<div style="font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:' + b.orange + ';margin:28px 0 10px;">Trend laatste ' + trend.length + ' maanden</div>' +
     '<div style="border:1px solid ' + b.border + ';border-radius:8px;padding:12px;text-align:center;">' +
-      '<img src="' + url + '" alt="Trend conversies en alle conversies per maand" width="100%" style="max-width:600px;border:0;outline:none;">' +
+      '<img src="' + src + '" alt="Trend conversies en alle conversies per maand" width="100%" style="max-width:600px;border:0;outline:none;">' +
     '</div>';
 }
 
