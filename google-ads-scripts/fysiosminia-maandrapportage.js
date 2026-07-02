@@ -18,12 +18,14 @@
 //  INSTELLINGEN  -  pas dit blok aan en verder hoef je niets te wijzigen
 // ===========================================================================
 var CONFIG = {
-  // --- Test / live -------------------------------------------------------
-  // testMode = true  -> de mail gaat ALLEEN naar testRecipient (nooit naar de klant).
-  //                     Gebruik dit om met "Voorbeeld" rustig de opmaak te checken.
-  // testMode = false -> live: mail gaat naar recipient + cc + bcc.
-  testMode:      true,
+  // --- Verzendmodus ------------------------------------------------------
+  // 'draft' -> maakt een CONCEPT in Gmail, geadresseerd aan de klant (+cc/bcc).
+  //            Jij controleert, past evt. aan en verstuurt zelf. AANRADER.
+  // 'test'  -> stuurt direct, maar ALLEEN naar testRecipient (nooit naar de klant).
+  // 'live'  -> stuurt direct naar recipient + cc + bcc (volledig automatisch).
+  mode:          'draft',
   testRecipient: 'support@seovrienden.nl',
+  replyTo:       'support@seovrienden.nl', // antwoorden van de klant komen hier binnen
 
   // --- Ontvangers (gebruikt zodra testMode = false) ----------------------
   recipient: 'terry.bosma@fysiosminia.nl',
@@ -127,24 +129,35 @@ function main() {
 
   var html = buildEmail(cur, prev, keywords, convActions, trend, current, previous, inlineFlags);
   var subject = 'Google Ads maandrapportage ' + CONFIG.clientName + ' - ' + current.label;
+  var plain = 'Google Ads maandrapportage ' + CONFIG.clientName + ' (' + current.label + '). Bekijk deze e-mail in HTML.';
 
-  // In testmodus gaat de mail uitsluitend naar de testontvanger (nooit naar de klant).
-  var to  = CONFIG.testMode ? CONFIG.testRecipient : CONFIG.recipient;
-  var cc  = CONFIG.testMode ? '' : CONFIG.cc;
-  var bcc = CONFIG.testMode ? '' : CONFIG.bcc;
-  if (CONFIG.testMode) subject = '[TEST] ' + subject;
+  if (CONFIG.mode === 'test') {
+    // Direct versturen, maar uitsluitend naar jezelf.
+    MailApp.sendEmail({
+      to: CONFIG.testRecipient, subject: '[TEST] ' + subject,
+      htmlBody: html, inlineImages: inlineImages, name: CONFIG.agencyName,
+      replyTo: CONFIG.replyTo || undefined
+    });
+    Logger.log('TEST - verstuurd naar ' + CONFIG.testRecipient);
+  } else if (CONFIG.mode === 'live') {
+    // Volledig automatisch naar de klant.
+    MailApp.sendEmail({
+      to: CONFIG.recipient, cc: CONFIG.cc || undefined, bcc: CONFIG.bcc || undefined,
+      subject: subject, htmlBody: html, inlineImages: inlineImages, name: CONFIG.agencyName,
+      replyTo: CONFIG.replyTo || undefined
+    });
+    Logger.log('LIVE - verstuurd naar ' + CONFIG.recipient);
+  } else {
+    // 'draft' (standaard): concept in Gmail ter controle, al geadresseerd aan de klant.
+    // Let op: werkt alleen als je met een Gmail/Google Workspace-account bij Google Ads inlogt.
+    GmailApp.createDraft(CONFIG.recipient, subject, plain, {
+      htmlBody: html, inlineImages: inlineImages, name: CONFIG.agencyName,
+      cc: CONFIG.cc || undefined, bcc: CONFIG.bcc || undefined,
+      replyTo: CONFIG.replyTo || undefined
+    });
+    Logger.log('CONCEPT aangemaakt in Gmail (aan: ' + CONFIG.recipient + '). Controleer, pas evt. aan en verstuur handmatig.');
+  }
 
-  MailApp.sendEmail({
-    to:           to,
-    cc:           cc || undefined,
-    bcc:          bcc || undefined,
-    subject:      subject,
-    htmlBody:     html,
-    inlineImages: inlineImages,
-    name:         CONFIG.agencyName
-  });
-
-  Logger.log((CONFIG.testMode ? 'TESTMODUS - ' : 'LIVE - ') + 'Rapportage verstuurd naar: ' + to);
   Logger.log('Periode: ' + current.label + ' vs ' + previous.label);
 }
 

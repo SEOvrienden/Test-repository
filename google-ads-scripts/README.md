@@ -55,18 +55,23 @@ matchtype, vertoningen, klikken, CTR, gem. CPC, conversies.
 - **Conversies per actie** (bv. telefoongesprekken, formulieren, routebeschrijving).
 - **Trend laatste 6 maanden** als visuele verticale staafgrafiek (conversies + kosten).
 
-## Test vs. live
+## Verzendmodus (concept / test / live)
 
-In `CONFIG` staat bovenaan een `testMode`:
+In `CONFIG` staat bovenaan `mode`:
 
-- `testMode: true` (standaard) → de mail gaat **uitsluitend** naar `testRecipient`
-  (`support@seovrienden.nl`), met `[TEST]` in de onderwerpregel. Ook bij **Voorbeeld**.
-  De klant ontvangt dus niets.
-- `testMode: false` → live: de mail gaat naar `recipient` + `cc` + `bcc`.
+- `mode: 'draft'` (standaard, aanrader) → maakt maandelijks een **concept in Gmail**,
+  al geadresseerd aan de klant (+ `cc`/`bcc`). Jij opent het concept, controleert,
+  past evt. tekst aan en klikt zelf op **Verzenden**. Zo houd je de eindcontrole en
+  kun je nog aanpassen. De klant ontvangt niets totdat jij verzendt.
+- `mode: 'test'` → stuurt direct, maar **uitsluitend** naar `testRecipient`
+  (`support@seovrienden.nl`), met `[TEST]` in de onderwerpregel. Handig om de opmaak
+  te checken.
+- `mode: 'live'` → stuurt volledig automatisch naar `recipient` + `cc` + `bcc`.
 
-> Let op: Google Ads verstuurt e-mail óók tijdens een "Voorbeeld"-run (er is geen
-> droogloop voor e-mail). De `testMode`-vlag is dus je beveiliging: laat 'm op
-> `true` staan tot je echt live wilt.
+> Let op: Google Ads verstuurt/aanmaakt e-mail óók tijdens een "Voorbeeld"-run.
+> In `'draft'`-modus wordt er dus een concept aangemaakt (geen verzending naar de klant),
+> in `'test'` gaat er een testmail naar jezelf. Bij de eerste run vraagt Google Ads
+> eenmalig **autorisatie** voor Gmail/e-mail.
 
 ## Gemaakte keuzes (afgestemd)
 
