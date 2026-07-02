@@ -55,23 +55,27 @@ matchtype, vertoningen, klikken, CTR, gem. CPC, conversies.
 - **Conversies per actie** (bv. telefoongesprekken, formulieren, routebeschrijving).
 - **Trend laatste 6 maanden** als visuele verticale staafgrafiek (conversies + kosten).
 
-## Verzendmodus (concept / test / live)
+## Verzendmodus (test / live / draft)
+
+Een Google Ads-script draait onder het **Google-account** waarmee je bij Google Ads
+inlogt (niet vanuit je Microsoft 365 / Outlook-mailbox). Daarop is `mode` afgestemd.
 
 In `CONFIG` staat bovenaan `mode`:
 
-- `mode: 'draft'` (standaard, aanrader) → maakt maandelijks een **concept in Gmail**,
-  al geadresseerd aan de klant (+ `cc`/`bcc`). Jij opent het concept, controleert,
-  past evt. tekst aan en klikt zelf op **Verzenden**. Zo houd je de eindcontrole en
-  kun je nog aanpassen. De klant ontvangt niets totdat jij verzendt.
-- `mode: 'test'` → stuurt direct, maar **uitsluitend** naar `testRecipient`
-  (`support@seovrienden.nl`), met `[TEST]` in de onderwerpregel. Handig om de opmaak
-  te checken.
+- `mode: 'test'` (standaard, aanrader bij Microsoft 365 / geen Gmail) → stuurt de
+  complete rapportage naar `testRecipient` (`support@seovrienden.nl`), met `[TEST]`
+  in de onderwerpregel. Je controleert 'm in je eigen inbox; de klant ontvangt niets.
+  Naar de klant sturen: zet `mode: 'live'`, of stuur 'm handmatig door vanuit Outlook.
 - `mode: 'live'` → stuurt volledig automatisch naar `recipient` + `cc` + `bcc`.
+- `mode: 'draft'` → maakt een **concept in Gmail**, al geadresseerd aan de klant.
+  Alleen bruikbaar als je met een **Gmail/Google Workspace-account** bij Google Ads
+  inlogt (het concept verschijnt dan in die Gmail-inbox).
 
-> Let op: Google Ads verstuurt/aanmaakt e-mail óók tijdens een "Voorbeeld"-run.
-> In `'draft'`-modus wordt er dus een concept aangemaakt (geen verzending naar de klant),
-> in `'test'` gaat er een testmail naar jezelf. Bij de eerste run vraagt Google Ads
-> eenmalig **autorisatie** voor Gmail/e-mail.
+`replyTo` staat op `support@seovrienden.nl`, zodat antwoorden van de klant altijd
+bij jullie binnenkomen — ongeacht welk afzenderadres Google gebruikt.
+
+> Let op: Google Ads verstuurt/maakt e-mail óók tijdens een "Voorbeeld"-run. Bij de
+> eerste run vraagt Google Ads eenmalig **autorisatie** voor e-mail.
 
 ## Gemaakte keuzes (afgestemd)
 

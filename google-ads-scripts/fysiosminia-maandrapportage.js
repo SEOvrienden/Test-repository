@@ -19,11 +19,13 @@
 // ===========================================================================
 var CONFIG = {
   // --- Verzendmodus ------------------------------------------------------
-  // 'draft' -> maakt een CONCEPT in Gmail, geadresseerd aan de klant (+cc/bcc).
-  //            Jij controleert, past evt. aan en verstuurt zelf. AANRADER.
-  // 'test'  -> stuurt direct, maar ALLEEN naar testRecipient (nooit naar de klant).
+  // 'test'  -> stuurt de complete rapportage naar testRecipient (support@seovrienden.nl),
+  //            zodat je 'm eerst in je eigen inbox controleert. AANRADER voor jullie
+  //            situatie (Microsoft 365 / geen Gmail). De klant ontvangt niets.
   // 'live'  -> stuurt direct naar recipient + cc + bcc (volledig automatisch).
-  mode:          'draft',
+  // 'draft' -> maakt een CONCEPT in Gmail (alleen bruikbaar als je met een
+  //            Gmail/Google Workspace-account bij Google Ads inlogt).
+  mode:          'test',
   testRecipient: 'support@seovrienden.nl',
   replyTo:       'support@seovrienden.nl', // antwoorden van de klant komen hier binnen
 
