@@ -145,7 +145,12 @@ p{margin-bottom:0.75rem;}p:last-child{margin-bottom:0;}
 .welkom-level{color:var(--tekst-zwak);margin-bottom:1.5rem;}
 .namen-lijst{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
 .naam-knop{min-height:56px;font-size:0.9rem;padding:10px 12px;}
-.safari-hint{background:rgba(204,171,55,0.15);border:1px solid var(--accent);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.85rem;line-height:1.5;color:var(--tekst);}
+/* Safari/Quick-Look hint — fullscreen overlay als JS niet draait */
+.safari-hint{position:fixed;inset:0;z-index:99999;background:#0f241a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;}
+.safari-hint-box{background:#183729;border:2px solid #ccab37;border-radius:16px;padding:2rem 1.5rem;max-width:340px;width:100%;}
+.safari-hint h2{color:#ccab37;font-size:1.4rem;margin-bottom:1rem;line-height:1.3;}
+.safari-hint ol{text-align:left;color:#ffffff;font-size:1.05rem;line-height:1.8;padding-left:1.5rem;margin-bottom:1.5rem;}
+.safari-hint p{color:#8fa79a;font-size:0.85rem;}
 .js-actief .safari-hint{display:none;}
 .eigen-naam-vak{display:flex;gap:8px;align-items:center;padding-top:0.5rem;border-top:1px solid rgba(255,255,255,0.1);}
 .eigen-naam-vak .invoer{flex:1;margin-bottom:0;}
@@ -235,8 +240,15 @@ p{margin-bottom:0.75rem;}p:last-child{margin-bottom:0;}
     </div>
     <div id="naam-keuze">
       <div class="safari-hint" id="safari-hint">
-        <p>⚠ <strong>Werkt het niet?</strong> Open dit bestand in Safari:<br>
-        Tik op <strong>Delen ↑</strong> → <strong>Open in Safari</strong></p>
+        <div class="safari-hint-box">
+          <h2>📱 Open in Safari</h2>
+          <ol>
+            <li>Tik rechtsonder op <strong>Delen ↑</strong></li>
+            <li>Kies <strong>"Open in Safari"</strong></li>
+            <li>Het spel start automatisch</li>
+          </ol>
+          <p>Dit bestand werkt alleen in de Safari-browser, niet in de preview.</p>
+        </div>
       </div>
       <h1 style="margin-bottom:0.25rem;">Wie ben jij?</h1>
       <p class="klein" style="margin-bottom:1rem;">Kies je naam om te beginnen.</p>
