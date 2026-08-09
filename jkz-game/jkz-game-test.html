@@ -145,6 +145,8 @@ p{margin-bottom:0.75rem;}p:last-child{margin-bottom:0;}
 .welkom-level{color:var(--tekst-zwak);margin-bottom:1.5rem;}
 .namen-lijst{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
 .naam-knop{min-height:56px;font-size:0.9rem;padding:10px 12px;}
+.safari-hint{background:rgba(204,171,55,0.15);border:1px solid var(--accent);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.85rem;line-height:1.5;color:var(--tekst);}
+.js-actief .safari-hint{display:none;}
 .eigen-naam-vak{display:flex;gap:8px;align-items:center;padding-top:0.5rem;border-top:1px solid rgba(255,255,255,0.1);}
 .eigen-naam-vak .invoer{flex:1;margin-bottom:0;}
 .eigen-naam-vak .knop{flex-shrink:0;width:auto;padding:10px 16px;min-width:80px;}
@@ -232,9 +234,35 @@ p{margin-bottom:0.75rem;}p:last-child{margin-bottom:0;}
       </div>
     </div>
     <div id="naam-keuze">
+      <div class="safari-hint" id="safari-hint">
+        <p>⚠ <strong>Werkt het niet?</strong> Open dit bestand in Safari:<br>
+        Tik op <strong>Delen ↑</strong> → <strong>Open in Safari</strong></p>
+      </div>
       <h1 style="margin-bottom:0.25rem;">Wie ben jij?</h1>
       <p class="klein" style="margin-bottom:1rem;">Kies je naam om te beginnen.</p>
-      <div class="namen-lijst" id="namen-lijst"></div>
+      <div class="namen-lijst" id="namen-lijst">
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 01 Anne de Vries')">Dummy 01 Anne de Vries</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 02 Bob Janssen')">Dummy 02 Bob Janssen</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 03 Charlotte Smit')">Dummy 03 Charlotte Smit</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 04 David van den Berg')">Dummy 04 David van den Berg</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 05 Emma Visser')">Dummy 05 Emma Visser</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 06 Frank de Boer')">Dummy 06 Frank de Boer</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 07 Giulia van Dijk')">Dummy 07 Giulia van Dijk</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 08 Hendrik Bakker')">Dummy 08 Hendrik Bakker</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 09 Iris Meijer')">Dummy 09 Iris Meijer</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 10 Jasper de Groot')">Dummy 10 Jasper de Groot</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 11 Kim van Leeuwen')">Dummy 11 Kim van Leeuwen</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 12 Lars Willems')">Dummy 12 Lars Willems</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 13 Manon Peters')">Dummy 13 Manon Peters</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 14 Niels Hendriks')">Dummy 14 Niels Hendriks</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 15 Olivia van der Berg')">Dummy 15 Olivia van der Berg</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 16 Pieter Mulder')">Dummy 16 Pieter Mulder</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 17 Quinty Hofman')">Dummy 17 Quinty Hofman</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 18 Ruben Kok')">Dummy 18 Ruben Kok</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 19 Stephanie Dekker')">Dummy 19 Stephanie Dekker</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 20 Tim van Santen')">Dummy 20 Tim van Santen</button>
+        <button class="knop naam-knop" type="button" onclick="naamGekozen('Dummy 21 Vera Brouwer')">Dummy 21 Vera Brouwer</button>
+      </div>
       <div class="eigen-naam-vak">
         <input type="text" id="eigen-naam-input" class="invoer" placeholder="Ik sta er niet bij…" autocomplete="off" autocorrect="off" spellcheck="false">
         <button class="knop primair" id="knop-eigen-naam" style="width:auto;">→</button>
@@ -870,13 +898,6 @@ function initNaamPagina(){
     laadRanglijst();toonPagina('ranglijst');
   });
 
-  var namenLijst=document.getElementById('namen-lijst');
-  leden.forEach(function(naam){
-    var knop=document.createElement('button');knop.className='knop naam-knop';knop.textContent=naam;
-    knop.addEventListener('pointerdown',async function(e){e.preventDefault();startAudioContext();await kiesNaam(naam);});
-    namenLijst.appendChild(knop);
-  });
-
   document.getElementById('knop-eigen-naam').addEventListener('pointerdown',async function(e){
     e.preventDefault();var naam=document.getElementById('eigen-naam-input').value.trim();
     if(naam.length<2)return;startAudioContext();await kiesNaam(naam);
@@ -886,6 +907,9 @@ function initNaamPagina(){
     if(e.key==='Enter'){var naam=e.target.value.trim();if(naam.length>=2)await kiesNaam(naam);}
   });
 }
+
+// Inline onclick handler for pre-rendered name buttons
+function naamGekozen(naam){startAudioContext();kiesNaam(naam);}
 
 async function kiesNaam(naam){
   try{
@@ -1078,6 +1102,7 @@ updateAlleMuteKnoppen();
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
+document.body.classList.add('js-actief'); // hides the safari-hint banner
 initNaamPagina();
 </script>
 </body>
