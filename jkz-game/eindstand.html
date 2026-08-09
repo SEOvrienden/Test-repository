@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JKZ — Eindstand</title>
+  <link rel="stylesheet" href="css/stijl.css">
+  <style>
+    /* Beamer-specifieke overrides — desktop gericht */
+    html, body {
+      height: 100%;
+      overflow: auto;
+      font-size: 18px;
+    }
+    body { min-height: 100vh; }
+    .eindstand-pagina { min-height: 100vh; }
+  </style>
+</head>
+<body>
+
+<div class="eindstand-pagina">
+
+  <div class="eindstand-kop">
+    <div>
+      <div class="eindstand-titel">JKZ Jaarverslag Game</div>
+      <div style="color:var(--tekst-zwak);font-family:'Courier New',monospace;
+                  font-size:0.9rem;letter-spacing:0.08em;margin-top:4px;">
+        EINDSTAND · LEARNING BY DOING · SINCE 1957
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-family:'Courier New',monospace;font-size:0.9rem;color:var(--tekst-zwak);">
+        Ververst over <span id="ververs-teller">15</span>s
+      </div>
+      <div id="aanmelding-count" style="font-size:0.85rem;color:var(--tekst-zwak);margin-top:4px;"></div>
+    </div>
+  </div>
+
+  <!-- Topscore per spel -->
+  <div id="top-per-spel" class="eindstand-winnaar-blok"></div>
+
+  <!-- Ranglijsttabel -->
+  <div style="overflow-x:auto;">
+    <table class="eindstand-tabel" id="eindstand-tabel">
+      <thead>
+        <tr>
+          <th style="width:50px;">#</th>
+          <th>Naam</th>
+          <th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th><th>S7</th>
+          <th>Totaal</th>
+        </tr>
+      </thead>
+      <tbody id="eindstand-body"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script type="module">
+import { haalRanglijst } from './js/api.js';
+
+let volgendeVervers = 15;
+
+async function laad() {
+  try {
+    const data = await haalRanglijst();
+    renderStand(data);
+    volgendeVervers = 15;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderStand(data) {
+  const tbody = document.getElementById('eindstand-body');
+  tbody.innerHTML = '';
+
+  // Topscore per spel
+  const topDiv = document.getElementById('top-per-spel');
+  topDiv.innerHTML = '';
+  const topPerSpel = {};
+  for (let s = 1; s <= 7; s++) {
+    let beste = null;
+    data.forEach(r => {
+      const sc = r.scores[s];
+      if (sc !== undefined && sc !== null) {
+        if (!beste || sc > beste.score) beste = { naam: r.naam, score: sc };
+      }
+    });
+    topPerSpel[s] = beste;
+    if (beste) {
+      const div = document.createElement('div');
+      div.className = 'eindstand-winnaar-spel';
+      div.innerHTML = `<div class="spel-naam">SPEL ${s}</div>
+        <div class="winnaar-naam">${escapeHtml(beste.naam)}</div>
+        <div style="color:var(--tekst-zwak);font-size:0.85em;">${beste.score} punten</div>`;
+      topDiv.appendChild(div);
+    }
+  }
+
+  // Tabel
+  data.forEach((rij, idx) => {
+    const tr = document.createElement('tr');
+    const positie = idx + 1;
+    const icoon = positie === 1 ? '🥇' : positie === 2 ? '🥈' : positie === 3 ? '🥉' : positie;
+    tr.innerHTML = `
+      <td style="font-family:'Courier New',monospace;">${icoon}</td>
+      <td>${escapeHtml(rij.naam)}</td>
+      ${[1,2,3,4,5,6,7].map(s => {
+        const sc = rij.scores[s];
+        return `<td>${sc !== undefined && sc !== null ? sc : '–'}</td>`;
+      }).join('')}
+      <td class="totaal-cel">${rij.totaal}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  if (data.length === 0) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="10" style="text-align:center;color:var(--tekst-zwak);padding:3rem;font-size:1.2rem;">
+      Het spel is nog niet begonnen.</td>`;
+    tbody.appendChild(tr);
+  }
+
+  // Aanmelding teller
+  document.getElementById('aanmelding-count').textContent =
+    `${data.length} spelers geregistreerd`;
+}
+
+laad();
+setInterval(laad, 15000);
+
+// Countdown
+const tellerEl = document.getElementById('ververs-teller');
+setInterval(() => {
+  volgendeVervers--;
+  if (volgendeVervers <= 0) volgendeVervers = 15;
+  tellerEl.textContent = volgendeVervers;
+}, 1000);
+</script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>JKZ Jaarverslag Game</title>
+  <link rel="stylesheet" href="css/stijl.css">
+</head>
+<body>
+
+<div class="landscape-waarschuwing">
+  <div class="draai-icoon">📱</div>
+  <h2>Draai je telefoon rechtop</h2>
+  <p>Dit spel werkt alleen in staande stand.</p>
+</div>
+
+<div class="pagina">
+  <header class="hoofd">
+    <!-- TODO: vervang de logo-placeholder door het echte JKZ-logo
+         <img src="img/jkz-logo.png" alt="JKZ" class="logo-img" style="height:36px">
+         Logo-URL: https://www.jkz.nl/wp-content/uploads/2026/02/jkz_logo.png
+    -->
+    <a href="index.html" class="logo-link">
+      <div class="logo-placeholder">
+        <span class="logo-jkz">JKZ</span>
+        <span class="logo-sub">since 1957</span>
+      </div>
+    </a>
+    <div class="hoofd-rechts">
+      <button class="mute-knop" id="mute-knop" aria-label="Geluid aan/uit">🔊</button>
+    </div>
+  </header>
+
+  <div class="inhoud" id="hoofd-inhoud">
+
+    <!-- Welkom terug -->
+    <div id="welkom-terug" class="verborgen" style="padding-top:2rem;">
+      <div class="centervak" style="justify-content:flex-start;padding:0;">
+        <p class="welkom-groot">Welkom terug!</p>
+        <h1 class="welkom-naam" id="welkom-naam-tekst">Naam</h1>
+        <p class="welkom-level" id="welkom-level-tekst">Je bent op level 1 van 7</p>
+        <div class="knoppen">
+          <a href="#" class="knop primair" id="knop-doorgaan" style="font-size:1.1rem;min-height:60px;">
+            Doorgaan →
+          </a>
+          <a href="ranglijst.html" class="knop secundair">Bekijk ranglijst</a>
+          <button class="knop secundair klein" id="knop-iemand-anders"
+                  style="font-size:0.85rem;min-height:44px;border-width:1px;">
+            Ik ben iemand anders
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Naam kiezen -->
+    <div id="naam-keuze">
+      <h1 style="margin-bottom:0.25rem;">Wie ben jij?</h1>
+      <p class="klein" style="margin-bottom:1rem;">Kies je naam om te beginnen.</p>
+
+      <div class="namen-lijst" id="namen-lijst"></div>
+
+      <div class="eigen-naam-vak">
+        <input type="text" id="eigen-naam-input" class="invoer"
+               placeholder="Ik sta er niet bij…"
+               autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="knop primair" id="knop-eigen-naam" style="width:auto;">→</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+import { leden } from './js/leden.js';
+import { registreerSpeler, haalVoortgang, haalSpelerUitStorage,
+         slaHuidigeSpelerOp, verwijderHuidigeSpeler, verwerkWachtrij } from './js/api.js';
+import { initMuteKnop, initLandschapswaarschuwing, checkGesloten } from './js/app.js';
+import { startAudioContext, isMuted, setMute } from './js/geluid.js';
+
+// Gesloten-check
+if (checkGesloten()) throw new Error('gesloten');
+
+// Probeer wachtrij te verwerken bij elke paginalading
+verwerkWachtrij().catch(() => {});
+
+// Landschap-waarschuwing (hier niet actief — index heeft geen spel)
+// Mute-knop
+const muteKnop = document.getElementById('mute-knop');
+const geluidMod = { isMuted, setMute };
+initMuteKnop(muteKnop, geluidMod);
+document.body.addEventListener('pointerdown', () => startAudioContext(), { once: true });
+
+// Check of speler al ingelogd is
+const huidig = haalSpelerUitStorage();
+if (huidig) {
+  // Haal voortgang op
+  haalVoortgang(huidig.spelerId).then(voortgang => {
+    const level = Math.min(voortgang.level, 8);
+    const klaar = level > 7;
+
+    document.getElementById('naam-keuze').classList.add('verborgen');
+    const welkomDiv = document.getElementById('welkom-terug');
+    welkomDiv.classList.remove('verborgen');
+
+    document.getElementById('welkom-naam-tekst').textContent = huidig.naam;
+
+    if (klaar) {
+      document.getElementById('welkom-level-tekst').textContent =
+        'Je hebt alle 7 levels gespeeld! Bekijk je eindstand.';
+      document.getElementById('knop-doorgaan').href = 'ranglijst.html';
+      document.getElementById('knop-doorgaan').textContent = 'Bekijk eindstand →';
+    } else {
+      document.getElementById('welkom-level-tekst').textContent =
+        `Je bent op level ${level} van 7`;
+      document.getElementById('knop-doorgaan').href = `spel.html?level=${level}`;
+      document.getElementById('knop-doorgaan').textContent =
+        `Level ${level} spelen →`;
+    }
+  });
+}
+
+// Iemand anders knop
+document.getElementById('knop-iemand-anders')?.addEventListener('click', () => {
+  verwijderHuidigeSpeler();
+  document.getElementById('welkom-terug').classList.add('verborgen');
+  document.getElementById('naam-keuze').classList.remove('verborgen');
+});
+
+// Naam-knoppen renderen
+const namenLijst = document.getElementById('namen-lijst');
+leden.forEach(naam => {
+  const knop = document.createElement('button');
+  knop.className = 'knop naam-knop';
+  knop.textContent = naam;
+  knop.addEventListener('pointerdown', async (e) => {
+    e.preventDefault();
+    startAudioContext();
+    await kiesNaam(naam);
+  });
+  namenLijst.appendChild(knop);
+});
+
+// Eigen naam
+document.getElementById('knop-eigen-naam').addEventListener('pointerdown', async (e) => {
+  e.preventDefault();
+  const naam = document.getElementById('eigen-naam-input').value.trim();
+  if (naam.length < 2) return;
+  startAudioContext();
+  await kiesNaam(naam);
+});
+
+document.getElementById('eigen-naam-input').addEventListener('keydown', async (e) => {
+  if (e.key === 'Enter') {
+    const naam = e.target.value.trim();
+    if (naam.length >= 2) await kiesNaam(naam);
+  }
+});
+
+async function kiesNaam(naam) {
+  try {
+    const { spelerId } = await registreerSpeler(naam);
+    slaHuidigeSpelerOp(spelerId);
+    const voortgang = await haalVoortgang(spelerId);
+    const level = Math.min(voortgang.level, 7);
+    window.location.href = `spel.html?level=${level}`;
+  } catch (err) {
+    console.error(err);
+  }
+}
+</script>
+</body>
+</html>

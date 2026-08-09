@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>JKZ — Spel</title>
+  <link rel="stylesheet" href="css/stijl.css">
+</head>
+<body>
+
+<div class="landscape-waarschuwing">
+  <div class="draai-icoon">📱</div>
+  <h2>Draai je telefoon rechtop</h2>
+  <p>Pauzeer het spel even en draai terug.</p>
+</div>
+
+<canvas id="confetti-canvas"></canvas>
+
+<div class="pagina" style="height:100vh;height:100dvh;">
+
+  <header class="hoofd">
+    <a href="index.html" class="logo-link">
+      <div class="logo-placeholder">
+        <span class="logo-jkz">JKZ</span>
+        <span class="logo-sub">since 1957</span>
+      </div>
+    </a>
+    <div class="hoofd-rechts">
+      <span id="spel-naam-header" class="klein" style="color:var(--accent);font-family:'Courier New',monospace;font-size:0.75rem;letter-spacing:0.08em;"></span>
+      <button class="mute-knop" id="mute-knop" aria-label="Geluid aan/uit">🔊</button>
+    </div>
+  </header>
+
+  <div class="voortgang" id="voortgang"></div>
+
+  <!-- ═══ UITLEG SCHERM ══════════════════════════════════════════════════════ -->
+  <div id="scherm-uitleg" class="scherm actief" style="flex-direction:column;">
+    <div class="uitleg-inhoud">
+      <h1 id="uitleg-naam">Laadt…</h1>
+      <p id="uitleg-tekst"></p>
+      <p id="uitleg-score-regel" class="klein" style="color:var(--accent);margin-bottom:0.5rem;"></p>
+      <div class="uitleg-demo" id="uitleg-demo"></div>
+    </div>
+    <div class="uitleg-knoppen">
+      <button class="knop" id="knop-oefenen">Eerst oefenen</button>
+      <button class="knop primair" id="knop-direct-spelen">Ik snap het, start voor punten</button>
+    </div>
+  </div>
+
+  <!-- ═══ OEFENSCHERM ════════════════════════════════════════════════════════ -->
+  <div id="scherm-oefenen" class="scherm" style="flex-direction:column;height:100%;">
+    <div class="oefenbalk">OEFENEN — dit telt niet mee</div>
+    <div id="oefenspeelveld" style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;"></div>
+  </div>
+
+  <!-- ═══ OEFENSCORE SCHERM ══════════════════════════════════════════════════ -->
+  <div id="scherm-oefenscore" class="scherm" style="flex-direction:column;">
+    <div class="oefenbalk">OEFENSCORE — telt niet mee</div>
+    <div class="inhoud centervak" style="flex:1;">
+      <p class="klein">Jouw oefenscore:</p>
+      <div class="score-punten-groot" id="oefen-score-waarde">–</div>
+      <p class="score-ruw" id="oefen-ruw-waarde"></p>
+      <div class="knoppen" style="width:100%;max-width:360px;margin-top:1.5rem;">
+        <button class="knop" id="knop-opnieuw-oefenen">Nog een keer oefenen</button>
+        <button class="knop primair" id="knop-na-oefenen-spelen">Start voor punten →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ AFTELLING SCHERM ═══════════════════════════════════════════════════ -->
+  <div id="scherm-aftelling" class="scherm centervak">
+    <p class="poging-label" id="poging-label-aftelling">Poging 1 van 2</p>
+    <div class="aftelling-cijfer" id="aftelling-cijfer">3</div>
+    <p class="klein" style="color:var(--tekst-zwak);margin-top:1rem;">
+      Learning by doing — since 1957
+    </p>
+  </div>
+
+  <!-- ═══ SPELSCHERM ════════════════════════════════════════════════════════ -->
+  <div id="scherm-spelen" class="scherm" style="flex-direction:column;height:100%;">
+    <div style="display:flex;align-items:center;justify-content:space-between;
+                padding:4px 12px;flex-shrink:0;font-family:'Courier New',monospace;
+                font-size:0.75rem;color:var(--tekst-zwak);">
+      <span id="poging-label-spelen">Poging 1 van 2</span>
+    </div>
+    <div id="speelveld" style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;"></div>
+  </div>
+
+  <!-- ═══ SCORESCHERM ════════════════════════════════════════════════════════ -->
+  <div id="scherm-score" class="scherm" style="flex-direction:column;">
+    <div class="inhoud" style="flex:1;overflow-y:auto;">
+      <div style="text-align:center;padding-top:1.5rem;">
+        <div id="score-nieuw-record" class="nieuw-record-label verborgen">🏆 Nieuw persoonlijk record!</div>
+        <p class="klein" id="score-poging-label" style="margin-bottom:0.25rem;">Poging 1 van 2</p>
+        <div class="score-punten-groot" id="score-punten">0</div>
+        <p class="score-ruw" id="score-ruw">–</p>
+        <p class="score-positie" id="score-positie"></p>
+        <p class="score-tekst" id="score-tekst-plagerig"></p>
+      </div>
+
+      <div class="knoppen" style="margin-top:1.5rem;">
+        <button class="knop" id="knop-nog-poging" style="display:none;">
+          Nog een poging
+        </button>
+        <a href="#" class="knop primair" id="knop-lees-verslag">
+          Lees verslag →
+        </a>
+        <a href="ranglijst.html" class="knop secundair">Bekijk ranglijst</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.pagina -->
+
+<script type="module">
+import { haalSpelerUitStorage, haalVoortgang, slaScoreOp, haalRanglijst, haalConfig }
+  from './js/api.js';
+import { renderVoortgang, initMuteKnop, plaatsTekst, checkGesloten, toonConfetti, urlParam }
+  from './js/app.js';
+import { startAudioContext, isMuted, setMute, speel }
+  from './js/geluid.js';
+
+if (checkGesloten()) throw new Error('gesloten');
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+const muteKnop = document.getElementById('mute-knop');
+initMuteKnop(muteKnop, { isMuted, setMute });
+document.body.addEventListener('pointerdown', () => startAudioContext(), { once: true });
+
+const level = parseInt(urlParam('level') || '1');
+if (isNaN(level) || level < 1 || level > 7) {
+  window.location.href = 'index.html'; throw new Error();
+}
+
+const speler = haalSpelerUitStorage();
+if (!speler) { window.location.href = 'index.html'; throw new Error(); }
+
+const config = haalConfig();
+
+// Level-check
+const voortgang = await haalVoortgang(speler.spelerId);
+const spelersLevel = voortgang.level;
+if (level > spelersLevel && !config.testmodus) {
+  window.location.href = 'index.html'; throw new Error();
+}
+
+// ── Voortgangsbalk ────────────────────────────────────────────────────────────
+const voortgangContainer = document.getElementById('voortgang');
+const gespeeldTm = spelersLevel - 1;
+renderVoortgang(voortgangContainer, level, gespeeldTm);
+
+// ── Module laden ──────────────────────────────────────────────────────────────
+document.getElementById('scherm-uitleg').querySelector('#uitleg-naam').textContent = 'Laadt…';
+let spelModule;
+try {
+  spelModule = await import(`./js/spellen/spel${level}.js`);
+} catch (e) {
+  console.error('Module laden mislukt:', e);
+  window.location.href = 'index.html'; throw e;
+}
+
+document.getElementById('spel-naam-header').textContent = `LEVEL ${level}`;
+
+// Uitleg invullen
+document.getElementById('uitleg-naam').textContent = spelModule.info.naam;
+document.getElementById('uitleg-tekst').textContent = spelModule.info.uitleg;
+document.getElementById('uitleg-score-regel').textContent = spelModule.info.scoreRegel;
+document.getElementById('uitleg-demo').innerHTML = spelModule.info.demoHTML;
+
+// ── Bestaande scores ophalen voor dit level ───────────────────────────────────
+const bestaandeScores = (voortgang.scores || []).find(s => s.spel === level);
+const aantalPogingen  = bestaandeScores ? bestaandeScores.pogingen.length : 0;
+const poging1Score    = bestaandeScores?.pogingen.find(p => p.poging === 1);
+const poging2Score    = bestaandeScores?.pogingen.find(p => p.poging === 2);
+
+// Als beide pogingen al gespeeld: sla uitleg over, toon scorescherm
+if (aantalPogingen >= 2) {
+  const beste = poging1Score.score >= poging2Score.score ? poging1Score : poging2Score;
+  const beste_nr = poging1Score.score >= poging2Score.score ? 1 : 2;
+  toonScoreScherm(beste.score, beste.ruwe_waarde, 2, false);
+  toonScherm('score');
+} else if (aantalPogingen === 1) {
+  // Eerste poging gespeeld — toon scorescherm met optie voor 2e poging
+  toonScoreScherm(poging1Score.score, poging1Score.ruwe_waarde, 1, false);
+  toonScherm('score');
+} else {
+  toonScherm('uitleg');
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let huidigSpelObject = null;
+let huidigePoging = aantalPogingen + 1;
+
+// ── Scherm-wisseling ──────────────────────────────────────────────────────────
+function toonScherm(naam) {
+  document.querySelectorAll('.scherm').forEach(s => s.classList.remove('actief'));
+  const el = document.getElementById(`scherm-${naam}`);
+  if (el) el.classList.add('actief');
+}
+
+// ── Uitleg knoppen ────────────────────────────────────────────────────────────
+document.getElementById('knop-oefenen').addEventListener('click', () => {
+  startAudioContext();
+  startOefenen();
+});
+
+document.getElementById('knop-direct-spelen').addEventListener('click', () => {
+  startAudioContext();
+  startAftelling(() => startEchtSpel());
+});
+
+// ── Oefenen ───────────────────────────────────────────────────────────────────
+function startOefenen() {
+  const container = document.getElementById('oefenspeelveld');
+  container.innerHTML = '';
+  toonScherm('oefenen');
+  huidigSpelObject = spelModule.maakSpel(container, {
+    modus: 'oefenen',
+    onKlaar(ruwe, score) {
+      if (huidigSpelObject) { huidigSpelObject.vernietig(); huidigSpelObject = null; }
+      document.getElementById('oefen-score-waarde').textContent = score;
+      document.getElementById('oefen-ruw-waarde').textContent = ruwe;
+      toonScherm('oefenscore');
+    },
+  });
+}
+
+document.getElementById('knop-opnieuw-oefenen').addEventListener('click', () => {
+  startOefenen();
+});
+
+document.getElementById('knop-na-oefenen-spelen').addEventListener('click', () => {
+  startAftelling(() => startEchtSpel());
+});
+
+// ── Aftelling ─────────────────────────────────────────────────────────────────
+function startAftelling(callback) {
+  toonScherm('aftelling');
+  document.getElementById('poging-label-aftelling').textContent =
+    `Poging ${huidigePoging} van 2`;
+  const cijferEl = document.getElementById('aftelling-cijfer');
+  let n = 3;
+  cijferEl.textContent = n;
+  speel('aftelling');
+
+  const tick = setInterval(() => {
+    n--;
+    if (n <= 0) {
+      clearInterval(tick);
+      speel('start');
+      callback();
+    } else {
+      cijferEl.style.animation = 'none';
+      cijferEl.offsetHeight; // reflow
+      cijferEl.style.animation = '';
+      cijferEl.textContent = n;
+      speel('aftelling');
+    }
+  }, 900);
+}
+
+// ── Echt spelen ───────────────────────────────────────────────────────────────
+function startEchtSpel() {
+  const container = document.getElementById('speelveld');
+  container.innerHTML = '';
+  document.getElementById('poging-label-spelen').textContent =
+    `Poging ${huidigePoging} van 2`;
+  toonScherm('spelen');
+
+  huidigSpelObject = spelModule.maakSpel(container, {
+    modus: 'spelen',
+    async onKlaar(ruwe, score) {
+      if (huidigSpelObject) { huidigSpelObject.vernietig(); huidigSpelObject = null; }
+
+      // Score opslaan
+      try {
+        await slaScoreOp(speler.spelerId, level, score, ruwe, huidigePoging);
+      } catch (err) {
+        console.warn('Score opslaan mislukt, staat in wachtrij:', err);
+      }
+
+      // Persoonlijk record?
+      const isNieuwRecord = huidigePoging === 2 && poging1Score && score > poging1Score.score;
+
+      toonScoreScherm(score, ruwe, huidigePoging, isNieuwRecord);
+      toonScherm('score');
+
+      if (isNieuwRecord) {
+        speel('nieuwRecord');
+        toonConfetti(document.getElementById('confetti-canvas'));
+      }
+
+      huidigePoging++;
+    },
+  });
+}
+
+// ── Scorescherm invullen ──────────────────────────────────────────────────────
+async function toonScoreScherm(score, ruwe, poging, nieuwRecord) {
+  document.getElementById('score-punten').textContent = score;
+  document.getElementById('score-ruw').textContent = ruwe;
+  document.getElementById('score-poging-label').textContent =
+    poging === 2 ? `Poging 2 van 2 — beste score telt` : `Poging ${poging} van 2`;
+  document.getElementById('score-tekst-plagerig').textContent = plaatsTekst(score);
+  document.getElementById('score-nieuw-record').classList.toggle('verborgen', !nieuwRecord);
+
+  // Ranglijstpositie
+  try {
+    const ranglijst = await haalRanglijst();
+    const spelScores = ranglijst.map(r => ({ naam: r.naam, score: r.scores[level] ?? null }))
+      .filter(r => r.score !== null)
+      .sort((a, b) => b.score - a.score);
+
+    const eigenpositie = spelScores.findIndex(r => r.naam === speler.naam) + 1;
+    const totaal = spelScores.length;
+    if (eigenpositie > 0) {
+      document.getElementById('score-positie').textContent =
+        `Daarmee sta je ${eigenpositie}e van ${totaal} spelers voor dit spel.`;
+    }
+  } catch (e) { /* ranglijst niet beschikbaar */ }
+
+  // Knoppen instellen
+  const nogPoging = document.getElementById('knop-nog-poging');
+  const verslagKnop = document.getElementById('knop-lees-verslag');
+  verslagKnop.href = `verslag.html?level=${level}`;
+
+  if (poging < 2) {
+    nogPoging.style.display = '';
+    nogPoging.onclick = () => {
+      speel('tik');
+      startAftelling(() => startEchtSpel());
+    };
+  } else {
+    nogPoging.style.display = 'none';
+  }
+}
+
+// ── Pauze bij visibilitychange ────────────────────────────────────────────────
+document.addEventListener('visibilitychange', () => {
+  if (!huidigSpelObject) return;
+  if (document.hidden) {
+    huidigSpelObject.pauzeer();
+  } else {
+    huidigSpelObject.hervat();
+  }
+});
+</script>
+</body>
+</html>

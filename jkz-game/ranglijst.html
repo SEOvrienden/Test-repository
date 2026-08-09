@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>JKZ — Ranglijst</title>
+  <link rel="stylesheet" href="css/stijl.css">
+</head>
+<body>
+
+<div class="landscape-waarschuwing">
+  <div class="draai-icoon">📱</div>
+  <h2>Draai je telefoon rechtop</h2>
+  <p>De ranglijst staat het beste rechtop.</p>
+</div>
+
+<div class="pagina">
+
+  <header class="hoofd">
+    <a href="index.html" class="logo-link">
+      <div class="logo-placeholder">
+        <span class="logo-jkz">JKZ</span>
+        <span class="logo-sub">since 1957</span>
+      </div>
+    </a>
+    <div class="hoofd-rechts">
+      <button class="mute-knop" id="mute-knop">🔊</button>
+    </div>
+  </header>
+
+  <div class="voortgang" id="voortgang"></div>
+
+  <div class="inhoud" style="padding:0;">
+
+    <div style="padding:1rem 1rem 0.5rem;display:flex;justify-content:space-between;align-items:center;">
+      <h1 style="margin:0;font-size:1.4rem;">Ranglijst</h1>
+      <span class="klein" id="ververs-label" style="color:var(--tekst-zwak);"></span>
+    </div>
+
+    <!-- Topscore per spel -->
+    <div style="padding:0 1rem 0.5rem;" id="top-per-spel"></div>
+
+    <!-- Ranglijst tabel (horizontaal scrollbaar op kleine schermen) -->
+    <div style="overflow-x:auto;padding:0 0 1rem;">
+      <table class="ranglijst-tabel" id="ranglijst-tabel">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Naam</th>
+            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
+            <th>Totaal</th>
+          </tr>
+        </thead>
+        <tbody id="ranglijst-body"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+import { haalRanglijst, haalSpelerUitStorage, haalVoortgang } from './js/api.js';
+import { renderVoortgang, initMuteKnop, checkGesloten } from './js/app.js';
+import { isMuted, setMute } from './js/geluid.js';
+
+if (checkGesloten()) throw new Error('gesloten');
+
+const muteKnop = document.getElementById('mute-knop');
+initMuteKnop(muteKnop, { isMuted, setMute });
+
+const speler = haalSpelerUitStorage();
+
+async function laadVoortgang() {
+  if (speler) {
+    const vg = await haalVoortgang(speler.spelerId);
+    renderVoortgang(document.getElementById('voortgang'), vg.level, vg.level - 1);
+  }
+}
+laadVoortgang();
+
+let verversInterval = null;
+let tellerInterval = null;
+let volgendeVervers = 15;
+
+async function laadRanglijst() {
+  try {
+    const data = await haalRanglijst();
+    renderRanglijst(data);
+    volgendeVervers = 15;
+  } catch (e) {
+    console.error('Ranglijst laden mislukt', e);
+  }
+}
+
+function renderRanglijst(data) {
+  const tbody = document.getElementById('ranglijst-body');
+  tbody.innerHTML = '';
+
+  // Top per spel berekenen
+  const topPerSpel = {};
+  for (let s = 1; s <= 7; s++) {
+    let beste = null;
+    data.forEach(r => {
+      const sc = r.scores[s];
+      if (sc !== undefined && sc !== null) {
+        if (!beste || sc > beste.score) beste = { naam: r.naam, score: sc };
+      }
+    });
+    topPerSpel[s] = beste;
+  }
+
+  // Top-per-spel weergeven
+  const topDiv = document.getElementById('top-per-spel');
+  if (Object.values(topPerSpel).some(v => v)) {
+    topDiv.innerHTML = '<p class="klein" style="color:var(--tekst-zwak);margin-bottom:6px;">Topscore per spel:</p>';
+    const rij = document.createElement('div');
+    rij.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
+    for (let s = 1; s <= 7; s++) {
+      const t = topPerSpel[s];
+      if (!t) continue;
+      const chip = document.createElement('div');
+      chip.style.cssText = `background:var(--jkz-groen-paneel);border:1px solid rgba(204,171,55,0.2);
+        border-radius:6px;padding:4px 8px;font-size:0.75rem;`;
+      chip.innerHTML = `<span style="color:var(--tekst-zwak)">S${s}:</span> `
+        + `<span style="color:var(--accent);font-weight:bold;">${t.score}</span> `
+        + `<span style="color:var(--tekst-zwak)">${naamKort(t.naam)}</span>`;
+      rij.appendChild(chip);
+    }
+    topDiv.appendChild(rij);
+  } else {
+    topDiv.innerHTML = '';
+  }
+
+  // Ranglijstrijen
+  data.forEach((rij, idx) => {
+    const tr = document.createElement('tr');
+    const eigenRij = speler && rij.naam === speler.naam;
+    if (eigenRij) tr.classList.add('eigen-rij');
+
+    const positie = idx + 1;
+    let positieTekst = positie <= 3
+      ? ['🥇', '🥈', '🥉'][positie - 1]
+      : positie;
+
+    tr.innerHTML = `
+      <td><span class="rangpositie">${positieTekst}</span></td>
+      <td>${eigenRij ? '▶ ' : ''}${escapeHtml(rij.naam)}</td>
+      ${[1,2,3,4,5,6,7].map(s => {
+        const sc = rij.scores[s];
+        return `<td>${sc !== undefined && sc !== null ? sc : '–'}</td>`;
+      }).join('')}
+      <td class="totaal">${rij.totaal}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  if (data.length === 0) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="10" style="text-align:center;color:var(--tekst-zwak);padding:2rem;">
+      Nog niemand gespeeld.</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+function naamKort(naam) {
+  const delen = naam.split(' ');
+  return delen.length > 2 ? delen[delen.length - 1] : naam;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Auto-refresh elke 15 seconden
+laadRanglijst();
+verversInterval = setInterval(laadRanglijst, 15000);
+
+// Countdown
+const vervLabel = document.getElementById('ververs-label');
+tellerInterval = setInterval(() => {
+  volgendeVervers--;
+  if (volgendeVervers <= 0) volgendeVervers = 15;
+  vervLabel.textContent = `Ververst over ${volgendeVervers}s`;
+}, 1000);
+</script>
+</body>
+</html>

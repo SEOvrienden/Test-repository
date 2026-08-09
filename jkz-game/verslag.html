@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>JKZ — Verslag</title>
+  <link rel="stylesheet" href="css/stijl.css">
+</head>
+<body>
+
+<div class="landscape-waarschuwing" style="z-index:10000;">
+  <div class="draai-icoon">📱</div>
+  <h2>Draai je telefoon rechtop</h2>
+  <p>Zo lees je het verslag het beste.</p>
+</div>
+
+<div class="pagina" style="height:100vh;height:100dvh;">
+
+  <header class="hoofd">
+    <a href="index.html" class="logo-link">
+      <div class="logo-placeholder">
+        <span class="logo-jkz">JKZ</span>
+        <span class="logo-sub">since 1957</span>
+      </div>
+    </a>
+    <div class="hoofd-rechts">
+      <button class="mute-knop" id="mute-knop">🔊</button>
+    </div>
+  </header>
+
+  <div class="voortgang" id="voortgang"></div>
+
+  <div class="verslag-iframe-wrap" id="pdf-wrap">
+    <div class="laadbericht" id="laad-bericht">Verslag laden…</div>
+    <iframe id="pdf-frame" title="Verslag" style="display:none;"></iframe>
+  </div>
+
+  <div class="verslag-voet">
+    <a href="#" class="knop primair" id="knop-volgend-level">
+      Naar level <span id="volgend-level-nr">2</span> →
+    </a>
+  </div>
+
+</div>
+
+<script type="module">
+import { haalSpelerUitStorage, haalVoortgang } from './js/api.js';
+import { renderVoortgang, initMuteKnop, urlParam, checkGesloten } from './js/app.js';
+import { isMuted, setMute } from './js/geluid.js';
+
+if (checkGesloten()) throw new Error('gesloten');
+
+const muteKnop = document.getElementById('mute-knop');
+initMuteKnop(muteKnop, { isMuted, setMute });
+
+const level = parseInt(urlParam('level') || '1');
+if (isNaN(level) || level < 1 || level > 7) {
+  window.location.href = 'index.html'; throw new Error();
+}
+
+const speler = haalSpelerUitStorage();
+if (!speler) { window.location.href = 'index.html'; throw new Error(); }
+
+// Voortgangsbalk
+const voortgang = await haalVoortgang(speler.spelerId);
+renderVoortgang(document.getElementById('voortgang'), level, voortgang.level - 1);
+
+// PDF laden
+const frame = document.getElementById('pdf-frame');
+const laadBericht = document.getElementById('laad-bericht');
+const src = `pdf/verslag-${level}.pdf`;
+
+frame.onload = () => {
+  laadBericht.style.display = 'none';
+  frame.style.display = 'block';
+};
+frame.onerror = () => {
+  laadBericht.textContent = 'Verslag kon niet geladen worden. Controleer of het PDF-bestand aanwezig is.';
+};
+frame.src = src;
+
+// Knop naar volgend level
+const volgend = level + 1;
+const volgendKnop = document.getElementById('knop-volgend-level');
+document.getElementById('volgend-level-nr').textContent = volgend;
+
+if (volgend > 7) {
+  volgendKnop.href = 'ranglijst.html';
+  volgendKnop.textContent = 'Bekijk eindstand →';
+} else {
+  volgendKnop.href = `spel.html?level=${volgend}`;
+}
+</script>
+</body>
+</html>

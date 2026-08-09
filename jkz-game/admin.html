@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>JKZ — Beheer</title>
+  <link rel="stylesheet" href="css/stijl.css">
+</head>
+<body>
+
+<div class="pagina">
+
+  <header class="hoofd">
+    <a href="index.html" class="logo-link">
+      <div class="logo-placeholder">
+        <span class="logo-jkz">JKZ</span>
+        <span class="logo-sub">beheer</span>
+      </div>
+    </a>
+  </header>
+
+  <div class="inhoud" id="inhoud">
+    <div class="laadbericht">Toegang controleren…</div>
+  </div>
+
+</div>
+
+<script type="module">
+import { resetAlles, resetSpeler, haalAllSpelers, haalVoortgang,
+         haalConfig, slaConfigOp } from './js/api.js';
+
+const BEHEER_SLEUTEL = 'GEHEIM'; // In fase 2: uit config.php
+
+// Sleutel uit URL halen
+const params = new URLSearchParams(window.location.search);
+const sleutel = params.get('key') || '';
+
+const inhoud = document.getElementById('inhoud');
+
+if (sleutel !== BEHEER_SLEUTEL) {
+  inhoud.innerHTML = `
+    <div class="centervak" style="padding-top:3rem;text-align:center;">
+      <div style="font-size:3rem;margin-bottom:1rem;">🔒</div>
+      <h2>Geen toegang</h2>
+      <p class="klein">Voeg <code>?key=GEHEIM</code> toe aan de URL.</p>
+    </div>`;
+} else {
+  renderBeheer();
+}
+
+async function renderBeheer() {
+  const config = haalConfig();
+  const spelers = haalAllSpelers();
+
+  inhoud.innerHTML = `
+    <h1 style="margin-bottom:1.5rem;">Beheer</h1>
+
+    <!-- STATUS -->
+    <div class="admin-sectie">
+      <h2>Status</h2>
+      <div class="schakelaar">
+        <input type="checkbox" id="cb-gesloten" ${config.gesloten ? 'checked' : ''}>
+        <label for="cb-gesloten">Spel gesloten (bezoekers zien gesloten-scherm)</label>
+      </div>
+      <div class="schakelaar">
+        <input type="checkbox" id="cb-testmodus" ${config.testmodus ? 'checked' : ''}>
+        <label for="cb-testmodus">Testmodus (alle levels direct open)</label>
+      </div>
+      <button class="knop primair" id="knop-config-opslaan">Opslaan</button>
+    </div>
+
+    <!-- SPELERS OVERZICHT -->
+    <div class="admin-sectie">
+      <h2>Spelers (${spelers.length})</h2>
+      <div id="spelers-lijst">Laden…</div>
+    </div>
+
+    <!-- RESET SPELER -->
+    <div class="admin-sectie">
+      <h2>Speler wissen</h2>
+      <select class="selecteer" id="reset-speler-select">
+        <option value="">— kies een speler —</option>
+        ${spelers.map(s => `<option value="${s.id}">${escapeHtml(s.naam)}</option>`).join('')}
+      </select>
+      <button class="knop gevaar" id="knop-reset-speler">Wis deze speler</button>
+    </div>
+
+    <!-- RESET ALLES -->
+    <div class="admin-sectie" style="border-color:rgba(212,84,26,0.3);">
+      <h2 style="color:var(--simon-4);">Alles wissen</h2>
+      <p class="klein" style="margin-bottom:0.75rem;">
+        Dit verwijdert alle spelers en scores. Onmogelijk terug te draaien.
+        Typ <strong>RESET</strong> om te bevestigen.
+      </p>
+      <input type="text" id="reset-bevestig" class="invoer" placeholder="Typ RESET om te bevestigen">
+      <button class="knop gevaar" id="knop-reset-alles">Alles wissen</button>
+    </div>
+
+    <p class="klein ta-c" style="margin-top:1rem;">
+      <a href="eindstand.html" style="color:var(--accent);">Beameroverzicht →</a>
+    </p>`;
+
+  // Spelers met voortgang laden
+  const spelersLijstEl = document.getElementById('spelers-lijst');
+  if (spelers.length === 0) {
+    spelersLijstEl.innerHTML = '<p class="klein">Nog geen spelers.</p>';
+  } else {
+    spelersLijstEl.innerHTML = '<div class="laadbericht">Voortgang laden…</div>';
+    const rijen = await Promise.all(spelers.map(async s => {
+      const vg = await haalVoortgang(s.id);
+      const totaal = vg.scores.reduce((som, sc) => som + sc.score, 0);
+      const levels = vg.scores.length;
+      return `<div class="admin-speler-rij">
+        <span>${escapeHtml(s.naam)}</span>
+        <span class="klein" style="color:var(--accent);">
+          Level ${vg.level} | ${levels} spellen | ${totaal} pts
+        </span>
+      </div>`;
+    }));
+    spelersLijstEl.innerHTML = rijen.join('');
+  }
+
+  // Config opslaan
+  document.getElementById('knop-config-opslaan').addEventListener('click', () => {
+    const gesloten  = document.getElementById('cb-gesloten').checked;
+    const testmodus = document.getElementById('cb-testmodus').checked;
+    slaConfigOp({ gesloten, testmodus });
+    toonMelding('Config opgeslagen!', 'ok');
+  });
+
+  // Reset speler
+  document.getElementById('knop-reset-speler').addEventListener('click', async () => {
+    const id = document.getElementById('reset-speler-select').value;
+    if (!id) { toonMelding('Kies eerst een speler.', 'fout'); return; }
+    const naam = spelers.find(s => s.id === id)?.naam || id;
+    if (!confirm(`Wis ${naam}? Dit kan niet ongedaan worden.`)) return;
+    try {
+      await resetSpeler(sleutel, id);
+      toonMelding(`${naam} gewist.`, 'ok');
+      setTimeout(() => location.reload(), 1000);
+    } catch (e) { toonMelding('Fout: ' + e.message, 'fout'); }
+  });
+
+  // Reset alles
+  document.getElementById('knop-reset-alles').addEventListener('click', async () => {
+    const invoer = document.getElementById('reset-bevestig').value;
+    if (invoer !== 'RESET') {
+      toonMelding('Typ exact RESET (hoofdletters).', 'fout'); return;
+    }
+    if (!confirm('Alle data wissen? Dit kan niet ongedaan worden!')) return;
+    try {
+      await resetAlles(sleutel);
+      toonMelding('Alles gewist. Pagina herlaadt…', 'ok');
+      setTimeout(() => location.reload(), 1500);
+    } catch (e) { toonMelding('Fout: ' + e.message, 'fout'); }
+  });
+}
+
+function toonMelding(tekst, type) {
+  const bestaand = document.getElementById('melding-banner');
+  if (bestaand) bestaand.remove();
+  const div = document.createElement('div');
+  div.id = 'melding-banner';
+  div.className = 'fout-banner';
+  div.style.cssText = type === 'ok'
+    ? 'background:rgba(39,174,96,0.15);border-color:#27ae60;color:#5dca8a;'
+    : '';
+  div.textContent = tekst;
+  inhoud.prepend(div);
+  setTimeout(() => div.remove(), 3000);
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
