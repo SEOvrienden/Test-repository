@@ -114,7 +114,7 @@ body::after {
   color: var(--tekst-zwak);
 }
 
-@media (orientation: landscape) {
+@media (orientation: landscape) and (max-height: 500px) {
   .landscape-waarschuwing { display: flex; }
 }
 
