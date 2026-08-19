@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Spel</title>
-  <link rel="stylesheet" href="css/stijl.css?v=4">
+  <link rel="stylesheet" href="css/stijl.css?v=5">
 </head>
 <body>
 
@@ -76,14 +76,16 @@ window.addEventListener('error', function (e) {
   <!-- ═══ OEFENSCORE SCHERM ══════════════════════════════════════════════════ -->
   <div id="scherm-oefenscore" class="scherm" style="flex-direction:column;">
     <div class="oefenbalk">OEFENSCORE — telt niet mee</div>
-    <div class="inhoud centervak" style="flex:1;">
-      <p class="klein">Jouw oefenscore:</p>
-      <div class="score-punten-groot" id="oefen-score-waarde">–</div>
-      <p class="score-ruw" id="oefen-ruw-waarde"></p>
-      <div class="knoppen" style="width:100%;max-width:360px;margin-top:1.5rem;">
-        <button class="knop" id="knop-opnieuw-oefenen">Nog een keer oefenen</button>
-        <button class="knop primair" id="knop-na-oefenen-spelen">Start voor punten →</button>
+    <div class="inhoud" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;text-align:center;">
+      <div>
+        <p class="klein">Jouw oefenscore:</p>
+        <div class="score-punten-groot" id="oefen-score-waarde">–</div>
+        <p class="score-ruw" id="oefen-ruw-waarde"></p>
       </div>
+    </div>
+    <div class="uitleg-knoppen">
+      <button class="knop" id="knop-opnieuw-oefenen">Nog een keer oefenen</button>
+      <button class="knop primair" id="knop-na-oefenen-spelen">Start voor punten →</button>
     </div>
   </div>
 
@@ -106,10 +108,12 @@ window.addEventListener('error', function (e) {
     <div id="speelveld" style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;"></div>
   </div>
 
-  <!-- ═══ SCORESCHERM ════════════════════════════════════════════════════════ -->
+  <!-- ═══ SCORESCHERM ════════════════════════════════════════════════════════
+       De tekst staat in een scrollbaar middendeel; de knoppen staan in een
+       vaste voet en vallen dus nooit buiten beeld. -->
   <div id="scherm-score" class="scherm" style="flex-direction:column;">
-    <div class="inhoud" style="flex:1;overflow-y:auto;">
-      <div style="text-align:center;padding-top:0.5rem;">
+    <div class="inhoud" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;text-align:center;">
+      <div>
         <div id="score-nieuw-record" class="nieuw-record-label verborgen">🏆 Nieuw persoonlijk record!</div>
         <p class="klein" id="score-poging-label" style="margin-bottom:0.25rem;">Poging 1 van 2</p>
         <div class="score-punten-groot" id="score-punten">0</div>
@@ -117,17 +121,17 @@ window.addEventListener('error', function (e) {
         <p class="score-positie" id="score-positie"></p>
         <p class="score-tekst" id="score-tekst-plagerig"></p>
       </div>
+    </div>
 
-      <!-- Ranglijst zit al in de navigatiebalk onderaan, dus hier alleen
-           de twee acties die bij dit moment horen -->
-      <div class="knoppen" style="margin-top:0.75rem;">
-        <button class="knop" id="knop-nog-poging" style="display:none;">
-          Nog een poging
-        </button>
-        <a href="#" class="knop primair" id="knop-lees-verslag">
-          Lees verslag →
-        </a>
-      </div>
+    <!-- Ranglijst zit al in de navigatiebalk onderaan, dus hier alleen
+         de twee acties die bij dit moment horen -->
+    <div class="uitleg-knoppen">
+      <button class="knop" id="knop-nog-poging" style="display:none;">
+        Nog een poging
+      </button>
+      <a href="#" class="knop primair" id="knop-lees-verslag">
+        Lees verslag →
+      </a>
     </div>
   </div>
 
@@ -135,10 +139,10 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { haalSpelerUitStorage, haalVoortgang, slaScoreOp, haalRanglijst, haalConfig }
-  from './js/api.js?v=4';
+  from './js/api.js?v=5';
 import { renderVoortgang, renderNav, plaatsTekst, checkGesloten, toonConfetti, urlParam }
-  from './js/app.js?v=4';
-import { speel } from './js/geluid.js?v=4';
+  from './js/app.js?v=5';
+import { speel } from './js/geluid.js?v=5';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -171,7 +175,7 @@ renderVoortgang(voortgangContainer, level, gespeeldTm);
 document.getElementById('scherm-uitleg').querySelector('#uitleg-naam').textContent = 'Laadt…';
 let spelModule;
 try {
-  spelModule = await import(`./js/spellen/spel${level}.js?v=4`);
+  spelModule = await import(`./js/spellen/spel${level}.js?v=5`);
 } catch (e) {
   console.error('Module laden mislukt:', e);
   window.location.href = 'index.html'; throw e;

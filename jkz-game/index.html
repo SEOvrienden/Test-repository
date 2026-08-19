@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ Jaarverslag Game</title>
-  <link rel="stylesheet" href="css/stijl.css?v=4">
+  <link rel="stylesheet" href="css/stijl.css?v=5">
 </head>
 <body>
 
@@ -62,6 +62,28 @@ window.addEventListener('error', function (e) {
       </div>
     </div>
 
+    <!-- Wissel van speler: eerst bevestigen -->
+    <div id="wissel-bevestig" class="verborgen" style="padding-top:2rem;">
+      <div class="centervak" style="justify-content:flex-start;padding:0;">
+        <h1 style="margin-bottom:0.25rem;">Weet je het zeker?</h1>
+        <p class="klein" style="margin-bottom:0.75rem;">Je speelt nu als:</p>
+        <p class="welkom-naam" id="wissel-huidige-naam">Naam</p>
+        <p class="klein" style="margin-bottom:1.5rem;">
+          Je scores blijven bewaard. Alleen met precies deze naam
+          speel je later verder waar je gebleven was.
+        </p>
+        <div class="knoppen">
+          <button class="knop primair" id="knop-wissel-nee"
+                  style="font-size:1.05rem;min-height:56px;">
+            Nee, ik blijf gewoon mezelf
+          </button>
+          <button class="knop secundair" id="knop-wissel-ja">
+            Ja, iemand anders speelt op deze telefoon
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Naam invullen -->
     <div id="naam-keuze">
       <h1 style="margin-bottom:0.25rem;">Wie ben jij?</h1>
@@ -80,6 +102,10 @@ window.addEventListener('error', function (e) {
         Speelde je al eerder mee? Typ dan precies dezelfde naam,
         dan ga je verder waar je gebleven was.
       </p>
+      <button class="knop secundair klein verborgen" id="knop-terug-naar-vorige"
+              style="margin-top:1.25rem;font-size:0.85rem;min-height:44px;border-width:1px;">
+        ← Ik ben toch <span id="terug-naam">…</span>
+      </button>
     </div>
 
     <!-- Naam bevestigen -->
@@ -108,8 +134,8 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { registreerSpeler, haalVoortgang, haalSpelerUitStorage,
-         slaHuidigeSpelerOp, verwijderHuidigeSpeler, verwerkWachtrij } from './js/api.js?v=4';
-import { renderNav, checkGesloten } from './js/app.js?v=4';
+         slaHuidigeSpelerOp, verwerkWachtrij } from './js/api.js?v=5';
+import { renderNav, checkGesloten } from './js/app.js?v=5';
 
 // Gesloten-check
 if (checkGesloten()) throw new Error('gesloten');
@@ -149,11 +175,35 @@ if (huidig) {
   });
 }
 
-// Iemand anders knop
+// ── Wisselen van speler: eerst bevestigen, en altijd een weg terug ────────────
+// De opgeslagen speler wordt pas overschreven als iemand een NIEUWE naam
+// bevestigt. Een misklik op "iemand anders" kan dus nooit voortgang kwijtmaken.
+function toonAlleen(id) {
+  ['welkom-terug', 'wissel-bevestig', 'naam-keuze', 'naam-bevestig'].forEach(x =>
+    document.getElementById(x).classList.toggle('verborgen', x !== id));
+}
+
 document.getElementById('knop-iemand-anders')?.addEventListener('click', () => {
-  verwijderHuidigeSpeler();
-  document.getElementById('welkom-terug').classList.add('verborgen');
-  document.getElementById('naam-keuze').classList.remove('verborgen');
+  document.getElementById('wissel-huidige-naam').textContent = huidig ? huidig.naam : '';
+  toonAlleen('wissel-bevestig');
+});
+
+document.getElementById('knop-wissel-nee').addEventListener('click', () => {
+  toonAlleen('welkom-terug');
+});
+
+document.getElementById('knop-wissel-ja').addEventListener('click', () => {
+  toonAlleen('naam-keuze');
+  // Toon een terugknop met de huidige naam, zodat je altijd terug kunt
+  if (huidig) {
+    document.getElementById('terug-naam').textContent = huidig.naam;
+    document.getElementById('knop-terug-naar-vorige').classList.remove('verborgen');
+  }
+  naamInput.focus();
+});
+
+document.getElementById('knop-terug-naar-vorige').addEventListener('click', () => {
+  toonAlleen('welkom-terug');
 });
 
 // Naam typen → controleren → bevestigingsscherm

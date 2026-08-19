@@ -1,5 +1,5 @@
 // Gedeelde hulpfuncties voor alle pagina's
-import { haalConfig } from './api.js?v=4';
+import { haalConfig } from './api.js?v=5';
 
 // ── Voortgangsbalk ────────────────────────────────────────────────────────────
 
@@ -49,14 +49,45 @@ export function initLandschapswaarschuwing(element) {
 }
 
 // ── Score-tekst (plagerig) ────────────────────────────────────────────────────
+// Per scoreband meerdere teksten; er wordt er willekeurig één gekozen,
+// zodat het bij elke poging fris blijft.
+
+const PLAAGTEKSTEN = [
+  { vanaf: 100, teksten: [
+    'Perfect! Ben jij eigenlijk wel een mens?',
+    'Vlekkeloos. Dit gaat de notulen in.',
+    'Maximale score. De voorzitter overweegt een standbeeld.',
+  ]},
+  { vanaf: 80, teksten: [
+    'Uitstekend! Je zit ruim in de top.',
+    'De voorzitter is trots op je.',
+    'Sterk werk — dit ruikt naar de bovenkant van de ranglijst.',
+  ]},
+  { vanaf: 60, teksten: [
+    'Goed gedaan! Meer dan de helft van de punten — dat telt.',
+    'Prima gespeeld. Netjes boven de middenmoot.',
+    'Solide. Nog één tandje erbij en je zit bij de toppers.',
+  ]},
+  { vanaf: 40, teksten: [
+    'Een prima score. Er zit nog ruimte voor verbetering.',
+    'De penningmeester zou zeggen: ruim voldoende.',
+    'Keurig. Op naar het volgende level!',
+  ]},
+  { vanaf: 20, teksten: [
+    'Niet slecht voor een eerste keer. Je kunt dit!',
+    'Oefening baart kunst — nog een poging?',
+    'De aanhouder wint. Serieus, probeer het nog eens.',
+  ]},
+  { vanaf: 0, teksten: [
+    'Learning by doing, hè. Maar oefening baart kunst!',
+    'Au. Gelukkig telt alleen je beste poging.',
+    'Dit blijft tussen ons. Nog een keertje?',
+  ]},
+];
 
 export function plaatsTekst(score) {
-  if (score >= 100) return 'Perfect! Ben jij eigenlijk wel een mens?';
-  if (score >= 80)  return 'Uitstekend! Je zit ruim in de top.';
-  if (score >= 60)  return 'Goed gedaan! Meer dan de helft van de punten — dat telt.';
-  if (score >= 40)  return 'Een prima score. Er zit nog ruimte voor verbetering.';
-  if (score >= 20)  return 'Niet slecht voor een eerste keer. Je kunt dit!';
-  return 'Learning by doing, hè. Maar oefening baart kunst!';
+  const band = PLAAGTEKSTEN.find(b => score >= b.vanaf) || PLAAGTEKSTEN[PLAAGTEKSTEN.length - 1];
+  return band.teksten[Math.floor(Math.random() * band.teksten.length)];
 }
 
 // ── Clamp ────────────────────────────────────────────────────────────────────

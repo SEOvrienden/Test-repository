@@ -1,140 +1,243 @@
-// Spel 7 — Quiz
-// 10 meerkeuzevragen over JKZ. Oefenen: 1 voorbeeldvraag met uitleg.
-import { speel } from '../geluid.js?v=4';
-import { clamp } from '../app.js?v=4';
-import { vragen, oefenvraag } from './vragen.js?v=4';
+// Spel 7 — Pong tegen de computer
+// Jij onderin, de computer bovenin. De bal wordt steeds sneller.
+// Hoe vaker jij hem terugslaat, hoe hoger je score. Mis = einde.
+// Oefenen: 20 seconden vrij spelen, gemiste bal komt gewoon terug.
+import { speel } from '../geluid.js?v=5';
+import { clamp } from '../app.js?v=5';
 
 export const info = {
-  naam: 'Quiz',
-  uitleg: 'Beantwoord 10 vragen over JKZ. Lees elke vraag goed voor je tikt. '
-        + 'Je ziet meteen of je goed zat.',
-  scoreRegel: 'Zo scoor je: 10 punten per goed antwoord. '
-            + 'Alle 10 goed is 100 punten.',
-  demoHTML: `<div class="demo-quiz">
-    <div class="demo-quiz-v" style="width:90%"></div>
-    <div class="demo-quiz-v" style="width:70%;margin-bottom:4px"></div>
-    <div class="demo-quiz-o"></div>
-    <div class="demo-quiz-o"></div>
-    <div class="demo-quiz-o"></div>
-    <div class="demo-quiz-o"></div>
+  naam: 'Pong',
+  uitleg: 'Sleep je peddel onderin heen en weer en sla de bal terug. '
+        + 'De computer bovenin slaat terug — en de bal wordt steeds sneller.',
+  scoreRegel: 'Zo scoor je: 8 punten per keer dat jij de bal terugslaat. 13 keer = 100 punten.',
+  demoHTML: `<div class="demo-pong">
+    <div class="demo-pong-cpu"></div>
+    <div class="demo-pong-bal"></div>
+    <div class="demo-pong-speler"></div>
   </div>`,
 };
 
-function berekenScore(goed) {
-  return clamp(goed * 10, 0, 100);
+const OEFEN_DUUR    = 20;    // seconden
+const BAL_SNELHEID  = 260;   // px/s start
+const VERSNELLING   = 1.06;  // per terugslag van de speler
+const PEDDEL_B      = 92;
+const PEDDEL_H      = 12;
+const BAL_R         = 7;
+const CPU_MAX       = 210;   // px/s — haalbaar te verslaan zodra de bal sneller wordt
+
+function berekenScore(terugslagen) {
+  return clamp(terugslagen * 8, 0, 100);
 }
 
 export function maakSpel(container, { modus, onKlaar }) {
   const isOefenen = modus === 'oefenen';
-  const spelVragen = isOefenen ? [oefenvraag] : vragen;
-  let vraagIdx = 0;
-  let goedAntwoorden = 0;
-  let antwoordGegeven = false;
-  let vernietigd = false;
 
   container.innerHTML = `
-    <div class="quiz-container">
-      <div class="quiz-voortgang" id="qz-voortgang">Vraag 1 van ${spelVragen.length}</div>
-      <div class="quiz-score-rij" id="qz-score-rij"></div>
-      <div class="quiz-vraag-tekst" id="qz-vraag"></div>
-      <div class="quiz-opties" id="qz-opties"></div>
-      <div class="quiz-uitleg verborgen" id="qz-uitleg"></div>
+    <div class="onebutton-container">
+      <div class="onebutton-canvas-wrap">
+        <canvas id="pong-canvas"></canvas>
+      </div>
+      <div class="onebutton-hint">Sleep om je peddel te bewegen &nbsp;🏓</div>
     </div>`;
 
-  const voortgangEl = container.querySelector('#qz-voortgang');
-  const scoreRijEl  = container.querySelector('#qz-score-rij');
-  const vraagEl     = container.querySelector('#qz-vraag');
-  const optiesEl    = container.querySelector('#qz-opties');
-  const uitlegEl    = container.querySelector('#qz-uitleg');
+  const canvas = container.querySelector('#pong-canvas');
+  const ctx    = canvas.getContext('2d');
+  const dpr    = window.devicePixelRatio || 1;
 
-  function renderScoreRij() {
-    scoreRijEl.innerHTML = '';
-    spelVragen.forEach((_, i) => {
-      const dot = document.createElement('div');
-      dot.className = 'quiz-score-dot';
-      // Gevulde dots voor al beantwoorde vragen
-      scoreRijEl.appendChild(dot);
-    });
+  function resize() {
+    const wrap = canvas.parentElement;
+    const w = wrap.clientWidth;
+    const h = wrap.clientHeight;
+    canvas.style.width  = w + 'px';
+    canvas.style.height = h + 'px';
+    canvas.width  = w * dpr;
+    canvas.height = h * dpr;
+    ctx.scale(dpr, dpr);
   }
+  resize();
 
-  function updateScoreRij(idx, goed) {
-    const dots = scoreRijEl.querySelectorAll('.quiz-score-dot');
-    if (dots[idx]) dots[idx].classList.add(goed ? 'goed' : 'fout');
+  const W = () => parseInt(canvas.style.width);
+  const H = () => parseInt(canvas.style.height);
+
+  // ── Spelstatus ────────────────────────────────────────────────────────────
+  let spelerX = W() / 2;
+  let cpuX    = W() / 2;
+  let balX = 0, balY = 0, balVX = 0, balVY = 0;
+  let terugslagen = 0;
+  let tijd        = 0;
+  let isGestart   = false;
+  let vernietigd  = false;
+  let gepauzeerd  = false;
+  let animId      = null;
+  let vorigeTs    = null;
+
+  function resetBal(richtingOmlaag) {
+    balX = W() / 2;
+    balY = H() / 2;
+    const snelheid = BAL_SNELHEID * Math.pow(VERSNELLING, terugslagen);
+    const hoek = (Math.random() * 0.6 - 0.3); // licht schuin
+    balVX = Math.sin(hoek) * snelheid;
+    balVY = (richtingOmlaag ? 1 : -1) * Math.cos(hoek) * snelheid;
   }
+  resetBal(true);
 
-  function toonVraag(idx) {
-    if (vernietigd) return;
-    antwoordGegeven = false;
-    const q = spelVragen[idx];
-    voortgangEl.textContent = `Vraag ${idx + 1} van ${spelVragen.length}`;
-    vraagEl.textContent = q.vraag;
-    uitlegEl.classList.add('verborgen');
-    uitlegEl.textContent = '';
-
-    optiesEl.innerHTML = '';
-    q.opties.forEach((optie, i) => {
-      const knop = document.createElement('button');
-      knop.className = 'quiz-optie';
-      knop.textContent = optie;
-      knop.addEventListener('click', () => {
-        if (antwoordGegeven || vernietigd) return;
-        verwerkAntwoord(idx, i, knop);
-      });
-      optiesEl.appendChild(knop);
-    });
-  }
-
-  function verwerkAntwoord(qIdx, gekozen, gekozenKnop) {
-    antwoordGegeven = true;
-    const q = spelVragen[qIdx];
-    const isGoed = gekozen === q.goed;
-
-    if (isGoed) {
-      speel('treffer');
-      goedAntwoorden++;
-      gekozenKnop.classList.add('goed');
-    } else {
-      speel('fout');
-      if (navigator.vibrate) navigator.vibrate(80);
-      gekozenKnop.classList.add('fout');
-      // Markeer het juiste antwoord
-      const alleKnoppen = optiesEl.querySelectorAll('.quiz-optie');
-      alleKnoppen[q.goed].classList.add('goed-antwoord-gemarkeerd');
-    }
-
-    updateScoreRij(qIdx, isGoed);
-
-    // Toon uitleg als aanwezig (altijd bij oefenen)
-    if (isOefenen && q.uitleg) {
-      uitlegEl.textContent = q.uitleg;
-      uitlegEl.classList.remove('verborgen');
-    }
-
-    // Volgende vraag of einde
-    const wacht = (isOefenen && q.uitleg) ? 3000 : 1500;
-    setTimeout(() => {
-      if (vernietigd) return;
-      vraagIdx++;
-      if (vraagIdx >= spelVragen.length) {
-        eindeSpel();
-      } else {
-        toonVraag(vraagIdx);
-      }
-    }, wacht);
+  function start() {
+    if (isGestart || vernietigd) return;
+    isGestart = true;
+    animId = requestAnimationFrame(loop);
   }
 
   function eindeSpel() {
-    speel('levelKlaar');
-    const score = berekenScore(goedAntwoorden);
-    onKlaar(`${goedAntwoorden} van ${spelVragen.length} goed`, score);
+    vernietigd = true;
+    cancelAnimationFrame(animId);
+    onKlaar(`${terugslagen} keer teruggeslagen`, berekenScore(terugslagen));
   }
 
-  renderScoreRij();
-  toonVraag(0);
+  function gemist() {
+    speel('fout');
+    if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+    if (isOefenen) { resetBal(true); return; }
+    eindeSpel();
+  }
+
+  function update(delta) {
+    tijd += delta;
+    if (isOefenen && tijd >= OEFEN_DUUR) { eindeSpel(); return; }
+
+    const w = W(), h = H();
+    balX += balVX * delta;
+    balY += balVY * delta;
+
+    // Zijmuren
+    if (balX - BAL_R < 0) { balX = BAL_R;     balVX =  Math.abs(balVX); }
+    if (balX + BAL_R > w) { balX = w - BAL_R; balVX = -Math.abs(balVX); }
+
+    // Computer beweegt naar de bal, met een maximum snelheid
+    const doel = balX;
+    const diff = doel - cpuX;
+    const stap = clamp(diff, -CPU_MAX * delta, CPU_MAX * delta);
+    cpuX = clamp(cpuX + stap, PEDDEL_B / 2, w - PEDDEL_B / 2);
+
+    // Computerpeddel bovenin
+    const cpuY = 22;
+    if (balVY < 0 && balY - BAL_R <= cpuY + PEDDEL_H && balY - BAL_R >= cpuY - 14) {
+      if (balX >= cpuX - PEDDEL_B / 2 - BAL_R && balX <= cpuX + PEDDEL_B / 2 + BAL_R) {
+        balY = cpuY + PEDDEL_H + BAL_R;
+        const rel = (balX - cpuX) / (PEDDEL_B / 2);
+        const snelheid = Math.hypot(balVX, balVY);
+        const hoek = rel * 0.85;
+        balVX = Math.sin(hoek) * snelheid;
+        balVY = Math.cos(hoek) * snelheid;
+        speel('tik');
+      }
+    }
+
+    // Spelerpeddel onderin
+    const spelerY = h - 34;
+    if (balVY > 0 && balY + BAL_R >= spelerY && balY + BAL_R <= spelerY + PEDDEL_H + 14) {
+      if (balX >= spelerX - PEDDEL_B / 2 - BAL_R && balX <= spelerX + PEDDEL_B / 2 + BAL_R) {
+        balY = spelerY - BAL_R;
+        terugslagen++;
+        speel('treffer');
+        const rel = (balX - spelerX) / (PEDDEL_B / 2);
+        const snelheid = Math.hypot(balVX, balVY) * VERSNELLING;
+        const hoek = rel * 0.85;
+        balVX = Math.sin(hoek) * snelheid;
+        balVY = -Math.cos(hoek) * snelheid;
+      }
+    }
+
+    // Bal voorbij de computer (bovenkant): punt voor jou, bal komt terug
+    if (balY + BAL_R < -20) { resetBal(true); return; }
+
+    // Bal voorbij jou (onderkant): gemist
+    if (balY - BAL_R > h) { gemist(); return; }
+  }
+
+  function teken() {
+    const w = W(), h = H();
+    ctx.fillStyle = '#0f241a';
+    ctx.fillRect(0, 0, w, h);
+
+    // Middenlijn
+    ctx.strokeStyle = 'rgba(204,171,55,0.25)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 10]);
+    ctx.beginPath();
+    ctx.moveTo(0, h / 2);
+    ctx.lineTo(w, h / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Computerpeddel
+    ctx.fillStyle = '#8fa79a';
+    ctx.fillRect(cpuX - PEDDEL_B / 2, 22, PEDDEL_B, PEDDEL_H);
+
+    // Spelerpeddel
+    ctx.fillStyle = '#e0c766';
+    ctx.fillRect(spelerX - PEDDEL_B / 2, h - 34, PEDDEL_B, PEDDEL_H);
+
+    // Bal
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(balX, balY, BAL_R, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Teller
+    ctx.fillStyle = 'rgba(204,171,55,0.9)';
+    ctx.font = `bold ${Math.round(h * 0.05)}px 'Courier New', monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText(terugslagen, w * 0.5, h * 0.60);
+    if (isOefenen) {
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = `${Math.round(h * 0.03)}px system-ui, sans-serif`;
+      ctx.fillText(`nog ${Math.max(0, Math.ceil(OEFEN_DUUR - tijd))} s`, w * 0.5, h * 0.66);
+    }
+
+    if (!isGestart) {
+      ctx.fillStyle = 'rgba(255,255,255,0.65)';
+      ctx.font = `${Math.round(h * 0.035)}px system-ui, sans-serif`;
+      ctx.fillText('Sleep of tik om te beginnen', w * 0.5, h * 0.70);
+    }
+  }
+
+  function loop(ts) {
+    if (vernietigd) return;
+    if (gepauzeerd) { animId = requestAnimationFrame(loop); return; }
+    if (vorigeTs === null) vorigeTs = ts;
+    const delta = Math.min((ts - vorigeTs) / 1000, 0.1);
+    vorigeTs = ts;
+    update(delta);
+    if (!vernietigd) teken();
+    animId = requestAnimationFrame(loop);
+  }
+
+  teken();
+
+  // ── Besturing ─────────────────────────────────────────────────────────────
+  function zetPeddel(clientX) {
+    const rect = canvas.getBoundingClientRect();
+    spelerX = clamp(clientX - rect.left, PEDDEL_B / 2, W() - PEDDEL_B / 2);
+  }
+  function onPointerDown(e) { e.preventDefault(); zetPeddel(e.clientX); start(); }
+  function onPointerMove(e) { if (e.buttons || e.pointerType === 'touch') { e.preventDefault(); zetPeddel(e.clientX); } }
+  function onKey(e) {
+    if (e.key === 'ArrowLeft')  { spelerX = clamp(spelerX - 28, PEDDEL_B / 2, W() - PEDDEL_B / 2); start(); }
+    if (e.key === 'ArrowRight') { spelerX = clamp(spelerX + 28, PEDDEL_B / 2, W() - PEDDEL_B / 2); start(); }
+  }
+  canvas.addEventListener('pointerdown', onPointerDown);
+  canvas.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('keydown', onKey);
 
   return {
-    pauzeer() { antwoordGegeven = true; },
-    hervat()  { antwoordGegeven = false; },
-    vernietig() { vernietigd = true; },
+    pauzeer() { gepauzeerd = true; vorigeTs = null; },
+    hervat()  { gepauzeerd = false; vorigeTs = null; },
+    vernietig() {
+      vernietigd = true;
+      cancelAnimationFrame(animId);
+      canvas.removeEventListener('pointerdown', onPointerDown);
+      canvas.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('keydown', onKey);
+    },
   };
 }

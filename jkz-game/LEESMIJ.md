@@ -34,7 +34,7 @@ Je hebt al: het subdomein `jaarverslag.jkz.nl` en een PHP-applicatie in Cloudway
    (bijvoorbeeld `index.php`) — die mag je verwijderen.
 4. **Sleep de bestanden erin.** Links in FileZilla ga je naar de map `jkz-game`
    op je computer. Selecteer alles wat **in** die map staat (dus `index.html`,
-   `spel.html`, de mappen `css`, `js`, `pdf`, enzovoort) en sleep het naar
+   `spel.html`, de mappen `css`, `js`, `verslag-teksten`, `img`, enzovoort) en sleep het naar
    rechts, in `public_html`. Niet de map `jkz-game` zelf slepen, anders wordt
    het adres jaarverslag.jkz.nl/jkz-game/.
 5. **Controleer.** Open jaarverslag.jkz.nl op je telefoon. Je moet het
@@ -44,7 +44,7 @@ Bij een update vervang je alleen de gewijzigde bestanden: zelfde stappen,
 FileZilla vraagt "overschrijven?" en dan kies je ja.
 
 **Over de browsercache:** achter elk bestand staat een versienummer
-(`?v=3`). Daardoor kan de browser van een speler nooit oude en nieuwe
+(zoals `?v=5`). Daardoor kan de browser van een speler nooit oude en nieuwe
 bestanden door elkaar gebruiken. Gaat het laden tóch een keer mis (bijv.
 door een halve upload), dan verschijnt er automatisch een rode balk met
 uitleg in plaats van een pagina die stilletjes niets doet.
@@ -53,11 +53,10 @@ uitleg in plaats van een pagina die stilletjes niets doet.
 
 ## Wat je nog moet invullen
 
-1. **Quizvragen** — `js/spellen/vragen.js`: vervang de 10 vragen (`// TODO`) door echte JKZ-vragen. Ook de oefenvraag (`oefenvraag`) aanpassen. Formaat:
-   ```js
-   { vraag: 'Tekst?', opties: ['A','B','C','D'], goed: 0 /* index 0-3 */ }
-   // Optioneel: uitleg: 'Dit is het goede antwoord omdat...'
-   ```
+1. **Verslagtitels** — `js/titels.js`: vervang "Verslag 1" t/m "Verslag 7"
+   door de echte namen, bijv. "Verslag voorzitter", "Verslag penningmeester",
+   "Verslag Coco 1 (Kars)". Deze titels verschijnen in het verslagenoverzicht
+   en bovenaan elk verslag.
 
 2. **Verslagen** — de verslagen zijn gewone tekstpagina's, geen PDF's meer.
    Open `verslag-teksten/verslag-1.html` t/m `verslag-7.html` in een
@@ -112,16 +111,16 @@ jkz-game/
   js/
     api.js            Adapterlaag (fase 1: localStorage, fase 2: fetch)
     app.js            Gedeelde hulpfuncties + navigatiebalk
+    titels.js         Verslagtitels — TODO: echte namen
     geluid.js         Uitgeschakeld (stille stub)
     spellen/
       spel1.js        Reactietest
-      spel2.js        Memory
+      spel2.js        JKZ Breakout (letters JKZ leegspelen)
       spel3.js        Simon
       spel4.js        Mepspel
       spel5.js        Snake
       spel6.js        One-button (Flappy style)
-      spel7.js        Quiz
-      vragen.js       Quiz-vragen — TODO: echte vragen
+      spel7.js        Pong tegen de computer
   verslag-teksten/
     verslag-1.html ... verslag-7.html   (nu: voorbeeldtekst, zelf invullen)
   img/                Hier zet je foto's voor in de verslagen
@@ -146,12 +145,12 @@ jkz-game/
 | Spel | Ruwe waarde | Formule |
 |------|-------------|---------|
 | 1 Reactie | gem. ms | `(550 - gem) / 3.5` |
-| 2 Memory | beurten | `100 - (beurten - 6) * 4` |
+| 2 Breakout | stenen + tijd | `stenen * 2` + tijdbonus (max 38) bij alles leeg |
 | 3 Simon | level | `level * 8` |
 | 4 Mepspel | treffers | `treffers * 4` |
 | 5 Snake | appels | `appels * 5` |
 | 6 One-button | palen | `palen * 5` |
-| 7 Quiz | goed | `goed * 10` |
+| 7 Pong | terugslagen | `terugslagen * 8` |
 Alle scores worden begrensd op 0–100.
 
 ### Beheerpagina

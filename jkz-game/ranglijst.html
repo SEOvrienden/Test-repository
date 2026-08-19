@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Ranglijst</title>
-  <link rel="stylesheet" href="css/stijl.css?v=4">
+  <link rel="stylesheet" href="css/stijl.css?v=5">
 </head>
 <body>
 
@@ -54,8 +54,8 @@ window.addEventListener('error', function (e) {
           <tr>
             <th>#</th>
             <th>Naam</th>
+            <th>Tot</th>
             <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
-            <th>Totaal</th>
           </tr>
         </thead>
         <tbody id="ranglijst-body"></tbody>
@@ -66,8 +66,8 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalRanglijst, haalSpelerUitStorage, haalVoortgang } from './js/api.js?v=4';
-import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=4';
+import { haalRanglijst, haalSpelerUitStorage, haalVoortgang } from './js/api.js?v=5';
+import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=5';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -149,12 +149,12 @@ function renderRanglijst(data) {
 
     tr.innerHTML = `
       <td><span class="rangpositie">${positieTekst}</span></td>
-      <td>${eigenRij ? '▶ ' : ''}${escapeHtml(rij.naam)}</td>
+      <td title="${escapeHtml(rij.naam)}">${eigenRij ? '▶ ' : ''}${escapeHtml(rij.naam)}</td>
+      <td class="totaal">${rij.totaal}</td>
       ${[1,2,3,4,5,6,7].map(s => {
         const sc = rij.scores[s];
         return `<td>${sc !== undefined && sc !== null ? sc : '–'}</td>`;
-      }).join('')}
-      <td class="totaal">${rij.totaal}</td>`;
+      }).join('')}`;
     tbody.appendChild(tr);
   });
 

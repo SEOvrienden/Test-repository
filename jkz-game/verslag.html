@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Verslag</title>
-  <link rel="stylesheet" href="css/stijl.css?v=4">
+  <link rel="stylesheet" href="css/stijl.css?v=5">
 </head>
 <body>
 
@@ -53,8 +53,9 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=4';
-import { renderVoortgang, renderNav, urlParam, checkGesloten } from './js/app.js?v=4';
+import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=5';
+import { renderVoortgang, renderNav, urlParam, checkGesloten } from './js/app.js?v=5';
+import { VERSLAG_TITELS } from './js/titels.js?v=5';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -76,7 +77,8 @@ if (!vrijgespeeld) {
   window.location.href = 'verslagen.html'; throw new Error();
 }
 
-document.getElementById('verslag-header').textContent = `VERSLAG ${level}`;
+document.getElementById('verslag-header').textContent =
+  (VERSLAG_TITELS[level] || `Verslag ${level}`).toUpperCase();
 
 // Voortgangsbalk
 renderVoortgang(document.getElementById('voortgang'), level, voortgang.level - 1);
@@ -84,7 +86,7 @@ renderVoortgang(document.getElementById('voortgang'), level, voortgang.level - 1
 // Verslagtekst laden (los HTML-bestand, makkelijk zelf aan te passen)
 const artikel = document.getElementById('verslag-artikel');
 try {
-  const res = await fetch(`verslag-teksten/verslag-${level}.html?v=4`);
+  const res = await fetch(`verslag-teksten/verslag-${level}.html?v=5`);
   if (!res.ok) throw new Error(res.status);
   artikel.innerHTML = await res.text();
   artikel.scrollTop = 0;

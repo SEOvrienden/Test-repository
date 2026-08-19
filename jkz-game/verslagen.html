@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Verslagen</title>
-  <link rel="stylesheet" href="css/stijl.css?v=4">
+  <link rel="stylesheet" href="css/stijl.css?v=5">
 </head>
 <body>
 
@@ -51,8 +51,9 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=4';
-import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=4';
+import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=5';
+import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=5';
+import { VERSLAG_TITELS } from './js/titels.js?v=5';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -67,10 +68,7 @@ const voortgang = await haalVoortgang(speler.spelerId);
 renderVoortgang(document.getElementById('voortgang'),
   Math.min(voortgang.level, 7), voortgang.level - 1);
 
-const TITELS = {
-  1: 'Verslag 1', 2: 'Verslag 2', 3: 'Verslag 3', 4: 'Verslag 4',
-  5: 'Verslag 5', 6: 'Verslag 6', 7: 'Verslag 7',
-};
+const TITELS = VERSLAG_TITELS;
 
 const lijst = document.getElementById('verslagen-lijst');
 lijst.innerHTML = '';

@@ -1,7 +1,7 @@
 // Spel 1 — Reactietest
 // Tik zodra het vlak groen wordt. 5 rondes (oefenen: 2).
-import { speel } from '../geluid.js?v=4';
-import { clamp } from '../app.js?v=4';
+import { speel } from '../geluid.js?v=5';
+import { clamp } from '../app.js?v=5';
 
 export const info = {
   naam: 'Reactietest',
