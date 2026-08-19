@@ -310,9 +310,18 @@ body.nav-verborgen .pagina {
 
 /* === SCHERMEN (show/hide) === */
 .scherm {
-  display: none;
   flex-direction: column;
-  height: 100%;
+  /* Neem precies de ruimte die over is (niet height:100%, want dan steekt
+     het scherm onder de navigatiebalk uit) */
+  flex: 1;
+  min-height: 0;
+}
+
+/* Alleen het actieve scherm is zichtbaar. De :not-variant wint van elke
+   losse klasse (zoals .centervak), zodat er nooit twee schermen tegelijk
+   op de pagina staan. */
+.scherm:not(.actief) {
+  display: none !important;
 }
 
 .scherm.actief {
@@ -483,7 +492,7 @@ p:last-child { margin-bottom: 0; }
 /* === SCORE SCHERM === */
 .score-punten-groot {
   font-family: 'Courier New', monospace;
-  font-size: 4rem;
+  font-size: 3.25rem;
   font-weight: bold;
   color: var(--accent);
   text-shadow: 0 0 20px rgba(204, 171, 55, 0.5);

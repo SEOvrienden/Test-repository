@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Spel</title>
-  <link rel="stylesheet" href="css/stijl.css?v=3">
+  <link rel="stylesheet" href="css/stijl.css?v=4">
 </head>
 <body>
 
@@ -68,7 +68,7 @@ window.addEventListener('error', function (e) {
   </div>
 
   <!-- ═══ OEFENSCHERM ════════════════════════════════════════════════════════ -->
-  <div id="scherm-oefenen" class="scherm" style="flex-direction:column;height:100%;">
+  <div id="scherm-oefenen" class="scherm" style="flex-direction:column;">
     <div class="oefenbalk">OEFENEN — dit telt niet mee</div>
     <div id="oefenspeelveld" style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;"></div>
   </div>
@@ -97,7 +97,7 @@ window.addEventListener('error', function (e) {
   </div>
 
   <!-- ═══ SPELSCHERM ════════════════════════════════════════════════════════ -->
-  <div id="scherm-spelen" class="scherm" style="flex-direction:column;height:100%;">
+  <div id="scherm-spelen" class="scherm" style="flex-direction:column;">
     <div style="display:flex;align-items:center;justify-content:space-between;
                 padding:4px 12px;flex-shrink:0;font-family:'Courier New',monospace;
                 font-size:0.75rem;color:var(--tekst-zwak);">
@@ -109,7 +109,7 @@ window.addEventListener('error', function (e) {
   <!-- ═══ SCORESCHERM ════════════════════════════════════════════════════════ -->
   <div id="scherm-score" class="scherm" style="flex-direction:column;">
     <div class="inhoud" style="flex:1;overflow-y:auto;">
-      <div style="text-align:center;padding-top:1.5rem;">
+      <div style="text-align:center;padding-top:0.5rem;">
         <div id="score-nieuw-record" class="nieuw-record-label verborgen">🏆 Nieuw persoonlijk record!</div>
         <p class="klein" id="score-poging-label" style="margin-bottom:0.25rem;">Poging 1 van 2</p>
         <div class="score-punten-groot" id="score-punten">0</div>
@@ -118,14 +118,15 @@ window.addEventListener('error', function (e) {
         <p class="score-tekst" id="score-tekst-plagerig"></p>
       </div>
 
-      <div class="knoppen" style="margin-top:1.5rem;">
+      <!-- Ranglijst zit al in de navigatiebalk onderaan, dus hier alleen
+           de twee acties die bij dit moment horen -->
+      <div class="knoppen" style="margin-top:0.75rem;">
         <button class="knop" id="knop-nog-poging" style="display:none;">
           Nog een poging
         </button>
         <a href="#" class="knop primair" id="knop-lees-verslag">
           Lees verslag →
         </a>
-        <a href="ranglijst.html" class="knop secundair">Bekijk ranglijst</a>
       </div>
     </div>
   </div>
@@ -134,10 +135,10 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { haalSpelerUitStorage, haalVoortgang, slaScoreOp, haalRanglijst, haalConfig }
-  from './js/api.js?v=3';
+  from './js/api.js?v=4';
 import { renderVoortgang, renderNav, plaatsTekst, checkGesloten, toonConfetti, urlParam }
-  from './js/app.js?v=3';
-import { speel } from './js/geluid.js?v=3';
+  from './js/app.js?v=4';
+import { speel } from './js/geluid.js?v=4';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -170,7 +171,7 @@ renderVoortgang(voortgangContainer, level, gespeeldTm);
 document.getElementById('scherm-uitleg').querySelector('#uitleg-naam').textContent = 'Laadt…';
 let spelModule;
 try {
-  spelModule = await import(`./js/spellen/spel${level}.js?v=3`);
+  spelModule = await import(`./js/spellen/spel${level}.js?v=4`);
 } catch (e) {
   console.error('Module laden mislukt:', e);
   window.location.href = 'index.html'; throw e;
