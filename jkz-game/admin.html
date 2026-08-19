@@ -4,9 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Beheer</title>
-  <link rel="stylesheet" href="css/stijl.css">
+  <link rel="stylesheet" href="css/stijl.css?v=3">
 </head>
 <body>
+
+<script>
+// Vangnet: als de pagina niet goed laadt (bijv. oude bestanden in de cache
+// of een halve upload), toon dan een duidelijke melding i.p.v. stil falen.
+window.addEventListener('error', function (e) {
+  if (!e || !e.message) return;
+  if (document.getElementById('laadfout-banner')) return;
+  var d = document.createElement('div');
+  d.id = 'laadfout-banner';
+  d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;' +
+    'background:#8a2020;color:#fff;padding:12px 16px;text-align:center;' +
+    'font:14px/1.45 -apple-system,Segoe UI,sans-serif;';
+  d.textContent = 'Oeps, de pagina is niet goed geladen. Sluit de browser helemaal af en open de site opnieuw. Blijft deze melding staan? Upload dan alle bestanden opnieuw naar de server.';
+  document.body.appendChild(d);
+}, true);
+</script>
 
 <div class="pagina">
 
@@ -27,7 +43,7 @@
 
 <script type="module">
 import { resetAlles, resetSpeler, haalAllSpelers, haalVoortgang,
-         haalConfig, slaConfigOp } from './js/api.js';
+         haalConfig, slaConfigOp } from './js/api.js?v=3';
 
 const BEHEER_SLEUTEL = 'GEHEIM'; // In fase 2: uit config.php
 

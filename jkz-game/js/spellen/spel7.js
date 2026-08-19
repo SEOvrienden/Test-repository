@@ -1,8 +1,8 @@
 // Spel 7 — Quiz
 // 10 meerkeuzevragen over JKZ. Oefenen: 1 voorbeeldvraag met uitleg.
-import { speel } from '../geluid.js';
-import { clamp } from '../app.js';
-import { vragen, oefenvraag } from './vragen.js';
+import { speel } from '../geluid.js?v=3';
+import { clamp } from '../app.js?v=3';
+import { vragen, oefenvraag } from './vragen.js?v=3';
 
 export const info = {
   naam: 'Quiz',

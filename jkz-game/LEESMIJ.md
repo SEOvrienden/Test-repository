@@ -43,6 +43,12 @@ Je hebt al: het subdomein `jaarverslag.jkz.nl` en een PHP-applicatie in Cloudway
 Bij een update vervang je alleen de gewijzigde bestanden: zelfde stappen,
 FileZilla vraagt "overschrijven?" en dan kies je ja.
 
+**Over de browsercache:** achter elk bestand staat een versienummer
+(`?v=3`). Daardoor kan de browser van een speler nooit oude en nieuwe
+bestanden door elkaar gebruiken. Gaat het laden tóch een keer mis (bijv.
+door een halve upload), dan verschijnt er automatisch een rode balk met
+uitleg in plaats van een pagina die stilletjes niets doet.
+
 ---
 
 ## Wat je nog moet invullen

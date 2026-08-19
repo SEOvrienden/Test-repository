@@ -1,5 +1,5 @@
 // Gedeelde hulpfuncties voor alle pagina's
-import { haalConfig } from './api.js';
+import { haalConfig } from './api.js?v=3';
 
 // ── Voortgangsbalk ────────────────────────────────────────────────────────────
 

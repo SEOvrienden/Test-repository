@@ -10,3 +10,5 @@ export function isMuted() { return true; }
 export function setMute() {}
 
 export function speel() {}
+
+export function speelSimon() {}

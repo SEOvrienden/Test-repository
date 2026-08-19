@@ -1,7 +1,7 @@
 // Spel 2 — Memory
 // 12 kaarten (6 paren). Oefenen: 4 kaarten (2 paren).
-import { speel } from '../geluid.js';
-import { clamp } from '../app.js';
+import { speel } from '../geluid.js?v=3';
+import { clamp } from '../app.js?v=3';
 
 export const info = {
   naam: 'Memory',
