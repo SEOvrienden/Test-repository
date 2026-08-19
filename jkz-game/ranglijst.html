@@ -8,12 +8,6 @@
 </head>
 <body>
 
-<div class="landscape-waarschuwing">
-  <div class="draai-icoon">📱</div>
-  <h2>Draai je telefoon rechtop</h2>
-  <p>De ranglijst staat het beste rechtop.</p>
-</div>
-
 <div class="pagina">
 
   <header class="hoofd">
@@ -23,9 +17,6 @@
         <span class="logo-sub">since 1957</span>
       </div>
     </a>
-    <div class="hoofd-rechts">
-      <button class="mute-knop" id="mute-knop">🔊</button>
-    </div>
   </header>
 
   <div class="voortgang" id="voortgang"></div>
@@ -60,13 +51,11 @@
 
 <script type="module">
 import { haalRanglijst, haalSpelerUitStorage, haalVoortgang } from './js/api.js';
-import { renderVoortgang, initMuteKnop, checkGesloten } from './js/app.js';
-import { isMuted, setMute } from './js/geluid.js';
+import { renderVoortgang, renderNav, checkGesloten } from './js/app.js';
 
 if (checkGesloten()) throw new Error('gesloten');
 
-const muteKnop = document.getElementById('mute-knop');
-initMuteKnop(muteKnop, { isMuted, setMute });
+renderNav('ranglijst');
 
 const speler = haalSpelerUitStorage();
 

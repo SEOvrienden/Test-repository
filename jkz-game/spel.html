@@ -27,7 +27,6 @@
     </a>
     <div class="hoofd-rechts">
       <span id="spel-naam-header" class="klein" style="color:var(--accent);font-family:'Courier New',monospace;font-size:0.75rem;letter-spacing:0.08em;"></span>
-      <button class="mute-knop" id="mute-knop" aria-label="Geluid aan/uit">🔊</button>
     </div>
   </header>
 
@@ -42,8 +41,13 @@
       <div class="uitleg-demo" id="uitleg-demo"></div>
     </div>
     <div class="uitleg-knoppen">
-      <button class="knop" id="knop-oefenen">Eerst oefenen</button>
-      <button class="knop primair" id="knop-direct-spelen">Ik snap het, start voor punten</button>
+      <button class="knop primair" id="knop-oefenen">
+        Eerst oefenen — telt niet mee
+      </button>
+      <button class="knop" id="knop-direct-spelen">Ik snap het, speel voor punten</button>
+      <p class="klein ta-c" style="color:var(--tekst-zwak);margin-top:0.5rem;">
+        Oefenen mag zo vaak je wilt. Pas als je voor punten speelt, telt het.
+      </p>
     </div>
   </div>
 
@@ -115,17 +119,14 @@
 <script type="module">
 import { haalSpelerUitStorage, haalVoortgang, slaScoreOp, haalRanglijst, haalConfig }
   from './js/api.js';
-import { renderVoortgang, initMuteKnop, plaatsTekst, checkGesloten, toonConfetti, urlParam }
+import { renderVoortgang, renderNav, plaatsTekst, checkGesloten, toonConfetti, urlParam }
   from './js/app.js';
-import { startAudioContext, isMuted, setMute, speel }
-  from './js/geluid.js';
+import { speel } from './js/geluid.js';
 
 if (checkGesloten()) throw new Error('gesloten');
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-const muteKnop = document.getElementById('mute-knop');
-initMuteKnop(muteKnop, { isMuted, setMute });
-document.body.addEventListener('pointerdown', () => startAudioContext(), { once: true });
+renderNav('spelen');
 
 const level = parseInt(urlParam('level') || '1');
 if (isNaN(level) || level < 1 || level > 7) {
@@ -196,16 +197,17 @@ function toonScherm(naam) {
   document.querySelectorAll('.scherm').forEach(s => s.classList.remove('actief'));
   const el = document.getElementById(`scherm-${naam}`);
   if (el) el.classList.add('actief');
+  // Nav verbergen zolang er echt gespeeld wordt, zodat je hem niet per ongeluk raakt
+  const spelend = naam === 'oefenen' || naam === 'aftelling' || naam === 'spelen';
+  document.body.classList.toggle('nav-verborgen', spelend);
 }
 
 // ── Uitleg knoppen ────────────────────────────────────────────────────────────
 document.getElementById('knop-oefenen').addEventListener('click', () => {
-  startAudioContext();
   startOefenen();
 });
 
 document.getElementById('knop-direct-spelen').addEventListener('click', () => {
-  startAudioContext();
   startAftelling(() => startEchtSpel());
 });
 

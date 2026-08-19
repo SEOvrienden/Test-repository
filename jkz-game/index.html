@@ -22,9 +22,6 @@
         <span class="logo-sub">since 1957</span>
       </div>
     </a>
-    <div class="hoofd-rechts">
-      <button class="mute-knop" id="mute-knop" aria-label="Geluid aan/uit">🔊</button>
-    </div>
   </header>
 
   <div class="inhoud" id="hoofd-inhoud">
@@ -39,6 +36,7 @@
           <a href="#" class="knop primair" id="knop-doorgaan" style="font-size:1.1rem;min-height:60px;">
             Doorgaan →
           </a>
+          <a href="verslagen.html" class="knop secundair">Lees de verslagen</a>
           <a href="ranglijst.html" class="knop secundair">Bekijk ranglijst</a>
           <button class="knop secundair klein" id="knop-iemand-anders"
                   style="font-size:0.85rem;min-height:44px;border-width:1px;">
@@ -95,8 +93,7 @@
 <script type="module">
 import { registreerSpeler, haalVoortgang, haalSpelerUitStorage,
          slaHuidigeSpelerOp, verwijderHuidigeSpeler, verwerkWachtrij } from './js/api.js';
-import { initMuteKnop, initLandschapswaarschuwing, checkGesloten } from './js/app.js';
-import { startAudioContext, isMuted, setMute } from './js/geluid.js';
+import { renderNav, checkGesloten } from './js/app.js';
 
 // Gesloten-check
 if (checkGesloten()) throw new Error('gesloten');
@@ -104,12 +101,8 @@ if (checkGesloten()) throw new Error('gesloten');
 // Probeer wachtrij te verwerken bij elke paginalading
 verwerkWachtrij().catch(() => {});
 
-// Landschap-waarschuwing (hier niet actief — index heeft geen spel)
-// Mute-knop
-const muteKnop = document.getElementById('mute-knop');
-const geluidMod = { isMuted, setMute };
-initMuteKnop(muteKnop, geluidMod);
-document.body.addEventListener('pointerdown', () => startAudioContext(), { once: true });
+// Navigatiebalk onderaan
+renderNav('spelen');
 
 // Check of speler al ingelogd is
 const huidig = haalSpelerUitStorage();
@@ -167,14 +160,12 @@ function naarBevestigen() {
     return;
   }
   naamFout.classList.add('verborgen');
-  startAudioContext();
   document.getElementById('bevestig-naam-tekst').textContent = naam;
   document.getElementById('naam-keuze').classList.add('verborgen');
   document.getElementById('naam-bevestig').classList.remove('verborgen');
 }
 
-document.getElementById('knop-naam-verder').addEventListener('pointerdown', (e) => {
-  e.preventDefault();
+document.getElementById('knop-naam-verder').addEventListener('click', () => {
   naarBevestigen();
 });
 
@@ -183,15 +174,13 @@ naamInput.addEventListener('keydown', (e) => {
 });
 
 // Bevestigen: ja → registreren en spelen
-document.getElementById('knop-bevestig-ja').addEventListener('pointerdown', async (e) => {
-  e.preventDefault();
+document.getElementById('knop-bevestig-ja').addEventListener('click', async () => {
   const naam = document.getElementById('bevestig-naam-tekst').textContent;
   await kiesNaam(naam);
 });
 
 // Bevestigen: nee → terug naar het invulveld
-document.getElementById('knop-bevestig-nee').addEventListener('pointerdown', (e) => {
-  e.preventDefault();
+document.getElementById('knop-bevestig-nee').addEventListener('click', () => {
   document.getElementById('naam-bevestig').classList.add('verborgen');
   document.getElementById('naam-keuze').classList.remove('verborgen');
   naamInput.focus();

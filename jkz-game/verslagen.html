@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>JKZ — Verslagen</title>
+  <link rel="stylesheet" href="css/stijl.css">
+</head>
+<body>
+
+<div class="pagina">
+
+  <header class="hoofd">
+    <a href="index.html" class="logo-link">
+      <div class="logo-placeholder">
+        <span class="logo-jkz">JKZ</span>
+        <span class="logo-sub">since 1957</span>
+      </div>
+    </a>
+  </header>
+
+  <div class="voortgang" id="voortgang"></div>
+
+  <div class="inhoud" style="overflow-y:auto;">
+    <h1 style="margin-bottom:0.25rem;">Verslagen</h1>
+    <p class="klein" style="margin-bottom:1rem;">
+      Elk level dat je speelt, opent een verslag. Vrijgespeelde verslagen
+      kun je hier altijd teruglezen.
+    </p>
+    <div id="verslagen-lijst">
+      <div class="laadbericht">Laden…</div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js';
+import { renderVoortgang, renderNav, checkGesloten } from './js/app.js';
+
+if (checkGesloten()) throw new Error('gesloten');
+
+renderNav('verslagen');
+
+const speler = haalSpelerUitStorage();
+if (!speler) { window.location.href = 'index.html'; throw new Error(); }
+
+const config = haalConfig();
+const voortgang = await haalVoortgang(speler.spelerId);
+
+renderVoortgang(document.getElementById('voortgang'),
+  Math.min(voortgang.level, 7), voortgang.level - 1);
+
+const TITELS = {
+  1: 'Verslag 1', 2: 'Verslag 2', 3: 'Verslag 3', 4: 'Verslag 4',
+  5: 'Verslag 5', 6: 'Verslag 6', 7: 'Verslag 7',
+};
+
+const lijst = document.getElementById('verslagen-lijst');
+lijst.innerHTML = '';
+
+for (let n = 1; n <= 7; n++) {
+  const open = n < voortgang.level || config.testmodus;
+
+  if (open) {
+    const kaart = document.createElement('a');
+    kaart.className = 'verslag-kaart';
+    kaart.href = `verslag.html?level=${n}`;
+    kaart.innerHTML = `
+      <span class="kaart-icoon">📖</span>
+      <span>
+        <span class="kaart-titel" style="display:block;">${TITELS[n]}</span>
+        <span class="kaart-sub">Vrijgespeeld — tik om te lezen</span>
+      </span>`;
+    lijst.appendChild(kaart);
+  } else {
+    const kaart = document.createElement('div');
+    kaart.className = 'verslag-kaart op-slot';
+    kaart.innerHTML = `
+      <span class="kaart-icoon">🔒</span>
+      <span>
+        <span class="kaart-titel" style="display:block;">${TITELS[n]}</span>
+        <span class="kaart-sub">Speel level ${n} om dit verslag te openen</span>
+      </span>`;
+    lijst.appendChild(kaart);
+  }
+}
+
+// Hint als er nog niets open is
+if (voortgang.level === 1 && !config.testmodus) {
+  const hint = document.createElement('p');
+  hint.className = 'klein ta-c';
+  hint.style.cssText = 'color:var(--tekst-zwak);margin-top:1rem;';
+  hint.innerHTML = 'Nog niets vrijgespeeld. <a href="spel.html?level=1" style="color:var(--accent);">Start level 1 →</a>';
+  lijst.appendChild(hint);
+}
+</script>
+</body>
+</html>

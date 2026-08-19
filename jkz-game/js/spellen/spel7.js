@@ -76,8 +76,7 @@ export function maakSpel(container, { modus, onKlaar }) {
       const knop = document.createElement('button');
       knop.className = 'quiz-optie';
       knop.textContent = optie;
-      knop.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
+      knop.addEventListener('click', () => {
         if (antwoordGegeven || vernietigd) return;
         verwerkAntwoord(idx, i, knop);
       });

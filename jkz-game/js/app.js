@@ -15,18 +15,25 @@ export function renderVoortgang(container, huidigLevel, gespeeldTm) {
   }
 }
 
-// ── Mute-knop ─────────────────────────────────────────────────────────────────
+// ── Navigatiebalk onderaan ────────────────────────────────────────────────────
+// Vaste balk op elke pagina zodat spelers altijd kunnen wisselen tussen
+// spelen, verslagen en de ranglijst.
 
-export function initMuteKnop(knop, geluidModule) {
-  function bijwerk() {
-    knop.textContent = geluidModule.isMuted() ? '🔇' : '🔊';
-    knop.title = geluidModule.isMuted() ? 'Geluid aan' : 'Geluid uit';
-  }
-  bijwerk();
-  knop.addEventListener('click', () => {
-    geluidModule.setMute(!geluidModule.isMuted());
-    bijwerk();
-  });
+export function renderNav(actief) {
+  const nav = document.createElement('nav');
+  nav.className = 'onder-nav';
+  nav.innerHTML = [
+    ['spelen',    'index.html',     '🎮', 'Spelen'],
+    ['verslagen', 'verslagen.html', '📖', 'Verslagen'],
+    ['ranglijst', 'ranglijst.html', '🏆', 'Ranglijst'],
+  ].map(([key, url, icoon, label]) =>
+    `<a href="${url}" class="onder-nav-item${key === actief ? ' actief' : ''}">
+       <span class="onder-nav-icoon">${icoon}</span><span>${label}</span>
+     </a>`
+  ).join('');
+  document.body.appendChild(nav);
+  document.body.classList.add('met-nav');
+  return nav;
 }
 
 // ── Landschapswaarschuwing ────────────────────────────────────────────────────

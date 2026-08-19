@@ -8,12 +8,6 @@
 </head>
 <body>
 
-<div class="landscape-waarschuwing" style="z-index:10000;">
-  <div class="draai-icoon">📱</div>
-  <h2>Draai je telefoon rechtop</h2>
-  <p>Zo lees je het verslag het beste.</p>
-</div>
-
 <div class="pagina" style="height:100vh;height:100dvh;">
 
   <header class="hoofd">
@@ -24,18 +18,17 @@
       </div>
     </a>
     <div class="hoofd-rechts">
-      <button class="mute-knop" id="mute-knop">🔊</button>
+      <span id="verslag-header" class="klein" style="color:var(--accent);font-family:'Courier New',monospace;font-size:0.75rem;letter-spacing:0.08em;"></span>
     </div>
   </header>
 
   <div class="voortgang" id="voortgang"></div>
 
-  <div class="verslag-iframe-wrap" id="pdf-wrap">
+  <div class="verslag-artikel" id="verslag-artikel">
     <div class="laadbericht" id="laad-bericht">Verslag laden…</div>
-    <iframe id="pdf-frame" title="Verslag" style="display:none;"></iframe>
   </div>
 
-  <div class="verslag-voet">
+  <div class="verslag-voet" style="padding-bottom:0.75rem;">
     <a href="#" class="knop primair" id="knop-volgend-level">
       Naar level <span id="volgend-level-nr">2</span> →
     </a>
@@ -44,51 +37,62 @@
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang } from './js/api.js';
-import { renderVoortgang, initMuteKnop, urlParam, checkGesloten } from './js/app.js';
-import { isMuted, setMute } from './js/geluid.js';
+import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js';
+import { renderVoortgang, renderNav, urlParam, checkGesloten } from './js/app.js';
 
 if (checkGesloten()) throw new Error('gesloten');
 
-const muteKnop = document.getElementById('mute-knop');
-initMuteKnop(muteKnop, { isMuted, setMute });
+renderNav('verslagen');
 
 const level = parseInt(urlParam('level') || '1');
 if (isNaN(level) || level < 1 || level > 7) {
-  window.location.href = 'index.html'; throw new Error();
+  window.location.href = 'verslagen.html'; throw new Error();
 }
 
 const speler = haalSpelerUitStorage();
 if (!speler) { window.location.href = 'index.html'; throw new Error(); }
 
-// Voortgangsbalk
+// Alleen vrijgespeelde verslagen zijn leesbaar (testmodus opent alles)
+const config = haalConfig();
 const voortgang = await haalVoortgang(speler.spelerId);
+const vrijgespeeld = level < voortgang.level || config.testmodus;
+if (!vrijgespeeld) {
+  window.location.href = 'verslagen.html'; throw new Error();
+}
+
+document.getElementById('verslag-header').textContent = `VERSLAG ${level}`;
+
+// Voortgangsbalk
 renderVoortgang(document.getElementById('voortgang'), level, voortgang.level - 1);
 
-// PDF laden
-const frame = document.getElementById('pdf-frame');
-const laadBericht = document.getElementById('laad-bericht');
-const src = `pdf/verslag-${level}.pdf`;
+// Verslagtekst laden (los HTML-bestand, makkelijk zelf aan te passen)
+const artikel = document.getElementById('verslag-artikel');
+try {
+  const res = await fetch(`verslag-teksten/verslag-${level}.html`);
+  if (!res.ok) throw new Error(res.status);
+  artikel.innerHTML = await res.text();
+  artikel.scrollTop = 0;
+} catch (e) {
+  artikel.innerHTML = `<p style="color:var(--tekst-zwak);text-align:center;padding-top:2rem;">
+    Dit verslag kon niet geladen worden.<br>
+    Controleer of <code>verslag-teksten/verslag-${level}.html</code> op de server staat.</p>`;
+}
 
-frame.onload = () => {
-  laadBericht.style.display = 'none';
-  frame.style.display = 'block';
-};
-frame.onerror = () => {
-  laadBericht.textContent = 'Verslag kon niet geladen worden. Controleer of het PDF-bestand aanwezig is.';
-};
-frame.src = src;
-
-// Knop naar volgend level
+// Knop onderin: volgend level, of de eindstand na het laatste verslag
 const volgend = level + 1;
 const volgendKnop = document.getElementById('knop-volgend-level');
-document.getElementById('volgend-level-nr').textContent = volgend;
 
-if (volgend > 7) {
+if (volgend > 7 && voortgang.level > 7) {
   volgendKnop.href = 'ranglijst.html';
   volgendKnop.textContent = 'Bekijk eindstand →';
-} else {
+} else if (volgend === voortgang.level) {
+  // Dit is de logische volgende stap in het spel
+  document.getElementById('volgend-level-nr').textContent = volgend;
   volgendKnop.href = `spel.html?level=${volgend}`;
+} else {
+  // Oud verslag teruglezen → terug naar het overzicht
+  volgendKnop.href = 'verslagen.html';
+  volgendKnop.textContent = 'Terug naar alle verslagen';
 }
 </script>
 </body>

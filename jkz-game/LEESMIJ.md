@@ -53,7 +53,13 @@ FileZilla vraagt "overschrijven?" en dan kies je ja.
    // Optioneel: uitleg: 'Dit is het goede antwoord omdat...'
    ```
 
-2. **PDF's** — vervang `pdf/verslag-1.pdf` t/m `pdf/verslag-7.pdf` door de echte verslagen. Dezelfde bestandsnamen aanhouden.
+2. **Verslagen** — de verslagen zijn gewone tekstpagina's, geen PDF's meer.
+   Open `verslag-teksten/verslag-1.html` t/m `verslag-7.html` in een
+   teksteditor (Kladblok kan al) en vervang de voorbeeldtekst. Bovenin elk
+   bestand staat precies uitgelegd hoe je koppen, alinea's, opsommingen en
+   **foto's** toevoegt. Foto's zet je in de map `/img/` en verwijs je aan met
+   `<img src="img/naam.jpg" alt="omschrijving">`. Bestandsnamen van de
+   verslagen gelijk houden.
 
 3. **Admin-sleutel** — In `admin.html` staat `const BEHEER_SLEUTEL = 'GEHEIM';` bovenaan het script. Verander dit naar een eigen wachtwoord. In fase 2 staat dit in `config.php`.
 
@@ -64,13 +70,34 @@ startscherm en bevestigen die. Er is geen vaste ledenlijst.
 
 ---
 
+## Scores resetten (na de testfase!)
+
+1. Ga naar `jaarverslag.jkz.nl/admin.html?key=GEHEIM` (of jouw eigen sleutel
+   als je die veranderd hebt).
+2. Scrol naar het blok **"Alles wissen"**.
+3. Typ in het veld letterlijk `RESET` (hoofdletters) en klik op
+   **Alles wissen**. Bevestig de vraag die verschijnt.
+4. Alle spelers en scores zijn nu weg; iedereen begint bij nul.
+
+Eén speler wissen kan ook, in het blok erboven: kies de naam en klik
+**Wis deze speler**.
+
+**Let op in fase 1:** de scores staan per apparaat in de browser
+(localStorage). Resetten via admin wist dus alleen het apparaat waarop je
+de adminpagina opent. Pas in fase 2 (database) wist de reset alles voor
+iedereen in één keer — daarom doe je de echte reset ná fase 2, vlak voor
+28 augustus.
+
+---
+
 ## Bestandsstructuur
 
 ```
 jkz-game/
-  index.html          Startscherm, naam kiezen
+  index.html          Startscherm, naam typen + bevestigen
   spel.html           Spel-flow: uitleg, oefenen, spelen, score
-  verslag.html        PDF-viewer + knop naar volgend level
+  verslag.html        Toont één verslag als tekstpagina
+  verslagen.html      Overzicht van alle 7 verslagen (open/op slot)
   ranglijst.html      Scorebord (ververst elke 15 sec)
   eindstand.html      Beamerpagina voor op de vergadering
   admin.html          Beheerpagina (?key=GEHEIM)
@@ -78,8 +105,8 @@ jkz-game/
   css/stijl.css       Alle stijlen, JKZ-huisstijl + arcade-laagje
   js/
     api.js            Adapterlaag (fase 1: localStorage, fase 2: fetch)
-    app.js            Gedeelde hulpfuncties
-    geluid.js         WebAudio-geluidseffecten
+    app.js            Gedeelde hulpfuncties + navigatiebalk
+    geluid.js         Uitgeschakeld (stille stub)
     spellen/
       spel1.js        Reactietest
       spel2.js        Memory
@@ -89,8 +116,9 @@ jkz-game/
       spel6.js        One-button (Flappy style)
       spel7.js        Quiz
       vragen.js       Quiz-vragen — TODO: echte vragen
-  pdf/
-    verslag-1.pdf ... verslag-7.pdf   (nu: dummy's)
+  verslag-teksten/
+    verslag-1.html ... verslag-7.html   (nu: voorbeeldtekst, zelf invullen)
+  img/                Hier zet je foto's voor in de verslagen
 ```
 
 ---
@@ -103,8 +131,10 @@ jkz-game/
 2. Speler-ID wordt opgeslagen in `localStorage`.
 3. Bij terugkeer: "Welkom terug" scherm met directe knop naar het volgende level.
 4. `spel.html?level=N` regelt: uitleg → oefenen → aftelling → spelen → score.
-5. Na spelen: verslag als PDF in `verslag.html`.
-6. Ranglijst is altijd zichtbaar.
+5. Na spelen: verslag als tekstpagina in `verslag.html`.
+6. Onderaan elke pagina staat een vaste navigatiebalk: Spelen, Verslagen,
+   Ranglijst. Tijdens het spelen verdwijnt hij even, zodat je hem niet per
+   ongeluk aanraakt.
 
 ### Score-formules (niet aanpassen zonder backend-update)
 | Spel | Ruwe waarde | Formule |
@@ -153,8 +183,8 @@ Upload-volgorde voor FileZilla:
 
 - [ ] iPhone (Safari) — met name: dvh-hoogte, safe-area-inset-bottom, touch events
 - [ ] Android Chrome — canvas rendering, touch events
-- [ ] Geluid werkt (iOS: mute-schakelaar naast het scherm maakt dit soms stil)
-- [ ] Portretoriëntatie-melding verschijnt bij draaien
+- [ ] Navigatiebalk onderaan valt niet achter de iPhone-homebalk
+- [ ] Portretoriëntatie-melding verschijnt bij draaien (tijdens een spel)
 - [ ] Spel pauzeert bij binnenkomend telefoontje (`visibilitychange`)
 - [ ] Naam typen + bevestigen werkt, en dezelfde naam opnieuw typen geeft je voortgang terug
 - [ ] Terugkomen na een dag: "Welkom terug" + juist level
