@@ -16,10 +16,6 @@
 
 <div class="pagina">
   <header class="hoofd">
-    <!-- TODO: vervang de logo-placeholder door het echte JKZ-logo
-         <img src="img/jkz-logo.png" alt="JKZ" class="logo-img" style="height:36px">
-         Logo-URL: https://www.jkz.nl/wp-content/uploads/2026/02/jkz_logo.png
-    -->
     <a href="index.html" class="logo-link">
       <div class="logo-placeholder">
         <span class="logo-jkz">JKZ</span>
@@ -52,18 +48,44 @@
       </div>
     </div>
 
-    <!-- Naam kiezen -->
+    <!-- Naam invullen -->
     <div id="naam-keuze">
       <h1 style="margin-bottom:0.25rem;">Wie ben jij?</h1>
-      <p class="klein" style="margin-bottom:1rem;">Kies je naam om te beginnen.</p>
+      <p class="klein" style="margin-bottom:1rem;">Typ je naam om te beginnen.</p>
 
-      <div class="namen-lijst" id="namen-lijst"></div>
-
-      <div class="eigen-naam-vak">
-        <input type="text" id="eigen-naam-input" class="invoer"
-               placeholder="Ik sta er niet bij…"
+      <div class="eigen-naam-vak" style="border-top:none;padding-top:0;">
+        <input type="text" id="naam-input" class="invoer"
+               placeholder="Je voor- en achternaam"
+               maxlength="80"
                autocomplete="off" autocorrect="off" spellcheck="false">
-        <button class="knop primair" id="knop-eigen-naam" style="width:auto;">→</button>
+        <button class="knop primair" id="knop-naam-verder" style="width:auto;">→</button>
+      </div>
+      <p class="klein verborgen" id="naam-fout"
+         style="color:var(--accent);margin-top:0.75rem;"></p>
+      <p class="klein" style="margin-top:1.5rem;color:var(--tekst-zwak);">
+        Speelde je al eerder mee? Typ dan precies dezelfde naam,
+        dan ga je verder waar je gebleven was.
+      </p>
+    </div>
+
+    <!-- Naam bevestigen -->
+    <div id="naam-bevestig" class="verborgen" style="padding-top:2rem;">
+      <div class="centervak" style="justify-content:flex-start;padding:0;">
+        <h1 style="margin-bottom:0.25rem;">Zeker weten?</h1>
+        <p class="klein" style="margin-bottom:0.75rem;">Je gaat spelen als:</p>
+        <p class="welkom-naam" id="bevestig-naam-tekst">Naam</p>
+        <p class="klein" style="margin-bottom:1.5rem;">
+          Hierna staat je naam vast — zo staat hij ook op de ranglijst.
+        </p>
+        <div class="knoppen">
+          <button class="knop primair" id="knop-bevestig-ja"
+                  style="font-size:1.1rem;min-height:60px;">
+            Ja, dit ben ik
+          </button>
+          <button class="knop secundair" id="knop-bevestig-nee">
+            Nee, aanpassen
+          </button>
+        </div>
       </div>
     </div>
 
@@ -71,7 +93,6 @@
 </div>
 
 <script type="module">
-import { leden } from './js/leden.js';
 import { registreerSpeler, haalVoortgang, haalSpelerUitStorage,
          slaHuidigeSpelerOp, verwijderHuidigeSpeler, verwerkWachtrij } from './js/api.js';
 import { initMuteKnop, initLandschapswaarschuwing, checkGesloten } from './js/app.js';
@@ -126,34 +147,54 @@ document.getElementById('knop-iemand-anders')?.addEventListener('click', () => {
   document.getElementById('naam-keuze').classList.remove('verborgen');
 });
 
-// Naam-knoppen renderen
-const namenLijst = document.getElementById('namen-lijst');
-leden.forEach(naam => {
-  const knop = document.createElement('button');
-  knop.className = 'knop naam-knop';
-  knop.textContent = naam;
-  knop.addEventListener('pointerdown', async (e) => {
-    e.preventDefault();
-    startAudioContext();
-    await kiesNaam(naam);
-  });
-  namenLijst.appendChild(knop);
+// Naam typen → controleren → bevestigingsscherm
+const naamInput = document.getElementById('naam-input');
+const naamFout  = document.getElementById('naam-fout');
+
+function toonFout(tekst) {
+  naamFout.textContent = tekst;
+  naamFout.classList.remove('verborgen');
+}
+
+function naarBevestigen() {
+  const naam = naamInput.value.trim().replace(/\s+/g, ' ');
+  if (naam.length < 2) {
+    toonFout('Typ eerst je naam (minstens 2 tekens).');
+    return;
+  }
+  if (!/[a-zA-Z0-9À-ž]/.test(naam)) {
+    toonFout('Gebruik letters in je naam, geen tekens.');
+    return;
+  }
+  naamFout.classList.add('verborgen');
+  startAudioContext();
+  document.getElementById('bevestig-naam-tekst').textContent = naam;
+  document.getElementById('naam-keuze').classList.add('verborgen');
+  document.getElementById('naam-bevestig').classList.remove('verborgen');
+}
+
+document.getElementById('knop-naam-verder').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  naarBevestigen();
 });
 
-// Eigen naam
-document.getElementById('knop-eigen-naam').addEventListener('pointerdown', async (e) => {
+naamInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') naarBevestigen();
+});
+
+// Bevestigen: ja → registreren en spelen
+document.getElementById('knop-bevestig-ja').addEventListener('pointerdown', async (e) => {
   e.preventDefault();
-  const naam = document.getElementById('eigen-naam-input').value.trim();
-  if (naam.length < 2) return;
-  startAudioContext();
+  const naam = document.getElementById('bevestig-naam-tekst').textContent;
   await kiesNaam(naam);
 });
 
-document.getElementById('eigen-naam-input').addEventListener('keydown', async (e) => {
-  if (e.key === 'Enter') {
-    const naam = e.target.value.trim();
-    if (naam.length >= 2) await kiesNaam(naam);
-  }
+// Bevestigen: nee → terug naar het invulveld
+document.getElementById('knop-bevestig-nee').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  document.getElementById('naam-bevestig').classList.add('verborgen');
+  document.getElementById('naam-keuze').classList.remove('verborgen');
+  naamInput.focus();
 });
 
 async function kiesNaam(naam) {

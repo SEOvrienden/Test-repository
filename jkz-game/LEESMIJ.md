@@ -15,25 +15,52 @@ python3 -m http.server 8080
 
 ---
 
+## Op de server zetten (fase 1, stap voor stap)
+
+Je hebt al: het subdomein `jaarverslag.jkz.nl` en een PHP-applicatie in Cloudways.
+
+1. **Zoek je FTP-gegevens op in Cloudways.** Log in op Cloudways, klik op je
+   server en dan op de applicatie van jaarverslag.jkz.nl. Bij **Access Details**
+   staat een blokje "Application Credentials": daar staan een gebruikersnaam en
+   wachtwoord (maak ze aan als ze er nog niet staan, met de knop erbij).
+   Het adres (host) is het IP-adres van je server, dat staat bovenaan dezelfde
+   pagina.
+2. **Verbind met FileZilla.** Bovenin FileZilla vul je in: Host = het IP-adres,
+   gebruikersnaam en wachtwoord = de Application Credentials, poort = 22 en zet
+   "sftp://" voor het IP-adres (dus bijvoorbeeld `sftp://12.34.56.78`).
+   Klik op Snelverbinden.
+3. **Ga naar de juiste map.** Rechts in FileZilla zie je de server. Open de map
+   `public_html`. Daar staat mogelijk een standaardbestand van Cloudways
+   (bijvoorbeeld `index.php`) — die mag je verwijderen.
+4. **Sleep de bestanden erin.** Links in FileZilla ga je naar de map `jkz-game`
+   op je computer. Selecteer alles wat **in** die map staat (dus `index.html`,
+   `spel.html`, de mappen `css`, `js`, `pdf`, enzovoort) en sleep het naar
+   rechts, in `public_html`. Niet de map `jkz-game` zelf slepen, anders wordt
+   het adres jaarverslag.jkz.nl/jkz-game/.
+5. **Controleer.** Open jaarverslag.jkz.nl op je telefoon. Je moet het
+   startscherm zien. Klaar.
+
+Bij een update vervang je alleen de gewijzigde bestanden: zelfde stappen,
+FileZilla vraagt "overschrijven?" en dan kies je ja.
+
+---
+
 ## Wat je nog moet invullen
 
-1. **Namen** — `js/leden.js`: vervang de 21 dummy-namen door de echte ledenlijst.
-
-2. **Quizvragen** — `js/spellen/vragen.js`: vervang de 10 vragen (`// TODO`) door echte JKZ-vragen. Ook de oefenvraag (`oefenvraag`) aanpassen. Formaat:
+1. **Quizvragen** — `js/spellen/vragen.js`: vervang de 10 vragen (`// TODO`) door echte JKZ-vragen. Ook de oefenvraag (`oefenvraag`) aanpassen. Formaat:
    ```js
    { vraag: 'Tekst?', opties: ['A','B','C','D'], goed: 0 /* index 0-3 */ }
    // Optioneel: uitleg: 'Dit is het goede antwoord omdat...'
    ```
 
-3. **Logo** — verwijder de `<div class="logo-placeholder">` in de drie HTML-bestanden en vervang door:
-   ```html
-   <img src="img/jkz-logo.png" alt="JKZ" class="logo-img" style="height:36px">
-   ```
-   Sla het logo op als `img/jkz-logo.png`.
+2. **PDF's** — vervang `pdf/verslag-1.pdf` t/m `pdf/verslag-7.pdf` door de echte verslagen. Dezelfde bestandsnamen aanhouden.
 
-4. **PDF's** — vervang `pdf/verslag-1.pdf` t/m `pdf/verslag-7.pdf` door de echte verslagen. Dezelfde bestandsnamen aanhouden.
+3. **Admin-sleutel** — In `admin.html` staat `const BEHEER_SLEUTEL = 'GEHEIM';` bovenaan het script. Verander dit naar een eigen wachtwoord. In fase 2 staat dit in `config.php`.
 
-5. **Admin-sleutel** — In `admin.html` staat `const BEHEER_SLEUTEL = 'GEHEIM';` bovenaan het script. Verander dit naar een eigen wachtwoord. In fase 2 staat dit in `config.php`.
+**Namen hoef je niet in te vullen:** spelers typen zelf hun naam op het
+startscherm en bevestigen die. Er is geen vaste ledenlijst.
+
+**Logo hoef je niet te uploaden:** het gouden "JKZ"-tekstlogo is definitief.
 
 ---
 
@@ -52,7 +79,6 @@ jkz-game/
   js/
     api.js            Adapterlaag (fase 1: localStorage, fase 2: fetch)
     app.js            Gedeelde hulpfuncties
-    leden.js          Namenlijst — TODO: echte namen
     geluid.js         WebAudio-geluidseffecten
     spellen/
       spel1.js        Reactietest
@@ -72,7 +98,8 @@ jkz-game/
 ## Hoe het werkt
 
 ### Gebruikersflow
-1. Bezoeker kiest naam op `index.html`.
+1. Bezoeker typt zijn naam op `index.html` en bevestigt ("Zeker weten?").
+   Wie later precies dezelfde naam typt, gaat verder waar hij was.
 2. Speler-ID wordt opgeslagen in `localStorage`.
 3. Bij terugkeer: "Welkom terug" scherm met directe knop naar het volgende level.
 4. `spel.html?level=N` regelt: uitleg → oefenen → aftelling → spelen → score.
@@ -129,7 +156,7 @@ Upload-volgorde voor FileZilla:
 - [ ] Geluid werkt (iOS: mute-schakelaar naast het scherm maakt dit soms stil)
 - [ ] Portretoriëntatie-melding verschijnt bij draaien
 - [ ] Spel pauzeert bij binnenkomend telefoontje (`visibilitychange`)
-- [ ] Naam kiezen werkt (eigen naam invullen + namenlijst)
+- [ ] Naam typen + bevestigen werkt, en dezelfde naam opnieuw typen geeft je voortgang terug
 - [ ] Terugkomen na een dag: "Welkom terug" + juist level
 - [ ] Twee pogingen per spel: beide pogingen tellen, hoogste in ranglijst
 - [ ] Admin: spel sluiten → gesloten-scherm zichtbaar
