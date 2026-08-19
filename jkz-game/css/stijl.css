@@ -1010,12 +1010,12 @@ p:last-child { margin-bottom: 0; }
 .ranglijst-tabel th:nth-child(2), .ranglijst-tabel td:nth-child(2) {
   position: sticky; left: 34px; z-index: 2;
   background: var(--achtergrond);
-  width: 118px; min-width: 118px; max-width: 118px;
+  width: 140px; min-width: 140px; max-width: 140px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   text-align: left;
 }
 .ranglijst-tabel th:nth-child(3), .ranglijst-tabel td:nth-child(3) {
-  position: sticky; left: 152px; z-index: 2;
+  position: sticky; left: 174px; z-index: 2;
   background: var(--achtergrond);
   width: 52px; min-width: 52px; max-width: 52px;
   border-right: 1px solid rgba(204, 171, 55, 0.25);
@@ -1658,3 +1658,70 @@ p:last-child { margin-bottom: 0; }
   0%, 45%  { opacity: 1; }
   50%, 100% { opacity: 0.15; }
 }
+
+/* Klikbare voortgangsblokjes (a-element) */
+a.voortgang-blokje {
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ranglijst: hint + vervaging aan de rechterkant zodat je ziet dat je
+   opzij kunt scrollen voor de scores per spel */
+.ranglijst-scrollwrap {
+  position: relative;
+}
+.ranglijst-scrollwrap::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  background: linear-gradient(to left, var(--achtergrond), transparent);
+}
+
+/* Mepspel: bommen */
+.mep-cel.bom.actief {
+  background: rgba(212, 84, 26, 0.25);
+  border-color: var(--simon-4);
+  font-size: 1.8rem;
+}
+.mep-cel.bom-geraakt {
+  background: var(--simon-4);
+  border-color: var(--simon-4);
+}
+
+/* === EINDKAART === */
+.eindkaart {
+  background: var(--vlak);
+  border: 2px solid var(--accent);
+  border-radius: 16px;
+  padding: 1.5rem 1.25rem;
+  box-shadow: 0 0 30px rgba(204, 171, 55, 0.25);
+}
+.eindkaart-kop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(204, 171, 55, 0.25);
+}
+.eindkaart-score {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  margin: 1.25rem 0;
+}
+.eindkaart-spellen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 14px;
+}
+.eindkaart-spel {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 8px;
+  background: var(--jkz-groen-paneel);
+  border-radius: 6px;
+}
+.eindkaart .welkom-naam { text-align: center; }

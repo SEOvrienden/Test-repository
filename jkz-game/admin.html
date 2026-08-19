@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Beheer</title>
-  <link rel="stylesheet" href="css/stijl.css?v=5">
+  <link rel="stylesheet" href="css/stijl.css?v=6">
 </head>
 <body>
 
@@ -42,32 +42,35 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { resetAlles, resetSpeler, haalAllSpelers, haalVoortgang,
-         haalConfig, slaConfigOp } from './js/api.js?v=5';
+import { haalSpelersOverzicht, haalSpelStatus, zetSpelStatus, zetTestmodus,
+         resetAlles, resetSpeler } from './js/api.js?v=6';
 
-const BEHEER_SLEUTEL = 'GEHEIM'; // In fase 2: uit config.php
-
-// Sleutel uit URL halen
+// Sleutel uit URL halen; de server controleert of hij klopt
 const params = new URLSearchParams(window.location.search);
 const sleutel = params.get('key') || '';
 
 const inhoud = document.getElementById('inhoud');
+let spelers = [];
 
-if (sleutel !== BEHEER_SLEUTEL) {
-  inhoud.innerHTML = `
-    <div class="centervak" style="padding-top:3rem;text-align:center;">
-      <div style="font-size:3rem;margin-bottom:1rem;">🔒</div>
-      <h2>Geen toegang</h2>
-      <p class="klein">Voeg <code>?key=GEHEIM</code> toe aan de URL.</p>
-    </div>`;
-} else {
-  renderBeheer();
+async function init() {
+  try {
+    spelers = await haalSpelersOverzicht(sleutel);
+  } catch (e) {
+    inhoud.innerHTML = `
+      <div class="centervak" style="padding-top:3rem;text-align:center;">
+        <div style="font-size:3rem;margin-bottom:1rem;">🔒</div>
+        <h2>Geen toegang</h2>
+        <p class="klein" style="max-width:320px;">${escapeHtml(e.message)}</p>
+        <p class="klein" style="margin-top:0.5rem;">Gebruik <code>admin.html?key=JOUWSLEUTEL</code>
+        met de sleutel uit config.php.</p>
+      </div>`;
+    return;
+  }
+  const status = await haalSpelStatus() || { open: true, testmodus: false };
+  renderBeheer(status);
 }
 
-async function renderBeheer() {
-  const config = haalConfig();
-  const spelers = haalAllSpelers();
-
+function renderBeheer(status) {
   inhoud.innerHTML = `
     <h1 style="margin-bottom:1.5rem;">Beheer</h1>
 
@@ -75,12 +78,12 @@ async function renderBeheer() {
     <div class="admin-sectie">
       <h2>Status</h2>
       <div class="schakelaar">
-        <input type="checkbox" id="cb-gesloten" ${config.gesloten ? 'checked' : ''}>
+        <input type="checkbox" id="cb-gesloten" ${status.open ? '' : 'checked'}>
         <label for="cb-gesloten">Spel gesloten (bezoekers zien gesloten-scherm)</label>
       </div>
       <div class="schakelaar">
-        <input type="checkbox" id="cb-testmodus" ${config.testmodus ? 'checked' : ''}>
-        <label for="cb-testmodus">Testmodus (alle levels direct open)</label>
+        <input type="checkbox" id="cb-testmodus" ${status.testmodus ? 'checked' : ''}>
+        <label for="cb-testmodus">Testmodus (alle levels en verslagen direct open)</label>
       </div>
       <button class="knop primair" id="knop-config-opslaan">Opslaan</button>
     </div>
@@ -88,7 +91,15 @@ async function renderBeheer() {
     <!-- SPELERS OVERZICHT -->
     <div class="admin-sectie">
       <h2>Spelers (${spelers.length})</h2>
-      <div id="spelers-lijst">Laden…</div>
+      <div id="spelers-lijst">${spelers.length === 0
+        ? '<p class="klein">Nog geen spelers.</p>'
+        : spelers.map(s => `<div class="admin-speler-rij">
+            <span>${escapeHtml(s.naam)}</span>
+            <span class="klein" style="color:var(--accent);text-align:right;">
+              Level ${Math.min(s.level, 7)} | ${s.gespeeld}/7 spellen | ${s.totaal} pt<br>
+              <span style="color:var(--tekst-zwak)">laatst actief: ${escapeHtml(s.laatste_actie || '–')}</span>
+            </span>
+          </div>`).join('')}</div>
     </div>
 
     <!-- RESET SPELER -->
@@ -105,7 +116,8 @@ async function renderBeheer() {
     <div class="admin-sectie" style="border-color:rgba(212,84,26,0.3);">
       <h2 style="color:var(--simon-4);">Alles wissen</h2>
       <p class="klein" style="margin-bottom:0.75rem;">
-        Dit verwijdert alle spelers en scores. Onmogelijk terug te draaien.
+        Dit verwijdert alle spelers en scores voor IEDEREEN — dit is de reset
+        die je na de testfase doet, vlak voor 28 augustus.
         Typ <strong>RESET</strong> om te bevestigen.
       </p>
       <input type="text" id="reset-bevestig" class="invoer" placeholder="Typ RESET om te bevestigen">
@@ -116,35 +128,14 @@ async function renderBeheer() {
       <a href="eindstand.html" style="color:var(--accent);">Beameroverzicht →</a>
     </p>`;
 
-  // Spelers met voortgang laden
-  const spelersLijstEl = document.getElementById('spelers-lijst');
-  if (spelers.length === 0) {
-    spelersLijstEl.innerHTML = '<p class="klein">Nog geen spelers.</p>';
-  } else {
-    spelersLijstEl.innerHTML = '<div class="laadbericht">Voortgang laden…</div>';
-    const rijen = await Promise.all(spelers.map(async s => {
-      const vg = await haalVoortgang(s.id);
-      const totaal = vg.scores.reduce((som, sc) => som + sc.score, 0);
-      const levels = vg.scores.length;
-      return `<div class="admin-speler-rij">
-        <span>${escapeHtml(s.naam)}</span>
-        <span class="klein" style="color:var(--accent);">
-          Level ${vg.level} | ${levels} spellen | ${totaal} pts
-        </span>
-      </div>`;
-    }));
-    spelersLijstEl.innerHTML = rijen.join('');
-  }
-
-  // Config opslaan
-  document.getElementById('knop-config-opslaan').addEventListener('click', () => {
-    const gesloten  = document.getElementById('cb-gesloten').checked;
-    const testmodus = document.getElementById('cb-testmodus').checked;
-    slaConfigOp({ gesloten, testmodus });
-    toonMelding('Config opgeslagen!', 'ok');
+  document.getElementById('knop-config-opslaan').addEventListener('click', async () => {
+    try {
+      await zetSpelStatus(sleutel, !document.getElementById('cb-gesloten').checked);
+      await zetTestmodus(sleutel, document.getElementById('cb-testmodus').checked);
+      toonMelding('Opgeslagen! Dit geldt nu voor iedereen.', 'ok');
+    } catch (e) { toonMelding('Fout: ' + e.message, 'fout'); }
   });
 
-  // Reset speler
   document.getElementById('knop-reset-speler').addEventListener('click', async () => {
     const id = document.getElementById('reset-speler-select').value;
     if (!id) { toonMelding('Kies eerst een speler.', 'fout'); return; }
@@ -157,13 +148,11 @@ async function renderBeheer() {
     } catch (e) { toonMelding('Fout: ' + e.message, 'fout'); }
   });
 
-  // Reset alles
   document.getElementById('knop-reset-alles').addEventListener('click', async () => {
-    const invoer = document.getElementById('reset-bevestig').value;
-    if (invoer !== 'RESET') {
+    if (document.getElementById('reset-bevestig').value !== 'RESET') {
       toonMelding('Typ exact RESET (hoofdletters).', 'fout'); return;
     }
-    if (!confirm('Alle data wissen? Dit kan niet ongedaan worden!')) return;
+    if (!confirm('Alle data van IEDEREEN wissen? Dit kan niet ongedaan worden!')) return;
     try {
       await resetAlles(sleutel);
       toonMelding('Alles gewist. Pagina herlaadt…', 'ok');
@@ -187,8 +176,10 @@ function toonMelding(tekst, type) {
 }
 
 function escapeHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+
+init();
 </script>
 </body>
 </html>

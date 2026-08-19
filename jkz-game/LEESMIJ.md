@@ -1,21 +1,15 @@
 # JKZ Jaarverslag Game — LEESMIJ
 
-## Snel starten (fase 1, lokaal testen)
+## Even weten: het spel praat nu met een database
 
-ES-modules werken **niet** met een `file://`-URL in Chrome. Gebruik één van:
-
-**Python (snelst):**
-```bash
-cd jkz-game
-python3 -m http.server 8080
-# Open http://localhost:8080
-```
-
-**Firefox of Safari** openen het bestand direct via `file://` wél correct.
+Sinds fase 2 staan alle scores in een MySQL-database op de server. Daardoor
+ziet iedereen elkaars scores in de ranglijst, op welk apparaat dan ook.
+Het spel werkt dus alleen nog op de server (niet meer door bestanden lokaal
+te openen) en de database moet één keer worden ingesteld — zie hieronder.
 
 ---
 
-## Op de server zetten (fase 1, stap voor stap)
+## Op de server zetten (stap voor stap)
 
 Je hebt al: het subdomein `jaarverslag.jkz.nl` en een PHP-applicatie in Cloudways.
 
@@ -37,8 +31,11 @@ Je hebt al: het subdomein `jaarverslag.jkz.nl` en een PHP-applicatie in Cloudway
    `spel.html`, de mappen `css`, `js`, `verslag-teksten`, `img`, enzovoort) en sleep het naar
    rechts, in `public_html`. Niet de map `jkz-game` zelf slepen, anders wordt
    het adres jaarverslag.jkz.nl/jkz-game/.
-5. **Controleer.** Open jaarverslag.jkz.nl op je telefoon. Je moet het
-   startscherm zien. Klaar.
+5. **Database aanmaken (eenmalig).** Zie het blok "Database instellen"
+   hieronder — dat is 10 minuten werk en hoeft maar één keer.
+6. **Controleer.** Open jaarverslag.jkz.nl op je telefoon. Je moet het
+   startscherm zien. Typ een testnaam en speel spel 1: verschijnt je score
+   daarna in de ranglijst, dan werkt alles.
 
 Bij een update vervang je alleen de gewijzigde bestanden: zelfde stappen,
 FileZilla vraagt "overschrijven?" en dan kies je ja.
@@ -66,7 +63,11 @@ uitleg in plaats van een pagina die stilletjes niets doet.
    `<img src="img/naam.jpg" alt="omschrijving">`. Bestandsnamen van de
    verslagen gelijk houden.
 
-3. **Admin-sleutel** — In `admin.html` staat `const BEHEER_SLEUTEL = 'GEHEIM';` bovenaan het script. Verander dit naar een eigen wachtwoord. In fase 2 staat dit in `config.php`.
+3. **Scoreteksten** — `js/teksten.js`: vervang de plagerige zinnetjes per
+   scoreband door je eigen teksten over de kamer en de leden.
+
+4. **Admin-sleutel** — die verzin je zelf en vul je in bij `config.php`
+   (zie "Database instellen" hierboven).
 
 **Namen hoef je niet in te vullen:** spelers typen zelf hun naam op het
 startscherm en bevestigen die. Er is geen vaste ledenlijst.
@@ -87,10 +88,8 @@ startscherm en bevestigen die. Er is geen vaste ledenlijst.
 Eén speler wissen kan ook, in het blok erboven: kies de naam en klik
 **Wis deze speler**.
 
-**Let op in fase 1:** de scores staan per apparaat in de browser
-(localStorage). Resetten via admin wist dus alleen het apparaat waarop je
-de adminpagina opent. Pas in fase 2 (database) wist de reset alles voor
-iedereen in één keer — daarom doe je de echte reset ná fase 2, vlak voor
+De reset werkt op de database en geldt dus in één keer **voor iedereen**,
+op alle telefoons. Precies wat je na de testfase nodig hebt, vlak voor
 28 augustus.
 
 ---
@@ -107,11 +106,18 @@ jkz-game/
   eindstand.html      Beamerpagina voor op de vergadering
   admin.html          Beheerpagina (?key=GEHEIM)
 
+  eindkaart.html      Persoonlijke eindkaart na level 7 (screenshotbaar)
+
+  api.php             Server-API: alle database-acties (fase 2)
+  config.voorbeeld.php  Voorbeeld-configuratie — invullen en opslaan als config.php
+  installatie.sql     Eenmalig plakken in phpMyAdmin
+
   css/stijl.css       Alle stijlen, JKZ-huisstijl + arcade-laagje
   js/
-    api.js            Adapterlaag (fase 1: localStorage, fase 2: fetch)
+    api.js            Adapterlaag: praat met api.php op de server
     app.js            Gedeelde hulpfuncties + navigatiebalk
     titels.js         Verslagtitels — TODO: echte namen
+    teksten.js        Plagerige scoreteksten — TODO: eigen teksten
     geluid.js         Uitgeschakeld (stille stub)
     spellen/
       spel1.js        Reactietest
@@ -136,6 +142,8 @@ jkz-game/
 2. Speler-ID wordt opgeslagen in `localStorage`.
 3. Bij terugkeer: "Welkom terug" scherm met directe knop naar het volgende level.
 4. `spel.html?level=N` regelt: uitleg → oefenen → aftelling → spelen → score.
+   Elk spel is onbeperkt opnieuw te spelen; de hoogste score telt. Via de
+   blokjes in de voortgangsbalk spring je naar elk eerder gespeeld level.
 5. Na spelen: verslag als tekstpagina in `verslag.html`.
 6. Onderaan elke pagina staat een vaste navigatiebalk: Spelen, Verslagen,
    Ranglijst. Tijdens het spelen verdwijnt hij even, zodat je hem niet per
@@ -145,7 +153,7 @@ jkz-game/
 | Spel | Ruwe waarde | Formule |
 |------|-------------|---------|
 | 1 Reactie | gem. ms | `(550 - gem) / 3.5` |
-| 2 Breakout | stenen + tijd | `stenen * 2` + tijdbonus (max 38) bij alles leeg |
+| 2 Breakout | stenen + tijd | `stenen * 2` + tijdbonus (max 36) bij alles leeg |
 | 3 Simon | level | `level * 8` |
 | 4 Mepspel | treffers | `treffers * 4` |
 | 5 Snake | appels | `appels * 5` |
@@ -164,21 +172,42 @@ Alle scores worden begrensd op 0–100.
 
 ---
 
-## Fase 2: PHP-backend (nog niet uitvoeren)
+## Database instellen (eenmalig, ± 10 minuten)
 
-Na akkoord op fase 1:
-- `api.php` met de zes endpoints
-- `config.php` met databasegegevens
-- `installatie.sql` voor phpMyAdmin
-- `js/api.js` omzetten naar fetch-aanroepen
-- Rate limiting (60 req/min/IP)
+**Stap 1 — Zoek je databasegegevens op.**
+Log in op Cloudways → klik op je server → klik op de applicatie van
+jaarverslag.jkz.nl → **Access Details**. Bij het blok **MySQL Access** zie je:
+DB Name, Username en Password. Laat dit tabblad open staan.
 
-Upload-volgorde voor FileZilla:
-1. Upload alle bestanden naar de Cloudways-applicatiemap
-2. Draai `installatie.sql` in phpMyAdmin
-3. Stel `config.php` in met databasegegevens
-4. Test met `admin.html?key=<jouwsleutel>`
-5. Open het spel via `admin.html`
+**Stap 2 — Maak de tabellen aan in phpMyAdmin.**
+Bij datzelfde blok MySQL Access staat een knop **Launch Database Manager**
+(dat is phpMyAdmin). Klik erop. Je ziet links de naam van je database —
+klik daarop. Klik dan bovenin op het tabblad **SQL**. Open op je computer
+het bestand `installatie.sql` in Kladblok, kopieer ALLES, plak het in het
+grote vak en klik rechtsonder op **Start** (of "Go"). Je ziet dan drie
+nieuwe tabellen verschijnen: spelers, scores en instellingen. Klaar.
+
+**Stap 3 — Vul config.php in.**
+Open op je computer het bestand `config.voorbeeld.php` in Kladblok.
+Vul in wat er gevraagd wordt:
+- de drie databasegegevens uit stap 1 (DB Name, Username, Password),
+- een zelfverzonnen ADMIN_SLEUTEL (lange reeks letters en cijfers,
+  bijvoorbeeld `jkz2026geheim8171`).
+Sla het bestand op als **config.php** (dus zonder "voorbeeld" in de naam)
+en upload het met FileZilla naar `public_html`, naast api.php.
+
+**Stap 4 — Controleer.**
+Ga naar `jaarverslag.jkz.nl/admin.html?key=JOUWSLEUTEL` (jouw eigen sleutel).
+Zie je de beheerpagina, dan staat alles goed. Zie je "Geen toegang" of een
+foutmelding over config.php, loop dan stap 3 nog eens na.
+
+**Bij een update van het spel:** upload gewoon alle nieuwe bestanden en
+overschrijf alles — behalve `config.php`, die staat niet in de nieuwe
+bestanden en blijft dus vanzelf staan. De database blijft ook gewoon staan.
+
+**Technisch (voor de volledigheid):** api.php gebruikt PDO met prepared
+statements, geeft JSON terug en heeft een limiet van 300 verzoeken per
+minuut per IP-adres (ruim genoeg voor de hele club op één wifi).
 
 ---
 

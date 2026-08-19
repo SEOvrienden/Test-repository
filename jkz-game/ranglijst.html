@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Ranglijst</title>
-  <link rel="stylesheet" href="css/stijl.css?v=5">
+  <link rel="stylesheet" href="css/stijl.css?v=6">
 </head>
 <body>
 
@@ -47,8 +47,11 @@ window.addEventListener('error', function (e) {
     <!-- Topscore per spel -->
     <div style="padding:0 1rem 0.5rem;" id="top-per-spel"></div>
 
-    <!-- Ranglijst tabel (horizontaal scrollbaar op kleine schermen) -->
-    <div style="overflow-x:auto;padding:0 0 1rem;">
+    <p class="klein" style="padding:0 1rem 0.35rem;color:var(--tekst-zwak);">
+      Veeg de tabel naar links voor de scores per spel →
+    </p>
+    <!-- Ranglijst tabel (horizontaal scrollbaar; #, naam en totaal blijven staan) -->
+    <div class="ranglijst-scrollwrap"><div style="overflow-x:auto;padding:0 0 1rem;">
       <table class="ranglijst-tabel" id="ranglijst-tabel">
         <thead>
           <tr>
@@ -60,14 +63,14 @@ window.addEventListener('error', function (e) {
         </thead>
         <tbody id="ranglijst-body"></tbody>
       </table>
-    </div>
+    </div></div>
 
   </div>
 </div>
 
 <script type="module">
-import { haalRanglijst, haalSpelerUitStorage, haalVoortgang } from './js/api.js?v=5';
-import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=5';
+import { haalRanglijst, haalSpelerUitStorage, haalVoortgang } from './js/api.js?v=6';
+import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=6';
 
 if (checkGesloten()) throw new Error('gesloten');
 

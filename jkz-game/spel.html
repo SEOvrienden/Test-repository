@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Spel</title>
-  <link rel="stylesheet" href="css/stijl.css?v=5">
+  <link rel="stylesheet" href="css/stijl.css?v=6">
 </head>
 <body>
 
@@ -114,6 +114,10 @@ window.addEventListener('error', function (e) {
   <div id="scherm-score" class="scherm" style="flex-direction:column;">
     <div class="inhoud" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;justify-content:center;text-align:center;">
       <div>
+        <p class="klein verborgen" id="score-niet-verstuurd"
+           style="color:var(--simon-4);margin-bottom:0.5rem;">
+          ⚠️ Score nog niet verstuurd — we proberen het automatisch opnieuw.
+        </p>
         <div id="score-nieuw-record" class="nieuw-record-label verborgen">🏆 Nieuw persoonlijk record!</div>
         <p class="klein" id="score-poging-label" style="margin-bottom:0.25rem;">Poging 1 van 2</p>
         <div class="score-punten-groot" id="score-punten">0</div>
@@ -139,10 +143,10 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { haalSpelerUitStorage, haalVoortgang, slaScoreOp, haalRanglijst, haalConfig }
-  from './js/api.js?v=5';
+  from './js/api.js?v=6';
 import { renderVoortgang, renderNav, plaatsTekst, checkGesloten, toonConfetti, urlParam }
-  from './js/app.js?v=5';
-import { speel } from './js/geluid.js?v=5';
+  from './js/app.js?v=6';
+import { speel } from './js/geluid.js?v=6';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -175,7 +179,7 @@ renderVoortgang(voortgangContainer, level, gespeeldTm);
 document.getElementById('scherm-uitleg').querySelector('#uitleg-naam').textContent = 'Laadt…';
 let spelModule;
 try {
-  spelModule = await import(`./js/spellen/spel${level}.js?v=5`);
+  spelModule = await import(`./js/spellen/spel${level}.js?v=6`);
 } catch (e) {
   console.error('Module laden mislukt:', e);
   window.location.href = 'index.html'; throw e;
@@ -190,20 +194,22 @@ document.getElementById('uitleg-score-regel').textContent = spelModule.info.scor
 document.getElementById('uitleg-demo').innerHTML = spelModule.info.demoHTML;
 
 // ── Bestaande scores ophalen voor dit level ───────────────────────────────────
+// Onbeperkt spelen: de HOOGSTE score telt voor de ranglijst.
 const bestaandeScores = (voortgang.scores || []).find(s => s.spel === level);
 const aantalPogingen  = bestaandeScores ? bestaandeScores.pogingen.length : 0;
-const poging1Score    = bestaandeScores?.pogingen.find(p => p.poging === 1);
-const poging2Score    = bestaandeScores?.pogingen.find(p => p.poging === 2);
+let besteScore = null, besteRuwe = null;
+if (bestaandeScores) {
+  for (const p of bestaandeScores.pogingen) {
+    if (besteScore === null || p.score > besteScore) {
+      besteScore = p.score;
+      besteRuwe = p.ruwe_waarde;
+    }
+  }
+}
 
-// Als beide pogingen al gespeeld: sla uitleg over, toon scorescherm
-if (aantalPogingen >= 2) {
-  const beste = poging1Score.score >= poging2Score.score ? poging1Score : poging2Score;
-  const beste_nr = poging1Score.score >= poging2Score.score ? 1 : 2;
-  toonScoreScherm(beste.score, beste.ruwe_waarde, 2, false);
-  toonScherm('score');
-} else if (aantalPogingen === 1) {
-  // Eerste poging gespeeld — toon scorescherm met optie voor 2e poging
-  toonScoreScherm(poging1Score.score, poging1Score.ruwe_waarde, 1, false);
+if (aantalPogingen >= 1) {
+  // Al gespeeld: toon meteen je beste score, met de knop om het opnieuw te proberen
+  toonScoreScherm(besteScore, besteRuwe, aantalPogingen, false, true);
   toonScherm('score');
 } else {
   toonScherm('uitleg');
@@ -260,7 +266,7 @@ document.getElementById('knop-na-oefenen-spelen').addEventListener('click', () =
 function startAftelling(callback) {
   toonScherm('aftelling');
   document.getElementById('poging-label-aftelling').textContent =
-    `Poging ${huidigePoging} van 2`;
+    besteScore !== null ? `Poging ${huidigePoging} — beste: ${besteScore}` : `Poging ${huidigePoging}`;
   const cijferEl = document.getElementById('aftelling-cijfer');
   let n = 3;
   cijferEl.textContent = n;
@@ -287,7 +293,7 @@ function startEchtSpel() {
   const container = document.getElementById('speelveld');
   container.innerHTML = '';
   document.getElementById('poging-label-spelen').textContent =
-    `Poging ${huidigePoging} van 2`;
+    besteScore !== null ? `Poging ${huidigePoging} — beste: ${besteScore}` : `Poging ${huidigePoging}`;
   toonScherm('spelen');
 
   huidigSpelObject = spelModule.maakSpel(container, {
@@ -296,16 +302,24 @@ function startEchtSpel() {
       if (huidigSpelObject) { huidigSpelObject.vernietig(); huidigSpelObject = null; }
 
       // Score opslaan
+      let verstuurd = true;
       try {
         await slaScoreOp(speler.spelerId, level, score, ruwe, huidigePoging);
       } catch (err) {
+        verstuurd = false;
         console.warn('Score opslaan mislukt, staat in wachtrij:', err);
       }
+      document.getElementById('score-niet-verstuurd')
+        .classList.toggle('verborgen', verstuurd);
 
       // Persoonlijk record?
-      const isNieuwRecord = huidigePoging === 2 && poging1Score && score > poging1Score.score;
+      const isNieuwRecord = besteScore !== null && score > besteScore;
+      if (besteScore === null || score > besteScore) {
+        besteScore = score;
+        besteRuwe = ruwe;
+      }
 
-      toonScoreScherm(score, ruwe, huidigePoging, isNieuwRecord);
+      toonScoreScherm(score, ruwe, huidigePoging, isNieuwRecord, false);
       toonScherm('score');
 
       if (isNieuwRecord) {
@@ -319,11 +333,18 @@ function startEchtSpel() {
 }
 
 // ── Scorescherm invullen ──────────────────────────────────────────────────────
-async function toonScoreScherm(score, ruwe, poging, nieuwRecord) {
+async function toonScoreScherm(score, ruwe, poging, nieuwRecord, isTerugblik) {
   document.getElementById('score-punten').textContent = score;
   document.getElementById('score-ruw').textContent = ruwe;
-  document.getElementById('score-poging-label').textContent =
-    poging === 2 ? `Poging 2 van 2 — beste score telt` : `Poging ${poging} van 2`;
+  let label;
+  if (isTerugblik) {
+    label = `Je beste score na ${poging} ${poging === 1 ? 'poging' : 'pogingen'}`;
+  } else if (besteScore !== null && besteScore > score) {
+    label = `Poging ${poging} — je beste blijft ${besteScore}`;
+  } else {
+    label = `Poging ${poging} — je hoogste score telt`;
+  }
+  document.getElementById('score-poging-label').textContent = label;
   document.getElementById('score-tekst-plagerig').textContent = plaatsTekst(score);
   document.getElementById('score-nieuw-record').classList.toggle('verborgen', !nieuwRecord);
 
@@ -342,20 +363,19 @@ async function toonScoreScherm(score, ruwe, poging, nieuwRecord) {
     }
   } catch (e) { /* ranglijst niet beschikbaar */ }
 
-  // Knoppen instellen
+  // Knoppen: opnieuw spelen mag altijd — de hoogste score telt
   const nogPoging = document.getElementById('knop-nog-poging');
   const verslagKnop = document.getElementById('knop-lees-verslag');
   verslagKnop.href = `verslag.html?level=${level}`;
 
-  if (poging < 2) {
-    nogPoging.style.display = '';
-    nogPoging.onclick = () => {
-      speel('tik');
-      startAftelling(() => startEchtSpel());
-    };
-  } else {
-    nogPoging.style.display = 'none';
-  }
+  nogPoging.style.display = '';
+  nogPoging.textContent = score >= (besteScore ?? 0) && !isTerugblik
+    ? 'Nog beter? Speel opnieuw'
+    : 'Speel opnieuw';
+  nogPoging.onclick = () => {
+    speel('tik');
+    startAftelling(() => startEchtSpel());
+  };
 }
 
 // ── Pauze bij visibilitychange ────────────────────────────────────────────────

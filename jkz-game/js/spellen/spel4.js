@@ -1,13 +1,13 @@
 // Spel 4 — Mepspel
 // Tik het opduikende vakje in 30 seconden. Oefenen: 10 seconden.
-import { speel } from '../geluid.js?v=5';
-import { clamp } from '../app.js?v=5';
+import { speel } from '../geluid.js?v=6';
+import { clamp } from '../app.js?v=6';
 
 export const info = {
   naam: 'Mepspel',
-  uitleg: 'Er duikt steeds een vakje op in het raster. Tik het zo snel mogelijk weg! '
-        + 'Je hebt 30 seconden.',
-  scoreRegel: 'Zo scoor je: 4 punten per treffer. '
+  uitleg: 'Tik de gouden vakjes zo snel mogelijk weg — maar blijf van de bommen af! '
+        + 'Het tempo loopt op. Je hebt 30 seconden.',
+  scoreRegel: 'Zo scoor je: 4 punten per treffer, een bom kost je 2 treffers. '
             + '25 treffers = 100 punten.',
   demoHTML: `<div class="demo-mep">
     <div></div><div></div><div></div><div></div>
@@ -16,8 +16,10 @@ export const info = {
 
 const DUUR_ECHT    = 30;
 const DUUR_OEFENEN = 10;
-const MEP_ZICHTBAAR = 1200; // ms dat een mol zichtbaar blijft
+const MEP_ZICHTBAAR_START = 1200; // ms zichtbaar aan het begin
+const MEP_ZICHTBAAR_EIND  = 650;  // ms zichtbaar aan het einde (tempo loopt op)
 const MEP_PAUZE     = 300;  // ms pauze na verdwijnen
+const BOM_KANS      = 0.22; // kans dat het vakje een bom is
 
 function berekenScore(treffers) {
   return clamp(treffers * 4, 0, 100);
@@ -27,6 +29,7 @@ export function maakSpel(container, { modus, onKlaar }) {
   const totaleTijd = modus === 'oefenen' ? DUUR_OEFENEN : DUUR_ECHT;
   let treffers = 0;
   let huidigeCel = -1;
+  let huidigeIsBom = false;
   let restTijd = totaleTijd;
   let timerInterval = null;
   let molTimer = null;
@@ -63,16 +66,35 @@ export function maakSpel(container, { modus, onKlaar }) {
   function mepCel(idx) {
     if (vernietigd || gepauzeerd || idx !== huidigeCel) return;
     clearTimeout(molTimer);
-    speel('treffer');
-    treffers++;
-    trefffersEl.textContent = treffers;
-    cellen[idx].classList.remove('actief');
-    cellen[idx].classList.add('geraakt');
+    const wasBom = huidigeIsBom;
+    cellen[idx].classList.remove('actief', 'bom');
+    cellen[idx].textContent = '';
     huidigeCel = -1;
-    setTimeout(() => {
-      if (!vernietigd && cellen[idx]) cellen[idx].classList.remove('geraakt');
-    }, 300);
+    if (wasBom) {
+      // Au! Bom geraakt: kost 2 treffers
+      speel('fout');
+      if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+      treffers = Math.max(0, treffers - 2);
+      cellen[idx].classList.add('bom-geraakt');
+      setTimeout(() => {
+        if (!vernietigd && cellen[idx]) cellen[idx].classList.remove('bom-geraakt');
+      }, 350);
+    } else {
+      speel('treffer');
+      treffers++;
+      cellen[idx].classList.add('geraakt');
+      setTimeout(() => {
+        if (!vernietigd && cellen[idx]) cellen[idx].classList.remove('geraakt');
+      }, 300);
+    }
+    trefffersEl.textContent = treffers;
     setTimeout(() => verschijnMol(), MEP_PAUZE);
+  }
+
+  // Tempo loopt op: hoe minder tijd over, hoe korter het vakje blijft staan
+  function zichtbaarNu() {
+    const voortgang = 1 - restTijd / totaleTijd; // 0 → 1
+    return MEP_ZICHTBAAR_START - (MEP_ZICHTBAAR_START - MEP_ZICHTBAAR_EIND) * voortgang;
   }
 
   function verschijnMol() {
@@ -85,21 +107,31 @@ export function maakSpel(container, { modus, onKlaar }) {
     let nieuw;
     do { nieuw = Math.floor(Math.random() * 9); } while (nieuw === huidigeCel);
     huidigeCel = nieuw;
+    huidigeIsBom = treffers > 0 && Math.random() < BOM_KANS;
     cellen[huidigeCel].classList.add('actief');
+    if (huidigeIsBom) {
+      cellen[huidigeCel].classList.add('bom');
+      cellen[huidigeCel].textContent = '💣';
+    }
 
+    const dezeCel = huidigeCel;
     molTimer = setTimeout(() => {
-      if (!vernietigd && cellen[huidigeCel]) {
-        cellen[huidigeCel].classList.remove('actief');
+      if (!vernietigd && cellen[dezeCel]) {
+        cellen[dezeCel].classList.remove('actief', 'bom');
+        cellen[dezeCel].textContent = '';
       }
       huidigeCel = -1;
       if (!vernietigd && !gepauzeerd) setTimeout(() => verschijnMol(), MEP_PAUZE);
-    }, MEP_ZICHTBAAR);
+    }, zichtbaarNu());
   }
 
   function eindeSpel() {
     clearInterval(timerInterval);
     clearTimeout(molTimer);
-    if (huidigeCel >= 0 && cellen[huidigeCel]) cellen[huidigeCel].classList.remove('actief');
+    if (huidigeCel >= 0 && cellen[huidigeCel]) {
+      cellen[huidigeCel].classList.remove('actief', 'bom');
+      cellen[huidigeCel].textContent = '';
+    }
     speel('levelKlaar');
     const score = berekenScore(treffers);
     onKlaar(`${treffers} treffers`, score);
@@ -119,7 +151,10 @@ export function maakSpel(container, { modus, onKlaar }) {
     pauzeer() {
       gepauzeerd = true;
       clearTimeout(molTimer);
-      if (huidigeCel >= 0 && cellen[huidigeCel]) cellen[huidigeCel].classList.remove('actief');
+      if (huidigeCel >= 0 && cellen[huidigeCel]) {
+        cellen[huidigeCel].classList.remove('actief', 'bom');
+        cellen[huidigeCel].textContent = '';
+      }
       huidigeCel = -1;
     },
     hervat() {

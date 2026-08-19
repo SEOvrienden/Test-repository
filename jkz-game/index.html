@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ Jaarverslag Game</title>
-  <link rel="stylesheet" href="css/stijl.css?v=5">
+  <link rel="stylesheet" href="css/stijl.css?v=6">
 </head>
 <body>
 
@@ -134,8 +134,8 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { registreerSpeler, haalVoortgang, haalSpelerUitStorage,
-         slaHuidigeSpelerOp, verwerkWachtrij } from './js/api.js?v=5';
-import { renderNav, checkGesloten } from './js/app.js?v=5';
+         slaHuidigeSpelerOp, verwerkWachtrij } from './js/api.js?v=6';
+import { renderNav, checkGesloten } from './js/app.js?v=6';
 
 // Gesloten-check
 if (checkGesloten()) throw new Error('gesloten');
@@ -163,8 +163,8 @@ if (huidig) {
     if (klaar) {
       document.getElementById('welkom-level-tekst').textContent =
         'Je hebt alle 7 levels gespeeld! Bekijk je eindstand.';
-      document.getElementById('knop-doorgaan').href = 'ranglijst.html';
-      document.getElementById('knop-doorgaan').textContent = 'Bekijk eindstand →';
+      document.getElementById('knop-doorgaan').href = 'eindkaart.html';
+      document.getElementById('knop-doorgaan').textContent = 'Bekijk je eindkaart 🏆';
     } else {
       document.getElementById('welkom-level-tekst').textContent =
         `Je bent op level ${level} van 7`;

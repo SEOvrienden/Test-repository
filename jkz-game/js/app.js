@@ -1,12 +1,17 @@
 // Gedeelde hulpfuncties voor alle pagina's
-import { haalConfig } from './api.js?v=5';
+import { haalConfig } from './api.js?v=6';
+import { PLAAGTEKSTEN } from './teksten.js?v=6';
 
 // ── Voortgangsbalk ────────────────────────────────────────────────────────────
 
 export function renderVoortgang(container, huidigLevel, gespeeldTm) {
   container.innerHTML = '';
   for (let i = 1; i <= 7; i++) {
-    const blok = document.createElement('div');
+    // Gespeelde levels en het actieve level zijn klikbaar: opnieuw spelen
+    // mag altijd, want je hoogste score telt.
+    const klikbaar = i <= Math.max(gespeeldTm + 1, huidigLevel);
+    const blok = document.createElement(klikbaar ? 'a' : 'div');
+    if (klikbaar) blok.href = `spel.html?level=${i}`;
     blok.className = 'voortgang-blokje';
     blok.textContent = i;
     if (i < huidigLevel || i <= gespeeldTm) blok.classList.add('gespeeld');
@@ -49,41 +54,8 @@ export function initLandschapswaarschuwing(element) {
 }
 
 // ── Score-tekst (plagerig) ────────────────────────────────────────────────────
-// Per scoreband meerdere teksten; er wordt er willekeurig één gekozen,
-// zodat het bij elke poging fris blijft.
-
-const PLAAGTEKSTEN = [
-  { vanaf: 100, teksten: [
-    'Perfect! Ben jij eigenlijk wel een mens?',
-    'Vlekkeloos. Dit gaat de notulen in.',
-    'Maximale score. De voorzitter overweegt een standbeeld.',
-  ]},
-  { vanaf: 80, teksten: [
-    'Uitstekend! Je zit ruim in de top.',
-    'De voorzitter is trots op je.',
-    'Sterk werk — dit ruikt naar de bovenkant van de ranglijst.',
-  ]},
-  { vanaf: 60, teksten: [
-    'Goed gedaan! Meer dan de helft van de punten — dat telt.',
-    'Prima gespeeld. Netjes boven de middenmoot.',
-    'Solide. Nog één tandje erbij en je zit bij de toppers.',
-  ]},
-  { vanaf: 40, teksten: [
-    'Een prima score. Er zit nog ruimte voor verbetering.',
-    'De penningmeester zou zeggen: ruim voldoende.',
-    'Keurig. Op naar het volgende level!',
-  ]},
-  { vanaf: 20, teksten: [
-    'Niet slecht voor een eerste keer. Je kunt dit!',
-    'Oefening baart kunst — nog een poging?',
-    'De aanhouder wint. Serieus, probeer het nog eens.',
-  ]},
-  { vanaf: 0, teksten: [
-    'Learning by doing, hè. Maar oefening baart kunst!',
-    'Au. Gelukkig telt alleen je beste poging.',
-    'Dit blijft tussen ons. Nog een keertje?',
-  ]},
-];
+// De teksten zelf staan in js/teksten.js (makkelijk zelf aan te passen);
+// er wordt per keer willekeurig één gekozen uit de juiste scoreband.
 
 export function plaatsTekst(score) {
   const band = PLAAGTEKSTEN.find(b => score >= b.vanaf) || PLAAGTEKSTEN[PLAAGTEKSTEN.length - 1];

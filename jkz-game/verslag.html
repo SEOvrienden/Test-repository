@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Verslag</title>
-  <link rel="stylesheet" href="css/stijl.css?v=5">
+  <link rel="stylesheet" href="css/stijl.css?v=6">
 </head>
 <body>
 
@@ -53,9 +53,9 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=5';
-import { renderVoortgang, renderNav, urlParam, checkGesloten } from './js/app.js?v=5';
-import { VERSLAG_TITELS } from './js/titels.js?v=5';
+import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=6';
+import { renderVoortgang, renderNav, urlParam, checkGesloten } from './js/app.js?v=6';
+import { VERSLAG_TITELS } from './js/titels.js?v=6';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -86,7 +86,7 @@ renderVoortgang(document.getElementById('voortgang'), level, voortgang.level - 1
 // Verslagtekst laden (los HTML-bestand, makkelijk zelf aan te passen)
 const artikel = document.getElementById('verslag-artikel');
 try {
-  const res = await fetch(`verslag-teksten/verslag-${level}.html?v=5`);
+  const res = await fetch(`verslag-teksten/verslag-${level}.html?v=6`);
   if (!res.ok) throw new Error(res.status);
   artikel.innerHTML = await res.text();
   artikel.scrollTop = 0;
@@ -101,8 +101,8 @@ const volgend = level + 1;
 const volgendKnop = document.getElementById('knop-volgend-level');
 
 if (volgend > 7 && voortgang.level > 7) {
-  volgendKnop.href = 'ranglijst.html';
-  volgendKnop.textContent = 'Bekijk eindstand →';
+  volgendKnop.href = 'eindkaart.html';
+  volgendKnop.textContent = 'Bekijk je eindkaart 🏆';
 } else if (volgend === voortgang.level) {
   // Dit is de logische volgende stap in het spel
   document.getElementById('volgend-level-nr').textContent = volgend;

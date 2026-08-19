@@ -2,13 +2,13 @@
 // Jij onderin, de computer bovenin. De bal wordt steeds sneller.
 // Hoe vaker jij hem terugslaat, hoe hoger je score. Mis = einde.
 // Oefenen: 20 seconden vrij spelen, gemiste bal komt gewoon terug.
-import { speel } from '../geluid.js?v=5';
-import { clamp } from '../app.js?v=5';
+import { speel } from '../geluid.js?v=6';
+import { clamp } from '../app.js?v=6';
 
 export const info = {
   naam: 'Pong',
   uitleg: 'Sleep je peddel onderin heen en weer en sla de bal terug. '
-        + 'De computer bovenin slaat terug — en de bal wordt steeds sneller.',
+        + 'De bal wordt steeds sneller én je peddel krimpt — hoe lang hou jij het vol?',
   scoreRegel: 'Zo scoor je: 8 punten per keer dat jij de bal terugslaat. 13 keer = 100 punten.',
   demoHTML: `<div class="demo-pong">
     <div class="demo-pong-cpu"></div>
@@ -61,6 +61,7 @@ export function maakSpel(container, { modus, onKlaar }) {
 
   // ── Spelstatus ────────────────────────────────────────────────────────────
   let spelerX = W() / 2;
+  let spelerB = PEDDEL_B; // krimpt elke 3 terugslagen iets
   let cpuX    = W() / 2;
   let balX = 0, balY = 0, balVX = 0, balVY = 0;
   let terugslagen = 0;
@@ -135,11 +136,13 @@ export function maakSpel(container, { modus, onKlaar }) {
     // Spelerpeddel onderin
     const spelerY = h - 34;
     if (balVY > 0 && balY + BAL_R >= spelerY && balY + BAL_R <= spelerY + PEDDEL_H + 14) {
-      if (balX >= spelerX - PEDDEL_B / 2 - BAL_R && balX <= spelerX + PEDDEL_B / 2 + BAL_R) {
+      if (balX >= spelerX - spelerB / 2 - BAL_R && balX <= spelerX + spelerB / 2 + BAL_R) {
         balY = spelerY - BAL_R;
         terugslagen++;
         speel('treffer');
-        const rel = (balX - spelerX) / (PEDDEL_B / 2);
+        // Elke 3 terugslagen krimpt je peddel een stukje (minimaal 56 px)
+        if (terugslagen % 3 === 0) spelerB = Math.max(56, spelerB - 7);
+        const rel = (balX - spelerX) / (spelerB / 2);
         const snelheid = Math.hypot(balVX, balVY) * VERSNELLING;
         const hoek = rel * 0.85;
         balVX = Math.sin(hoek) * snelheid;
@@ -175,7 +178,7 @@ export function maakSpel(container, { modus, onKlaar }) {
 
     // Spelerpeddel
     ctx.fillStyle = '#e0c766';
-    ctx.fillRect(spelerX - PEDDEL_B / 2, h - 34, PEDDEL_B, PEDDEL_H);
+    ctx.fillRect(spelerX - spelerB / 2, h - 34, spelerB, PEDDEL_H);
 
     // Bal
     ctx.fillStyle = '#ffffff';
@@ -217,13 +220,13 @@ export function maakSpel(container, { modus, onKlaar }) {
   // ── Besturing ─────────────────────────────────────────────────────────────
   function zetPeddel(clientX) {
     const rect = canvas.getBoundingClientRect();
-    spelerX = clamp(clientX - rect.left, PEDDEL_B / 2, W() - PEDDEL_B / 2);
+    spelerX = clamp(clientX - rect.left, spelerB / 2, W() - spelerB / 2);
   }
   function onPointerDown(e) { e.preventDefault(); zetPeddel(e.clientX); start(); }
   function onPointerMove(e) { if (e.buttons || e.pointerType === 'touch') { e.preventDefault(); zetPeddel(e.clientX); } }
   function onKey(e) {
-    if (e.key === 'ArrowLeft')  { spelerX = clamp(spelerX - 28, PEDDEL_B / 2, W() - PEDDEL_B / 2); start(); }
-    if (e.key === 'ArrowRight') { spelerX = clamp(spelerX + 28, PEDDEL_B / 2, W() - PEDDEL_B / 2); start(); }
+    if (e.key === 'ArrowLeft')  { spelerX = clamp(spelerX - 28, spelerB / 2, W() - spelerB / 2); start(); }
+    if (e.key === 'ArrowRight') { spelerX = clamp(spelerX + 28, spelerB / 2, W() - spelerB / 2); start(); }
   }
   canvas.addEventListener('pointerdown', onPointerDown);
   canvas.addEventListener('pointermove', onPointerMove);
