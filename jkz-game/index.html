@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ Jaarverslag Game</title>
-  <link rel="stylesheet" href="css/stijl.css?v=7">
+  <link rel="stylesheet" href="css/stijl.css?v=8">
 </head>
 <body>
 
@@ -134,8 +134,8 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { registreerSpeler, haalVoortgang, haalSpelerUitStorage,
-         slaHuidigeSpelerOp, verwerkWachtrij, controleerVerbinding } from './js/api.js?v=7';
-import { renderNav, checkGesloten } from './js/app.js?v=7';
+         slaHuidigeSpelerOp, verwerkWachtrij, controleerVerbinding } from './js/api.js?v=8';
+import { renderNav, checkGesloten } from './js/app.js?v=8';
 
 // Gesloten-check
 if (checkGesloten()) throw new Error('gesloten');
@@ -179,9 +179,30 @@ if (huidig) {
 
     if (klaar) {
       document.getElementById('welkom-level-tekst').textContent =
-        'Je hebt alle 7 levels gespeeld! Bekijk je eindstand.';
+        'Alle 7 levels gespeeld! Je kunt tot de jaarvergadering blijven spelen — je hoogste score telt.';
       document.getElementById('knop-doorgaan').href = 'eindkaart.html';
       document.getElementById('knop-doorgaan').textContent = 'Bekijk je eindkaart 🏆';
+
+      // Spelkiezer: verbeter je score per spel (beste score per spel erbij)
+      const NAMEN = ['Reactie', 'Breakout', 'Simon', 'Mep', 'Snake', 'Flappy', 'Pong'];
+      const kiezer = document.createElement('div');
+      kiezer.innerHTML = '<p class="klein" style="margin:1.25rem 0 0.5rem;color:var(--tekst-zwak);">' +
+        'Verbeter je scores — kies een spel:</p>';
+      const grid = document.createElement('div');
+      grid.className = 'spel-kiezer';
+      for (let s = 1; s <= 7; s++) {
+        const sc = (voortgang.scores || []).find(x => x.spel === s);
+        const beste = sc ? Math.max(...sc.pogingen.map(p => p.score)) : null;
+        const a = document.createElement('a');
+        a.className = 'spel-kiezer-knop';
+        a.href = `spel.html?level=${s}`;
+        a.innerHTML = `<span>${NAMEN[s - 1]}</span>` +
+          `<span class="spel-kiezer-score">${beste ?? '–'}</span>`;
+        grid.appendChild(a);
+      }
+      kiezer.appendChild(grid);
+      // De spelkiezer komt bóven de andere knoppen: spelen is de hoofdactie
+      document.querySelector('#welkom-terug .knoppen').before(kiezer);
     } else {
       document.getElementById('welkom-level-tekst').textContent =
         `Je bent op level ${level} van 7`;

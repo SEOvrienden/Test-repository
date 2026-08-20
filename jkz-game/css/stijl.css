@@ -1725,3 +1725,47 @@ a.voortgang-blokje {
   border-radius: 6px;
 }
 .eindkaart .welkom-naam { text-align: center; }
+
+
+/* === SPELKIEZER (welkomscherm na level 7) === */
+.spel-kiezer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+.spel-kiezer-knop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px 12px;
+  background: var(--jkz-groen-paneel);
+  border: 1px solid rgba(204, 171, 55, 0.3);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--tekst);
+  font-size: 0.9rem;
+  -webkit-tap-highlight-color: transparent;
+}
+.spel-kiezer-knop:active {
+  border-color: var(--accent);
+  background: var(--vlak);
+}
+.spel-kiezer-score {
+  color: var(--accent);
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+}
+
+/* Eindkaart: spelrijen zijn klikbaar */
+a.eindkaart-spel {
+  text-decoration: none;
+  min-height: 44px;
+  align-items: center;
+  -webkit-tap-highlight-color: transparent;
+}
+a.eindkaart-spel:active {
+  background: var(--vlak);
+  outline: 1px solid var(--accent);
+}

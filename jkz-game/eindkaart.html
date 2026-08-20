@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Jouw eindkaart</title>
-  <link rel="stylesheet" href="css/stijl.css?v=7">
+  <link rel="stylesheet" href="css/stijl.css?v=8">
 </head>
 <body>
 
@@ -69,13 +69,21 @@ window.addEventListener('error', function (e) {
     <p class="klein ta-c" style="margin-top:1rem;color:var(--tekst-zwak);">
       Maak een screenshot en deel hem in de groepsapp 📸
     </p>
+
+    <div class="knoppen" style="margin-top:1rem;">
+      <a href="index.html" class="knop primair">🎮 Speel opnieuw &amp; verbeter je scores</a>
+    </div>
+    <p class="klein ta-c" style="margin-top:0.5rem;color:var(--tekst-zwak);">
+      Je kunt tot de jaarvergadering blijven spelen — je hoogste score telt.
+      Tik hierboven op een spel om meteen te starten.
+    </p>
   </div>
 
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalRanglijst } from './js/api.js?v=7';
-import { renderNav, checkGesloten, toonConfetti } from './js/app.js?v=7';
+import { haalSpelerUitStorage, haalVoortgang, haalRanglijst } from './js/api.js?v=8';
+import { renderNav, checkGesloten, toonConfetti } from './js/app.js?v=8';
 
 if (checkGesloten()) throw new Error('gesloten');
 renderNav('ranglijst');
@@ -94,8 +102,10 @@ for (let s = 1; s <= 7; s++) {
   const sc = (voortgang.scores || []).find(x => x.spel === s);
   const beste = sc ? Math.max(...sc.pogingen.map(p => p.score)) : null;
   if (beste !== null) totaal += beste;
-  const blok = document.createElement('div');
+  // Elke spelregel is klikbaar: tik erop om dat spel opnieuw te spelen
+  const blok = document.createElement('a');
   blok.className = 'eindkaart-spel';
+  blok.href = `spel.html?level=${s}`;
   blok.innerHTML = `<span class="klein" style="color:var(--tekst-zwak);">${NAMEN[s-1]}</span>
     <span style="color:var(--accent);font-family:'Courier New',monospace;font-weight:bold;">${beste ?? '–'}</span>`;
   spellenDiv.appendChild(blok);
