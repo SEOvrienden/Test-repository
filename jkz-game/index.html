@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ Jaarverslag Game</title>
-  <link rel="stylesheet" href="css/stijl.css?v=6">
+  <link rel="stylesheet" href="css/stijl.css?v=7">
 </head>
 <body>
 
@@ -134,8 +134,8 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { registreerSpeler, haalVoortgang, haalSpelerUitStorage,
-         slaHuidigeSpelerOp, verwerkWachtrij } from './js/api.js?v=6';
-import { renderNav, checkGesloten } from './js/app.js?v=6';
+         slaHuidigeSpelerOp, verwerkWachtrij, controleerVerbinding } from './js/api.js?v=7';
+import { renderNav, checkGesloten } from './js/app.js?v=7';
 
 // Gesloten-check
 if (checkGesloten()) throw new Error('gesloten');
@@ -145,6 +145,23 @@ verwerkWachtrij().catch(() => {});
 
 // Navigatiebalk onderaan
 renderNav('spelen');
+
+// Gezondheidscheck: kan de site de database bereiken? Zo nee, zeg meteen
+// duidelijk wat er aan de hand is in plaats van pas te falen bij het opslaan.
+controleerVerbinding().then(res => {
+  if (res.ok) return;
+  const balk = document.createElement('div');
+  balk.style.cssText = 'background:rgba(212,84,26,0.15);border:1px solid #d4541a;' +
+    'border-radius:10px;padding:12px 14px;margin-bottom:1rem;font-size:0.9rem;line-height:1.5;';
+  balk.innerHTML = '<strong>⚠️ De server is nog niet klaar.</strong><br>' +
+    escapeHtml(res.fout) + '<br>' +
+    '<a href="controle.php" style="color:var(--accent);">→ Open de zelfcontrole (controle.php)</a>';
+  document.getElementById('hoofd-inhoud').prepend(balk);
+});
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
 // Check of speler al ingelogd is
 const huidig = haalSpelerUitStorage();
@@ -266,10 +283,15 @@ async function kiesNaam(naam) {
     console.error(err);
     jaKnop.disabled = false;
     jaKnop.textContent = 'Ja, dit ben ik';
-    // Terug naar het invulveld met een zichtbare melding
+    // Terug naar het invulveld, met de ECHTE reden van de server erbij
     document.getElementById('naam-bevestig').classList.add('verborgen');
     document.getElementById('naam-keuze').classList.remove('verborgen');
-    toonFout('Opslaan lukte niet. Probeer het nog een keer.');
+    let melding = 'Opslaan lukte niet. Controleer je internetverbinding en probeer het opnieuw.';
+    if (err && err.serverFout && err.message) {
+      melding = err.message;
+      if (!melding.includes('controle.php')) melding += ' (Tip: open controle.php voor een controle.)';
+    }
+    toonFout(melding);
   }
 }
 </script>

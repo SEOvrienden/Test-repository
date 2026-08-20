@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Jouw eindkaart</title>
-  <link rel="stylesheet" href="css/stijl.css?v=6">
+  <link rel="stylesheet" href="css/stijl.css?v=7">
 </head>
 <body>
 
@@ -74,8 +74,8 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalRanglijst } from './js/api.js?v=6';
-import { renderNav, checkGesloten, toonConfetti } from './js/app.js?v=6';
+import { haalSpelerUitStorage, haalVoortgang, haalRanglijst } from './js/api.js?v=7';
+import { renderNav, checkGesloten, toonConfetti } from './js/app.js?v=7';
 
 if (checkGesloten()) throw new Error('gesloten');
 renderNav('ranglijst');

@@ -109,6 +109,7 @@ jkz-game/
   eindkaart.html      Persoonlijke eindkaart na level 7 (screenshotbaar)
 
   api.php             Server-API: alle database-acties (fase 2)
+  controle.php        Zelfcontrole: vertelt of de database goed staat
   config.voorbeeld.php  Voorbeeld-configuratie — invullen en opslaan als config.php
   installatie.sql     Eenmalig plakken in phpMyAdmin
 
@@ -196,10 +197,11 @@ Vul in wat er gevraagd wordt:
 Sla het bestand op als **config.php** (dus zonder "voorbeeld" in de naam)
 en upload het met FileZilla naar `public_html`, naast api.php.
 
-**Stap 4 — Controleer.**
-Ga naar `jaarverslag.jkz.nl/admin.html?key=JOUWSLEUTEL` (jouw eigen sleutel).
-Zie je de beheerpagina, dan staat alles goed. Zie je "Geen toegang" of een
-foutmelding over config.php, loop dan stap 3 nog eens na.
+**Stap 4 — Controleer met de zelfcontrole-pagina.**
+Ga naar `jaarverslag.jkz.nl/controle.php`. Die pagina controleert alles
+en vertelt in gewone taal wat er eventueel nog mist én wat je moet doen.
+Alles groen? Dan werkt het spel. Ververs de pagina na elke aanpassing.
+De beheerpagina vind je op `jaarverslag.jkz.nl/admin.html?key=JOUWSLEUTEL`.
 
 **Bij een update van het spel:** upload gewoon alle nieuwe bestanden en
 overschrijf alles — behalve `config.php`, die staat niet in de nieuwe

@@ -82,6 +82,7 @@ function naar_slug(string $naam): string {
 
 $nu = date('Y-m-d H:i:s');
 
+try {
 switch ($actie) {
 
 // ── Speler registreren (of bestaande speler terugvinden) ─────────────
@@ -273,6 +274,11 @@ case 'spelersOverzicht': {
 
 default:
     fout('Onbekende actie.', 404);
+}
+} catch (PDOException $e) {
+    // Meestal: de tabellen zijn nog niet aangemaakt met installatie.sql
+    fout('Databaseprobleem: waarschijnlijk zijn de tabellen nog niet aangemaakt. '
+       . 'Open controle.php in je browser — die vertelt precies wat er mist.', 500);
 }
 
 // ── Hulpfunctie: instelling opslaan (werkt op MySQL én SQLite) ────────

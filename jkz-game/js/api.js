@@ -116,6 +116,17 @@ export async function haalSpelStatus() {
   return verversStatus();
 }
 
+// Controleert of de server en database bereikbaar zijn.
+// Geeft { ok: true } of { ok: false, fout: 'reden in gewone taal' }.
+export async function controleerVerbinding() {
+  try {
+    await roep('haalSpelStatus');
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, fout: err.message };
+  }
+}
+
 // ── Beheer (alle acties vereisen de adminsleutel) ─────────────────────────────
 
 export async function resetAlles(sleutel) {
