@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Beheer</title>
-  <link rel="stylesheet" href="css/stijl.css?v=9">
+  <link rel="stylesheet" href="css/stijl.css?v=10">
 </head>
 <body>
 
@@ -43,7 +43,7 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { haalSpelersOverzicht, haalSpelStatus, zetSpelStatus, zetTestmodus,
-         resetAlles, resetSpeler } from './js/api.js?v=9';
+         zetTikkieLink, zetBonus, resetAlles, resetSpeler } from './js/api.js?v=10';
 
 // Sleutel uit URL halen; de server controleert of hij klopt
 const params = new URLSearchParams(window.location.search);
@@ -88,6 +88,32 @@ function renderBeheer(status) {
       <button class="knop primair" id="knop-config-opslaan">Opslaan</button>
     </div>
 
+    <!-- BONUSPUNTEN / TIKKIE -->
+    <div class="admin-sectie">
+      <h2>Bonuspunten (Tikkie)</h2>
+      <p class="klein" style="margin-bottom:0.75rem;">
+        Zet hieronder je Tikkie-link; spelers zien dan op de ranglijstpagina
+        een knop "Steun de clubkas". Zie je in je Tikkie-app dat iemand
+        betaald heeft? Ken hier de bonuspunten toe (0 = weer weghalen).
+      </p>
+      <input type="text" id="tikkie-link" class="invoer" placeholder="https://tikkie.me/pay/..."
+             value="${status.tikkie_link ? escapeHtml(status.tikkie_link) : ''}"
+             style="margin-bottom:0.5rem;">
+      <button class="knop" id="knop-tikkie-opslaan" style="margin-bottom:1rem;">Tikkie-link opslaan</button>
+
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select class="selecteer" id="bonus-speler-select" style="flex:1;margin-bottom:0;">
+          <option value="">— kies een speler —</option>
+          ${spelers.map(s => `<option value="${s.id}">${escapeHtml(s.naam)}${s.bonus > 0 ? ' (heeft ' + s.bonus + ' 💰)' : ''}</option>`).join('')}
+        </select>
+        <input type="number" id="bonus-punten" class="invoer" value="25" min="0" max="100"
+               style="width:80px;margin-bottom:0;">
+      </div>
+      <button class="knop primair" id="knop-bonus-toekennen" style="margin-top:0.5rem;">
+        Bonuspunten toekennen
+      </button>
+    </div>
+
     <!-- SPELERS OVERZICHT -->
     <div class="admin-sectie">
       <h2>Spelers (${spelers.length})</h2>
@@ -96,7 +122,7 @@ function renderBeheer(status) {
         : spelers.map(s => `<div class="admin-speler-rij">
             <span>${escapeHtml(s.naam)}</span>
             <span class="klein" style="color:var(--accent);text-align:right;">
-              Level ${Math.min(s.level, 7)} | ${s.gespeeld}/7 spellen | ${s.totaal} pt<br>
+              Level ${Math.min(s.level, 7)} | ${s.gespeeld}/7 spellen | ${s.totaal} pt${s.bonus > 0 ? ' (waarvan ' + s.bonus + ' 💰)' : ''}<br>
               <span style="color:var(--tekst-zwak)">laatst actief: ${escapeHtml(s.laatste_actie || '–')}</span>
             </span>
           </div>`).join('')}</div>
@@ -127,6 +153,27 @@ function renderBeheer(status) {
     <p class="klein ta-c" style="margin-top:1rem;">
       <a href="eindstand.html" style="color:var(--accent);">Beameroverzicht →</a>
     </p>`;
+
+  document.getElementById('knop-tikkie-opslaan').addEventListener('click', async () => {
+    try {
+      await zetTikkieLink(sleutel, document.getElementById('tikkie-link').value.trim());
+      toonMelding('Tikkie-link opgeslagen. Spelers zien de knop op de ranglijstpagina.', 'ok');
+    } catch (e) { toonMelding('Fout: ' + e.message, 'fout'); }
+  });
+
+  document.getElementById('knop-bonus-toekennen').addEventListener('click', async () => {
+    const id = document.getElementById('bonus-speler-select').value;
+    const punten = parseInt(document.getElementById('bonus-punten').value);
+    if (!id) { toonMelding('Kies eerst een speler.', 'fout'); return; }
+    if (isNaN(punten) || punten < 0 || punten > 100) {
+      toonMelding('Vul een aantal punten in tussen 0 en 100.', 'fout'); return;
+    }
+    try {
+      await zetBonus(sleutel, id, punten);
+      toonMelding('Bonuspunten toegekend! De ranglijst telt ze direct mee.', 'ok');
+      setTimeout(() => location.reload(), 1200);
+    } catch (e) { toonMelding('Fout: ' + e.message, 'fout'); }
+  });
 
   document.getElementById('knop-config-opslaan').addEventListener('click', async () => {
     try {

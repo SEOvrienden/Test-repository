@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Jouw eindkaart</title>
-  <link rel="stylesheet" href="css/stijl.css?v=9">
+  <link rel="stylesheet" href="css/stijl.css?v=10">
 </head>
 <body>
 
@@ -82,8 +82,8 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalRanglijst } from './js/api.js?v=9';
-import { renderNav, checkGesloten, toonConfetti } from './js/app.js?v=9';
+import { haalSpelerUitStorage, haalVoortgang, haalRanglijst } from './js/api.js?v=10';
+import { renderNav, checkGesloten, toonConfetti } from './js/app.js?v=10';
 
 if (checkGesloten()) throw new Error('gesloten');
 renderNav('ranglijst');
@@ -112,11 +112,20 @@ for (let s = 1; s <= 7; s++) {
 }
 document.getElementById('ek-totaal').textContent = totaal;
 
-// Positie in de ranglijst
+// Positie in de ranglijst + bonuspunten (tellen mee in het totaal)
 try {
   const ranglijst = await haalRanglijst();
   const idx = ranglijst.findIndex(r => r.naam === speler.naam);
   if (idx >= 0) {
+    const eigen = ranglijst[idx];
+    if (eigen.bonus > 0) {
+      const blok = document.createElement('div');
+      blok.className = 'eindkaart-spel';
+      blok.innerHTML = `<span class="klein" style="color:var(--tekst-zwak);">Clubkas 💰</span>
+        <span style="color:var(--accent);font-family:'Courier New',monospace;font-weight:bold;">+${eigen.bonus}</span>`;
+      spellenDiv.appendChild(blok);
+    }
+    document.getElementById('ek-totaal').textContent = eigen.totaal;
     document.getElementById('ek-positie').textContent =
       idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}e`;
     document.getElementById('ek-positie-sub').textContent =

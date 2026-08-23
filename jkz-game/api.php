@@ -186,14 +186,18 @@ case 'haalRanglijst': {
     foreach ($q->fetchAll() as $r) {
         $beste[(int) $r['speler_id']][(int) $r['spel']] = (int) $r['beste'];
     }
+    $bonus = lees_bonuspunten($db);
     $uit = [];
     foreach ($spelers as $s) {
-        $scores = $beste[(int) $s['id']] ?? [];
+        $sid = (int) $s['id'];
+        $scores = $beste[$sid] ?? [];
+        $b = $bonus[$sid] ?? 0;
         $uit[] = [
-            'spelerId' => (string) $s['id'],
+            'spelerId' => (string) $sid,
             'naam'     => $s['naam'],
             'scores'   => $scores ? $scores : new stdClass(),
-            'totaal'   => array_sum($scores),
+            'bonus'    => $b,
+            'totaal'   => array_sum($scores) + $b,
         ];
     }
     usort($uit, fn($a, $b) => $b['totaal'] <=> $a['totaal']);
@@ -206,9 +210,10 @@ case 'haalSpelStatus': {
     $inst = [];
     foreach ($q->fetchAll() as $r) $inst[$r['sleutel']] = $r['waarde'];
     antwoord([
-        'ok'        => true,
-        'open'      => ($inst['spel_open'] ?? '1') === '1',
-        'testmodus' => ($inst['testmodus'] ?? '0') === '1',
+        'ok'          => true,
+        'open'        => ($inst['spel_open'] ?? '1') === '1',
+        'testmodus'   => ($inst['testmodus'] ?? '0') === '1',
+        'tikkie_link' => $inst['tikkie_link'] ?? '',
     ]);
 }
 
@@ -226,6 +231,42 @@ case 'zetTestmodus': {
     antwoord(['ok' => true]);
 }
 
+// ── Beheer: Tikkie-link instellen (leeg = knop verbergen) ─────────────
+case 'zetTikkieLink': {
+    eis_admin($invoer);
+    $link = trim((string) ($invoer['link'] ?? ''));
+    if ($link !== '' && !preg_match('#^https://#i', $link)) {
+        fout('De Tikkie-link moet met https:// beginnen (of leeg zijn om de knop te verbergen).');
+    }
+    if (mb_strlen($link) > 200) fout('Link is te lang.');
+    zet_instelling($db, 'tikkie_link', $link);
+    antwoord(['ok' => true]);
+}
+
+// ── Beheer: bonuspunten toekennen (na een Tikkie-betaling) ────────────
+case 'zetBonus': {
+    eis_admin($invoer);
+    $spelerId = (int) ($invoer['spelerId'] ?? 0);
+    $punten   = (int) ($invoer['punten'] ?? -1);
+    if ($spelerId <= 0) fout('Ongeldige speler.');
+    if ($punten < 0 || $punten > 100) fout('Bonuspunten moeten tussen 0 en 100 liggen (0 = weghalen).');
+
+    $db->exec('CREATE TABLE IF NOT EXISTS bonuspunten (
+        speler_id INT PRIMARY KEY,
+        punten INT NOT NULL,
+        toegekend_op DATETIME NOT NULL)');
+
+    $q = $db->prepare('UPDATE bonuspunten SET punten = ?, toegekend_op = ? WHERE speler_id = ?');
+    $q->execute([$punten, $nu, $spelerId]);
+    if ($q->rowCount() === 0) {
+        try {
+            $db->prepare('INSERT INTO bonuspunten (speler_id, punten, toegekend_op) VALUES (?, ?, ?)')
+               ->execute([$spelerId, $punten, $nu]);
+        } catch (PDOException $e) { /* bestond al */ }
+    }
+    antwoord(['ok' => true]);
+}
+
 // ── Beheer: één speler wissen ─────────────────────────────────────────
 case 'resetSpeler': {
     eis_admin($invoer);
@@ -233,6 +274,8 @@ case 'resetSpeler': {
     if ($spelerId <= 0) fout('Ongeldige speler.');
     $db->prepare('DELETE FROM scores WHERE speler_id = ?')->execute([$spelerId]);
     $db->prepare('DELETE FROM spelers WHERE id = ?')->execute([$spelerId]);
+    try { $db->prepare('DELETE FROM bonuspunten WHERE speler_id = ?')->execute([$spelerId]); }
+    catch (PDOException $e) { /* tabel bestaat nog niet */ }
     antwoord(['ok' => true]);
 }
 
@@ -241,6 +284,7 @@ case 'resetAlles': {
     eis_admin($invoer);
     $db->exec('DELETE FROM scores');
     $db->exec('DELETE FROM spelers');
+    try { $db->exec('DELETE FROM bonuspunten'); } catch (PDOException $e) { /* nog niet aangemaakt */ }
     antwoord(['ok' => true]);
 }
 
@@ -256,16 +300,19 @@ case 'spelersOverzicht': {
         $per[$sid]['scores'][(int) $r['spel']] = (int) $r['beste'];
         $per[$sid]['laatst'] = max($per[$sid]['laatst'] ?? '', $r['laatst']);
     }
+    $bonus = lees_bonuspunten($db);
     $uit = [];
     foreach ($spelers as $s) {
         $sid = (int) $s['id'];
         $scores = $per[$sid]['scores'] ?? [];
+        $b = $bonus[$sid] ?? 0;
         $uit[] = [
             'id'            => (string) $sid,
             'naam'          => $s['naam'],
             'level'         => ($scores ? max(array_keys($scores)) : 0) + 1,
             'gespeeld'      => count($scores),
-            'totaal'        => array_sum($scores),
+            'bonus'         => $b,
+            'totaal'        => array_sum($scores) + $b,
             'laatste_actie' => $per[$sid]['laatst'] ?? $s['aangemaakt_op'],
         ];
     }
@@ -279,6 +326,19 @@ default:
     // Meestal: de tabellen zijn nog niet aangemaakt met installatie.sql
     fout('Databaseprobleem: waarschijnlijk zijn de tabellen nog niet aangemaakt. '
        . 'Open controle.php in je browser — die vertelt precies wat er mist.', 500);
+}
+
+// ── Hulpfunctie: bonuspunten lezen ({speler_id: punten}) ──────────────
+function lees_bonuspunten(PDO $db): array {
+    try {
+        $uit = [];
+        foreach ($db->query('SELECT speler_id, punten FROM bonuspunten')->fetchAll() as $r) {
+            $uit[(int) $r['speler_id']] = (int) $r['punten'];
+        }
+        return $uit;
+    } catch (PDOException $e) {
+        return []; // tabel bestaat pas na de eerste toekenning
+    }
 }
 
 // ── Hulpfunctie: instelling opslaan (werkt op MySQL én SQLite) ────────

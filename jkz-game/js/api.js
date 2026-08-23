@@ -107,9 +107,15 @@ export function haalConfig() {
 export async function verversStatus() {
   try {
     const r = await roep('haalSpelStatus');
-    sla(SLEUTEL_STATUS, { open: r.open, testmodus: r.testmodus });
+    sla(SLEUTEL_STATUS, { open: r.open, testmodus: r.testmodus, tikkieLink: r.tikkie_link || '' });
     return r;
   } catch { return null; }
+}
+
+// De ingestelde Tikkie-link (leeg = geen steunknop tonen)
+export function haalTikkieLink() {
+  const s = laad(SLEUTEL_STATUS, null);
+  return s && s.tikkieLink ? s.tikkieLink : '';
 }
 
 export async function haalSpelStatus() {
@@ -150,6 +156,15 @@ export async function zetTestmodus(sleutel, testmodus) {
 export async function haalSpelersOverzicht(sleutel) {
   const r = await roep('spelersOverzicht', { sleutel });
   return r.spelers;
+}
+
+export async function zetTikkieLink(sleutel, link) {
+  await roep('zetTikkieLink', { sleutel, link });
+  await verversStatus();
+}
+
+export async function zetBonus(sleutel, spelerId, punten) {
+  await roep('zetBonus', { sleutel, spelerId, punten });
 }
 
 // ── Wachtrij voor scores die niet verstuurd konden worden ─────────────────────

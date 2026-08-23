@@ -88,6 +88,21 @@ startscherm en bevestigen die. Er is geen vaste ledenlijst.
 Eén speler wissen kan ook, in het blok erboven: kies de naam en klik
 **Wis deze speler**.
 
+---
+
+## Bonuspunten via Tikkie (steun de clubkas)
+
+1. Maak in je Tikkie-app een betaalverzoek zonder einddatum en kopieer de link.
+2. Plak die link op de beheerpagina bij **Bonuspunten (Tikkie)** en klik op
+   "Tikkie-link opslaan". Spelers zien nu op de ranglijstpagina een gouden
+   knop "Steun de clubkas — koop 25 bonuspunten".
+3. Zie je in je Tikkie-app dat iemand betaald heeft? Kies op de beheerpagina
+   die speler, vul het aantal punten in (standaard 25) en klik
+   **Bonuspunten toekennen**. De punten tellen direct mee in het totaal en
+   staan met een 💰 in de ranglijst.
+4. Per ongeluk toegekend? Ken 0 punten toe en de bonus is weer weg.
+5. Link weghalen = veld leegmaken en opnieuw opslaan; de knop verdwijnt dan.
+
 De reset werkt op de database en geldt dus in één keer **voor iedereen**,
 op alle telefoons. Precies wat je na de testfase nodig hebt, vlak voor
 28 augustus.

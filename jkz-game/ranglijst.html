@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Ranglijst</title>
-  <link rel="stylesheet" href="css/stijl.css?v=9">
+  <link rel="stylesheet" href="css/stijl.css?v=10">
 </head>
 <body>
 
@@ -44,6 +44,9 @@ window.addEventListener('error', function (e) {
       <span class="klein" id="ververs-label" style="color:var(--tekst-zwak);"></span>
     </div>
 
+    <!-- Steun de clubkas (verschijnt alleen als er een Tikkie-link is ingesteld) -->
+    <div style="padding:0 1rem;" id="clubkas-vak"></div>
+
     <!-- Topscore per spel -->
     <div style="padding:0 1rem 0.5rem;" id="top-per-spel"></div>
 
@@ -69,14 +72,35 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalRanglijst, haalSpelerUitStorage, haalVoortgang } from './js/api.js?v=9';
-import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=9';
+import { haalRanglijst, haalSpelerUitStorage, haalVoortgang, haalTikkieLink, verversStatus }
+  from './js/api.js?v=10';
+import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=10';
 
 if (checkGesloten()) throw new Error('gesloten');
 
 renderNav('ranglijst');
 
 const speler = haalSpelerUitStorage();
+
+// Steun de clubkas: gouden blok met de Tikkie-link van de penningmeester
+async function toonClubkas() {
+  await verversStatus();
+  const link = haalTikkieLink();
+  const vak = document.getElementById('clubkas-vak');
+  if (!link) { vak.innerHTML = ''; return; }
+  vak.innerHTML = `
+    <a href="${link.replace(/"/g, '&quot;')}" target="_blank" rel="noopener"
+       style="display:block;background:rgba(204,171,55,0.12);border:1px solid var(--accent);
+              border-radius:12px;padding:0.8rem 1rem;margin-bottom:0.75rem;
+              text-decoration:none;color:var(--tekst);">
+      <strong style="color:var(--accent);">💰 Steun de clubkas — koop 25 bonuspunten</strong><br>
+      <span class="klein" style="color:var(--tekst-zwak);">
+        Eenmalig. Betaal via Tikkie; zodra de betaling binnen is, worden je
+        bonuspunten toegekend en tellen ze mee in je totaal.
+      </span>
+    </a>`;
+}
+toonClubkas();
 
 async function laadVoortgang() {
   if (speler) {
@@ -153,7 +177,7 @@ function renderRanglijst(data) {
     tr.innerHTML = `
       <td><span class="rangpositie">${positieTekst}</span></td>
       <td title="${escapeHtml(rij.naam)}">${eigenRij ? '▶ ' : ''}${escapeHtml(rij.naam)}</td>
-      <td class="totaal">${rij.totaal}</td>
+      <td class="totaal">${rij.totaal}${rij.bonus > 0 ? ' <span title="waarvan ' + rij.bonus + ' bonuspunten" style="font-size:0.7rem;">💰</span>' : ''}</td>
       ${[1,2,3,4,5,6,7].map(s => {
         const sc = rij.scores[s];
         return `<td>${sc !== undefined && sc !== null ? sc : '–'}</td>`;
