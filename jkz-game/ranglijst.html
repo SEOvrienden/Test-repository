@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Ranglijst</title>
-  <link rel="stylesheet" href="css/stijl.css?v=10">
+  <link rel="stylesheet" href="css/stijl.css?v=11">
 </head>
 <body>
 
@@ -47,34 +47,30 @@ window.addEventListener('error', function (e) {
     <!-- Steun de clubkas (verschijnt alleen als er een Tikkie-link is ingesteld) -->
     <div style="padding:0 1rem;" id="clubkas-vak"></div>
 
-    <!-- Topscore per spel -->
-    <div style="padding:0 1rem 0.5rem;" id="top-per-spel"></div>
+    <!-- Tabbladen: totaal + één per spel -->
+    <div class="rang-tabs" id="rang-tabs"></div>
 
-    <p class="klein" style="padding:0 1rem 0.35rem;color:var(--tekst-zwak);">
-      Veeg de tabel naar links voor de scores per spel →
-    </p>
-    <!-- Ranglijst tabel (horizontaal scrollbaar; #, naam en totaal blijven staan) -->
-    <div class="ranglijst-scrollwrap"><div style="overflow-x:auto;padding:0 0 1rem;">
+    <div style="padding:0 0 1rem;">
       <table class="ranglijst-tabel" id="ranglijst-tabel">
         <thead>
           <tr>
             <th>#</th>
             <th>Naam</th>
-            <th>Tot</th>
-            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
+            <th style="text-align:right;" id="kolom-punten">Punten</th>
           </tr>
         </thead>
         <tbody id="ranglijst-body"></tbody>
       </table>
-    </div></div>
+      <p class="klein" id="tab-voetnoot" style="padding:0.5rem 1rem 0;color:var(--tekst-zwak);"></p>
+    </div>
 
   </div>
 </div>
 
 <script type="module">
-import { haalRanglijst, haalSpelerUitStorage, haalVoortgang, haalTikkieLink, verversStatus }
-  from './js/api.js?v=10';
-import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=10';
+import { haalRanglijst, haalSpelerUitStorage, haalVoortgang, haalTikkieLink, verversStatus,
+         toonPunten } from './js/api.js?v=11';
+import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=11';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -93,10 +89,11 @@ async function toonClubkas() {
        style="display:block;background:rgba(204,171,55,0.12);border:1px solid var(--accent);
               border-radius:12px;padding:0.8rem 1rem;margin-bottom:0.75rem;
               text-decoration:none;color:var(--tekst);">
-      <strong style="color:var(--accent);">💰 Steun de clubkas — koop 25 bonuspunten</strong><br>
+      <strong style="color:var(--accent);">💰 Steun de clubkas — koop bonuspunten</strong><br>
       <span class="klein" style="color:var(--tekst-zwak);">
-        Eenmalig. Betaal via Tikkie; zodra de betaling binnen is, worden je
-        bonuspunten toegekend en tellen ze mee in je totaal.
+        Elke euro die je via Tikkie geeft is 1 bonuspunt (€30,50 = 30,5 punten).
+        Zodra je betaling binnen is, worden je punten toegekend en tellen ze
+        mee in je totaal.
       </span>
     </a>`;
 }
@@ -124,78 +121,82 @@ async function laadRanglijst() {
   }
 }
 
-function renderRanglijst(data) {
-  const tbody = document.getElementById('ranglijst-body');
-  tbody.innerHTML = '';
+// ── Tabbladen: Totaal + één per spel ─────────────────────────────────────────
 
-  // Top per spel berekenen
-  const topPerSpel = {};
-  for (let s = 1; s <= 7; s++) {
-    let beste = null;
-    data.forEach(r => {
-      const sc = r.scores[s];
-      if (sc !== undefined && sc !== null) {
-        if (!beste || sc > beste.score) beste = { naam: r.naam, score: sc };
-      }
+const SPEL_NAMEN = ['Reactie', 'Breakout', 'Simon', 'Mep', 'Snake', 'Flappy', 'Pong'];
+let actieveTab = 'totaal';   // 'totaal' of spelnummer 1–7
+let laatsteData = null;
+
+function renderTabs() {
+  const tabsDiv = document.getElementById('rang-tabs');
+  tabsDiv.innerHTML = '';
+  const tabs = [['totaal', '🏆 Totaal'], ...SPEL_NAMEN.map((n, i) => [i + 1, n])];
+  tabs.forEach(([key, label]) => {
+    const knop = document.createElement('button');
+    knop.className = 'rang-tab' + (String(key) === String(actieveTab) ? ' actief' : '');
+    knop.textContent = label;
+    knop.addEventListener('click', () => {
+      actieveTab = key;
+      renderTabs();
+      if (laatsteData) renderRanglijst(laatsteData);
     });
-    topPerSpel[s] = beste;
+    tabsDiv.appendChild(knop);
+  });
+}
+renderTabs();
+
+function renderRanglijst(data) {
+  laatsteData = data;
+  const tbody = document.getElementById('ranglijst-body');
+  const voetnoot = document.getElementById('tab-voetnoot');
+  const kolom = document.getElementById('kolom-punten');
+  tbody.innerHTML = '';
+  voetnoot.textContent = '';
+
+  if (data.length === 0) {
+    kolom.textContent = 'Punten';
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--tekst-zwak);padding:2rem;">
+      Nog niemand gespeeld.</td></tr>`;
+    return;
   }
 
-  // Top-per-spel weergeven
-  const topDiv = document.getElementById('top-per-spel');
-  if (Object.values(topPerSpel).some(v => v)) {
-    topDiv.innerHTML = '<p class="klein" style="color:var(--tekst-zwak);margin-bottom:6px;">Topscore per spel:</p>';
-    const rij = document.createElement('div');
-    rij.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
-    for (let s = 1; s <= 7; s++) {
-      const t = topPerSpel[s];
-      if (!t) continue;
-      const chip = document.createElement('div');
-      chip.style.cssText = `background:var(--jkz-groen-paneel);border:1px solid rgba(204,171,55,0.2);
-        border-radius:6px;padding:4px 8px;font-size:0.75rem;`;
-      chip.innerHTML = `<span style="color:var(--tekst-zwak)">S${s}:</span> `
-        + `<span style="color:var(--accent);font-weight:bold;">${t.score}</span> `
-        + `<span style="color:var(--tekst-zwak)">${naamKort(t.naam)}</span>`;
-      rij.appendChild(chip);
-    }
-    topDiv.appendChild(rij);
+  let rijen;
+  if (actieveTab === 'totaal') {
+    kolom.textContent = 'Totaal';
+    // De 💰 laat zien dát iemand de clubkas gesteund heeft — niet hoeveel.
+    rijen = data.map(r => ({
+      naam: r.naam,
+      tekst: toonPunten(r.totaal) + (r.bonus > 0 ? ' <span style="font-size:0.75rem;">💰</span>' : ''),
+      sorteer: r.totaal,
+    }));
+    voetnoot.innerHTML = '💰 = heeft de clubkas gesteund &nbsp;·&nbsp; tik op een spelnaam voor de stand per spel';
   } else {
-    topDiv.innerHTML = '';
+    const s = Number(actieveTab);
+    kolom.textContent = 'Score';
+    rijen = data
+      .filter(r => r.scores[s] !== undefined && r.scores[s] !== null)
+      .map(r => ({ naam: r.naam, tekst: String(r.scores[s]), sorteer: r.scores[s] }))
+      .sort((a, b) => b.sorteer - a.sorteer);
+    if (rijen.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--tekst-zwak);padding:2rem;">
+        Nog niemand heeft ${SPEL_NAMEN[s - 1]} gespeeld.</td></tr>`;
+      return;
+    }
+    voetnoot.textContent = `Spel ${s} — ${SPEL_NAMEN[s - 1]} · ${rijen.length} van ${data.length} spelers gespeeld · max 100 punten`;
   }
 
-  // Ranglijstrijen
-  data.forEach((rij, idx) => {
+  rijen.forEach((rij, idx) => {
     const tr = document.createElement('tr');
     const eigenRij = speler && rij.naam === speler.naam;
     if (eigenRij) tr.classList.add('eigen-rij');
-
     const positie = idx + 1;
-    let positieTekst = positie <= 3
-      ? ['🥇', '🥈', '🥉'][positie - 1]
-      : positie;
-
+    const positieTekst = positie <= 3 ? ['🥇', '🥈', '🥉'][positie - 1] : positie;
     tr.innerHTML = `
       <td><span class="rangpositie">${positieTekst}</span></td>
-      <td title="${escapeHtml(rij.naam)}">${eigenRij ? '▶ ' : ''}${escapeHtml(rij.naam)}</td>
-      <td class="totaal">${rij.totaal}${rij.bonus > 0 ? ' <span title="waarvan ' + rij.bonus + ' bonuspunten" style="font-size:0.7rem;">💰</span>' : ''}</td>
-      ${[1,2,3,4,5,6,7].map(s => {
-        const sc = rij.scores[s];
-        return `<td>${sc !== undefined && sc !== null ? sc : '–'}</td>`;
-      }).join('')}`;
+      <td>${eigenRij ? '▶ ' : ''}${escapeHtml(rij.naam)}</td>
+      <td class="totaal" style="text-align:right;">${rij.tekst}</td>`;
     tbody.appendChild(tr);
   });
-
-  if (data.length === 0) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td colspan="10" style="text-align:center;color:var(--tekst-zwak);padding:2rem;">
-      Nog niemand gespeeld.</td>`;
-    tbody.appendChild(tr);
-  }
-}
-
-function naamKort(naam) {
-  const delen = naam.split(' ');
-  return delen.length > 2 ? delen[delen.length - 1] : naam;
 }
 
 function escapeHtml(s) {

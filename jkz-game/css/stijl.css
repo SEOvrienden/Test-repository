@@ -995,30 +995,56 @@ p:last-child { margin-bottom: 0; }
 /* === RANGLIJST === */
 .ranglijst-tabel {
   width: 100%;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.85rem;
 }
 
-/* Eerste drie kolommen (#, naam, totaal) blijven staan bij horizontaal
-   scrollen; de 7 spelscores schuiven eronderdoor */
+/* Drie kolommen: positie (smal), naam (rekt mee, lange namen worden
+   afgekapt), punten (rechts uitgelijnd). Geen horizontaal scrollen meer —
+   de scores per spel zitten in de tabbladen. */
 .ranglijst-tabel th:nth-child(1), .ranglijst-tabel td:nth-child(1) {
-  position: sticky; left: 0; z-index: 2;
-  background: var(--achtergrond);
-  width: 34px; min-width: 34px; max-width: 34px;
+  width: 40px; min-width: 40px;
+  padding-left: 1rem;
 }
 .ranglijst-tabel th:nth-child(2), .ranglijst-tabel td:nth-child(2) {
-  position: sticky; left: 34px; z-index: 2;
-  background: var(--achtergrond);
-  width: 140px; min-width: 140px; max-width: 140px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   text-align: left;
 }
 .ranglijst-tabel th:nth-child(3), .ranglijst-tabel td:nth-child(3) {
-  position: sticky; left: 174px; z-index: 2;
-  background: var(--achtergrond);
-  width: 52px; min-width: 52px; max-width: 52px;
-  border-right: 1px solid rgba(204, 171, 55, 0.25);
+  width: 84px; min-width: 84px;
+  padding-right: 1rem;
+  white-space: nowrap;
+}
+
+/* Tabbladen boven de ranglijst */
+.rang-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.25rem 1rem 0.75rem;
+  scrollbar-width: none;
+}
+.rang-tabs::-webkit-scrollbar { display: none; }
+.rang-tab {
+  flex: 0 0 auto;
+  border: 1px solid rgba(204, 171, 55, 0.3);
+  border-radius: 999px;
+  background: var(--jkz-groen-paneel);
+  color: var(--tekst-zwak);
+  font-size: 0.8rem;
+  padding: 8px 13px;
+  min-height: 36px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.rang-tab.actief {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--jkz-groen);
+  font-weight: bold;
 }
 
 .ranglijst-tabel th {
@@ -1663,20 +1689,6 @@ p:last-child { margin-bottom: 0; }
 a.voortgang-blokje {
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
-}
-
-/* Ranglijst: hint + vervaging aan de rechterkant zodat je ziet dat je
-   opzij kunt scrollen voor de scores per spel */
-.ranglijst-scrollwrap {
-  position: relative;
-}
-.ranglijst-scrollwrap::after {
-  content: '';
-  position: absolute;
-  top: 0; right: 0; bottom: 0;
-  width: 28px;
-  pointer-events: none;
-  background: linear-gradient(to left, var(--achtergrond), transparent);
 }
 
 /* Mepspel: bommen */

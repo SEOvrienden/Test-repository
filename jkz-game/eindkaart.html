@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Jouw eindkaart</title>
-  <link rel="stylesheet" href="css/stijl.css?v=10">
+  <link rel="stylesheet" href="css/stijl.css?v=11">
 </head>
 <body>
 
@@ -51,7 +51,7 @@ window.addEventListener('error', function (e) {
       <div class="eindkaart-score">
         <div>
           <div class="score-punten-groot" id="ek-totaal" style="font-size:2.8rem;">0</div>
-          <p class="klein" style="color:var(--tekst-zwak);">van 700 punten</p>
+          <p class="klein" style="color:var(--tekst-zwak);" id="ek-totaal-sub">van 700 punten</p>
         </div>
         <div>
           <div class="score-punten-groot" id="ek-positie" style="font-size:2.8rem;">–</div>
@@ -82,8 +82,8 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalRanglijst } from './js/api.js?v=10';
-import { renderNav, checkGesloten, toonConfetti } from './js/app.js?v=10';
+import { haalSpelerUitStorage, haalVoortgang, haalRanglijst, toonPunten } from './js/api.js?v=11';
+import { renderNav, checkGesloten, toonConfetti } from './js/app.js?v=11';
 
 if (checkGesloten()) throw new Error('gesloten');
 renderNav('ranglijst');
@@ -119,13 +119,17 @@ try {
   if (idx >= 0) {
     const eigen = ranglijst[idx];
     if (eigen.bonus > 0) {
+      // Alleen dát je gesteund hebt, niet hoeveel — de eindkaart wordt gedeeld
       const blok = document.createElement('div');
       blok.className = 'eindkaart-spel';
-      blok.innerHTML = `<span class="klein" style="color:var(--tekst-zwak);">Clubkas 💰</span>
-        <span style="color:var(--accent);font-family:'Courier New',monospace;font-weight:bold;">+${eigen.bonus}</span>`;
+      blok.innerHTML = `<span class="klein" style="color:var(--tekst-zwak);">Clubkas gesteund</span>
+        <span style="color:var(--accent);font-weight:bold;">💰</span>`;
       spellenDiv.appendChild(blok);
     }
-    document.getElementById('ek-totaal').textContent = eigen.totaal;
+    document.getElementById('ek-totaal').textContent = toonPunten(eigen.totaal);
+    if (eigen.bonus > 0) {
+      document.getElementById('ek-totaal-sub').textContent = 'punten (spel + clubkas)';
+    }
     document.getElementById('ek-positie').textContent =
       idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}e`;
     document.getElementById('ek-positie-sub').textContent =

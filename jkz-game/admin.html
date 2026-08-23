@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Beheer</title>
-  <link rel="stylesheet" href="css/stijl.css?v=10">
+  <link rel="stylesheet" href="css/stijl.css?v=11">
 </head>
 <body>
 
@@ -43,7 +43,8 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { haalSpelersOverzicht, haalSpelStatus, zetSpelStatus, zetTestmodus,
-         zetTikkieLink, zetBonus, resetAlles, resetSpeler } from './js/api.js?v=10';
+         zetTikkieLink, zetBonus, resetAlles, resetSpeler, resetScores,
+         resetBonus, toonPunten } from './js/api.js?v=11';
 
 // Sleutel uit URL halen; de server controleert of hij klopt
 const params = new URLSearchParams(window.location.search);
@@ -92,9 +93,11 @@ function renderBeheer(status) {
     <div class="admin-sectie">
       <h2>Bonuspunten (Tikkie)</h2>
       <p class="klein" style="margin-bottom:0.75rem;">
-        Zet hieronder je Tikkie-link; spelers zien dan op de ranglijstpagina
-        een knop "Steun de clubkas". Zie je in je Tikkie-app dat iemand
-        betaald heeft? Ken hier de bonuspunten toe (0 = weer weghalen).
+        Spelers zien op de ranglijstpagina een knop "Steun de clubkas" met
+        deze Tikkie-link. <strong>Elke euro = 1 bonuspunt</strong> (€30,50 =
+        30,5 punten). Zie je in je Tikkie-app dat iemand betaald heeft?
+        Vul hieronder het betaalde bedrag in als punten (0 = weer weghalen).
+        Betaalt iemand nóg een keer? Tel het dan zelf bij het oude bedrag op.
       </p>
       <input type="text" id="tikkie-link" class="invoer" placeholder="https://tikkie.me/pay/..."
              value="${status.tikkie_link ? escapeHtml(status.tikkie_link) : ''}"
@@ -104,10 +107,10 @@ function renderBeheer(status) {
       <div style="display:flex;gap:8px;align-items:center;">
         <select class="selecteer" id="bonus-speler-select" style="flex:1;margin-bottom:0;">
           <option value="">— kies een speler —</option>
-          ${spelers.map(s => `<option value="${s.id}">${escapeHtml(s.naam)}${s.bonus > 0 ? ' (heeft ' + s.bonus + ' 💰)' : ''}</option>`).join('')}
+          ${spelers.map(s => `<option value="${s.id}">${escapeHtml(s.naam)}${s.bonus > 0 ? ' (heeft ' + toonPunten(s.bonus) + ' 💰)' : ''}</option>`).join('')}
         </select>
-        <input type="number" id="bonus-punten" class="invoer" value="25" min="0" max="100"
-               style="width:80px;margin-bottom:0;">
+        <input type="text" inputmode="decimal" id="bonus-punten" class="invoer" value="25"
+               placeholder="30,50" style="width:90px;margin-bottom:0;">
       </div>
       <button class="knop primair" id="knop-bonus-toekennen" style="margin-top:0.5rem;">
         Bonuspunten toekennen
@@ -122,7 +125,7 @@ function renderBeheer(status) {
         : spelers.map(s => `<div class="admin-speler-rij">
             <span>${escapeHtml(s.naam)}</span>
             <span class="klein" style="color:var(--accent);text-align:right;">
-              Level ${Math.min(s.level, 7)} | ${s.gespeeld}/7 spellen | ${s.totaal} pt${s.bonus > 0 ? ' (waarvan ' + s.bonus + ' 💰)' : ''}<br>
+              Level ${Math.min(s.level, 7)} | ${s.gespeeld}/7 spellen | ${toonPunten(s.totaal)} pt${s.bonus > 0 ? ' (waarvan ' + toonPunten(s.bonus) + ' 💰)' : ''}<br>
               <span style="color:var(--tekst-zwak)">laatst actief: ${escapeHtml(s.laatste_actie || '–')}</span>
             </span>
           </div>`).join('')}</div>
@@ -138,12 +141,30 @@ function renderBeheer(status) {
       <button class="knop gevaar" id="knop-reset-speler">Wis deze speler</button>
     </div>
 
-    <!-- RESET ALLES -->
+    <!-- RESETS -->
     <div class="admin-sectie" style="border-color:rgba(212,84,26,0.3);">
-      <h2 style="color:var(--simon-4);">Alles wissen</h2>
+      <h2 style="color:var(--simon-4);">Wissen &amp; resetten</h2>
       <p class="klein" style="margin-bottom:0.75rem;">
-        Dit verwijdert alle spelers en scores voor IEDEREEN — dit is de reset
-        die je na de testfase doet, vlak voor 28 augustus.
+        Drie aparte resets, alle drie voor IEDEREEN en niet ongedaan te maken:
+      </p>
+
+      <p class="klein" style="margin-bottom:0.35rem;">
+        <strong>1. Alleen spelscores wissen</strong> — spelers en bonuspunten
+        blijven staan. Typ <strong>SCORES</strong> om te bevestigen.
+      </p>
+      <input type="text" id="reset-scores-bevestig" class="invoer" placeholder="Typ SCORES om te bevestigen">
+      <button class="knop gevaar" id="knop-reset-scores" style="margin-bottom:1rem;">Wis alle spelscores</button>
+
+      <p class="klein" style="margin-bottom:0.35rem;">
+        <strong>2. Alleen bonuspunten wissen</strong> — spelers en spelscores
+        blijven staan. Typ <strong>BONUS</strong> om te bevestigen.
+      </p>
+      <input type="text" id="reset-bonus-bevestig" class="invoer" placeholder="Typ BONUS om te bevestigen">
+      <button class="knop gevaar" id="knop-reset-bonus" style="margin-bottom:1rem;">Wis alle bonuspunten</button>
+
+      <p class="klein" style="margin-bottom:0.35rem;">
+        <strong>3. Alles wissen</strong> — spelers, scores én bonuspunten weg.
+        Dit is de grote reset na de testfase, vlak voor 28 augustus.
         Typ <strong>RESET</strong> om te bevestigen.
       </p>
       <input type="text" id="reset-bevestig" class="invoer" placeholder="Typ RESET om te bevestigen">
@@ -163,10 +184,11 @@ function renderBeheer(status) {
 
   document.getElementById('knop-bonus-toekennen').addEventListener('click', async () => {
     const id = document.getElementById('bonus-speler-select').value;
-    const punten = parseInt(document.getElementById('bonus-punten').value);
+    // Komma of punt mag allebei: "30,50" en "30.50" zijn allebei 30,5 punt
+    const punten = parseFloat(document.getElementById('bonus-punten').value.replace(',', '.'));
     if (!id) { toonMelding('Kies eerst een speler.', 'fout'); return; }
-    if (isNaN(punten) || punten < 0 || punten > 100) {
-      toonMelding('Vul een aantal punten in tussen 0 en 100.', 'fout'); return;
+    if (isNaN(punten) || punten < 0 || punten > 250) {
+      toonMelding('Vul een aantal punten in tussen 0 en 250 (komma mag, bijv. 30,50).', 'fout'); return;
     }
     try {
       await zetBonus(sleutel, id, punten);
@@ -192,6 +214,30 @@ function renderBeheer(status) {
       await resetSpeler(sleutel, id);
       toonMelding(`${naam} gewist.`, 'ok');
       setTimeout(() => location.reload(), 1000);
+    } catch (e) { toonMelding('Fout: ' + e.message, 'fout'); }
+  });
+
+  document.getElementById('knop-reset-scores').addEventListener('click', async () => {
+    if (document.getElementById('reset-scores-bevestig').value !== 'SCORES') {
+      toonMelding('Typ exact SCORES (hoofdletters).', 'fout'); return;
+    }
+    if (!confirm('Alle spelscores van IEDEREEN wissen? Spelers en bonuspunten blijven staan.')) return;
+    try {
+      await resetScores(sleutel);
+      toonMelding('Alle spelscores gewist. Pagina herlaadt…', 'ok');
+      setTimeout(() => location.reload(), 1500);
+    } catch (e) { toonMelding('Fout: ' + e.message, 'fout'); }
+  });
+
+  document.getElementById('knop-reset-bonus').addEventListener('click', async () => {
+    if (document.getElementById('reset-bonus-bevestig').value !== 'BONUS') {
+      toonMelding('Typ exact BONUS (hoofdletters).', 'fout'); return;
+    }
+    if (!confirm('Alle bonuspunten van IEDEREEN wissen? Spelers en spelscores blijven staan.')) return;
+    try {
+      await resetBonus(sleutel);
+      toonMelding('Alle bonuspunten gewist. Pagina herlaadt…', 'ok');
+      setTimeout(() => location.reload(), 1500);
     } catch (e) { toonMelding('Fout: ' + e.message, 'fout'); }
   });
 

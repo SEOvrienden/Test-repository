@@ -82,6 +82,10 @@ function naar_slug(string $naam): string {
 
 $nu = date('Y-m-d H:i:s');
 
+// Standaard Tikkie-link: geldt zolang er in het beheerscherm nog nooit
+// een link is opgeslagen. Leeg opslaan in beheer verbergt de knop alsnog.
+const STANDAARD_TIKKIE = 'https://tikkie.me/pay/bf80bh3aore48u6cnrh3';
+
 try {
 switch ($actie) {
 
@@ -197,7 +201,7 @@ case 'haalRanglijst': {
             'naam'     => $s['naam'],
             'scores'   => $scores ? $scores : new stdClass(),
             'bonus'    => $b,
-            'totaal'   => array_sum($scores) + $b,
+            'totaal'   => round(array_sum($scores) + $b, 2),
         ];
     }
     usort($uit, fn($a, $b) => $b['totaal'] <=> $a['totaal']);
@@ -213,7 +217,8 @@ case 'haalSpelStatus': {
         'ok'          => true,
         'open'        => ($inst['spel_open'] ?? '1') === '1',
         'testmodus'   => ($inst['testmodus'] ?? '0') === '1',
-        'tikkie_link' => $inst['tikkie_link'] ?? '',
+        'tikkie_link' => array_key_exists('tikkie_link', $inst)
+                             ? $inst['tikkie_link'] : STANDAARD_TIKKIE,
     ]);
 }
 
@@ -239,22 +244,31 @@ case 'zetTikkieLink': {
         fout('De Tikkie-link moet met https:// beginnen (of leeg zijn om de knop te verbergen).');
     }
     if (mb_strlen($link) > 200) fout('Link is te lang.');
+    // Oudere installaties hebben een te smalle waarde-kolom (40 tekens);
+    // stilletjes verbreden zodat de link er heel in past (SQLite negeert dit).
+    try { $db->exec('ALTER TABLE instellingen MODIFY waarde VARCHAR(200) NOT NULL'); }
+    catch (PDOException $e) { /* al goed, of geen MySQL */ }
     zet_instelling($db, 'tikkie_link', $link);
     antwoord(['ok' => true]);
 }
 
 // ── Beheer: bonuspunten toekennen (na een Tikkie-betaling) ────────────
+// 1 euro = 1 punt, dus decimalen mogen: €30,50 wordt 30,5 punten.
 case 'zetBonus': {
     eis_admin($invoer);
     $spelerId = (int) ($invoer['spelerId'] ?? 0);
-    $punten   = (int) ($invoer['punten'] ?? -1);
+    $punten   = round((float) ($invoer['punten'] ?? -1), 2);
     if ($spelerId <= 0) fout('Ongeldige speler.');
-    if ($punten < 0 || $punten > 100) fout('Bonuspunten moeten tussen 0 en 100 liggen (0 = weghalen).');
+    if ($punten < 0 || $punten > 250) fout('Bonuspunten moeten tussen 0 en 250 liggen (0 = weghalen).');
 
     $db->exec('CREATE TABLE IF NOT EXISTS bonuspunten (
         speler_id INT PRIMARY KEY,
-        punten INT NOT NULL,
+        punten DECIMAL(6,2) NOT NULL,
         toegekend_op DATETIME NOT NULL)');
+    // Oudere versie maakte de kolom als geheel getal aan; stilletjes
+    // opwaarderen zodat decimalen niet afgekapt worden (SQLite negeert dit).
+    try { $db->exec('ALTER TABLE bonuspunten MODIFY punten DECIMAL(6,2) NOT NULL'); }
+    catch (PDOException $e) { /* al goed, of geen MySQL */ }
 
     $q = $db->prepare('UPDATE bonuspunten SET punten = ?, toegekend_op = ? WHERE speler_id = ?');
     $q->execute([$punten, $nu, $spelerId]);
@@ -288,6 +302,20 @@ case 'resetAlles': {
     antwoord(['ok' => true]);
 }
 
+// ── Beheer: alleen de spelscores wissen (spelers en bonus blijven) ────
+case 'resetScores': {
+    eis_admin($invoer);
+    $db->exec('DELETE FROM scores');
+    antwoord(['ok' => true]);
+}
+
+// ── Beheer: alleen de bonuspunten wissen (spelers en scores blijven) ──
+case 'resetBonus': {
+    eis_admin($invoer);
+    try { $db->exec('DELETE FROM bonuspunten'); } catch (PDOException $e) { /* nog niet aangemaakt */ }
+    antwoord(['ok' => true]);
+}
+
 // ── Beheer: overzicht van alle spelers met voortgang ──────────────────
 case 'spelersOverzicht': {
     eis_admin($invoer);
@@ -312,7 +340,7 @@ case 'spelersOverzicht': {
             'level'         => ($scores ? max(array_keys($scores)) : 0) + 1,
             'gespeeld'      => count($scores),
             'bonus'         => $b,
-            'totaal'        => array_sum($scores) + $b,
+            'totaal'        => round(array_sum($scores) + $b, 2),
             'laatste_actie' => $per[$sid]['laatst'] ?? $s['aangemaakt_op'],
         ];
     }
@@ -333,7 +361,7 @@ function lees_bonuspunten(PDO $db): array {
     try {
         $uit = [];
         foreach ($db->query('SELECT speler_id, punten FROM bonuspunten')->fetchAll() as $r) {
-            $uit[(int) $r['speler_id']] = (int) $r['punten'];
+            $uit[(int) $r['speler_id']] = round((float) $r['punten'], 2);
         }
         return $uit;
     } catch (PDOException $e) {

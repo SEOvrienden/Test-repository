@@ -25,7 +25,14 @@ CREATE TABLE IF NOT EXISTS scores (
 
 CREATE TABLE IF NOT EXISTS instellingen (
   sleutel VARCHAR(40) PRIMARY KEY,
-  waarde VARCHAR(40) NOT NULL
+  waarde VARCHAR(200) NOT NULL       -- ruim genoeg voor een Tikkie-link
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Bonuspunten uit de clubkas-Tikkie (1 euro = 1 punt, decimalen mogen)
+CREATE TABLE IF NOT EXISTS bonuspunten (
+  speler_id INT PRIMARY KEY,
+  punten DECIMAL(6,2) NOT NULL,
+  toegekend_op DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Standaardinstellingen: spel open, testmodus uit

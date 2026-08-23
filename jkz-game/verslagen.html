@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Verslagen</title>
-  <link rel="stylesheet" href="css/stijl.css?v=10">
+  <link rel="stylesheet" href="css/stijl.css?v=11">
 </head>
 <body>
 
@@ -51,9 +51,9 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=10';
-import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=10';
-import { VERSLAG_TITELS } from './js/titels.js?v=10';
+import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=11';
+import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=11';
+import { VERSLAG_TITELS } from './js/titels.js?v=11';
 
 if (checkGesloten()) throw new Error('gesloten');
 

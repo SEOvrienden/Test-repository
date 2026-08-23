@@ -92,20 +92,39 @@ Eén speler wissen kan ook, in het blok erboven: kies de naam en klik
 
 ## Bonuspunten via Tikkie (steun de clubkas)
 
-1. Maak in je Tikkie-app een betaalverzoek zonder einddatum en kopieer de link.
-2. Plak die link op de beheerpagina bij **Bonuspunten (Tikkie)** en klik op
-   "Tikkie-link opslaan". Spelers zien nu op de ranglijstpagina een gouden
-   knop "Steun de clubkas — koop 25 bonuspunten".
-3. Zie je in je Tikkie-app dat iemand betaald heeft? Kies op de beheerpagina
-   die speler, vul het aantal punten in (standaard 25) en klik
-   **Bonuspunten toekennen**. De punten tellen direct mee in het totaal en
-   staan met een 💰 in de ranglijst.
-4. Per ongeluk toegekend? Ken 0 punten toe en de bonus is weer weg.
-5. Link weghalen = veld leegmaken en opnieuw opslaan; de knop verdwijnt dan.
+**1 euro = 1 bonuspunt.** Betaalt iemand €30,50, dan krijgt diegene 30,5
+punten. Ter vergelijking: elk spel is maximaal 100 punten, alle 7 spellen
+samen dus 700. Bonuspunten geven een zetje, maar spelen blijft het
+belangrijkste.
 
-De reset werkt op de database en geldt dus in één keer **voor iedereen**,
-op alle telefoons. Precies wat je na de testfase nodig hebt, vlak voor
-28 augustus.
+1. Jouw Tikkie-link staat er standaard al in — je hoeft niets te doen.
+   Spelers zien op de ranglijstpagina de gouden knop "Steun de clubkas".
+   Andere link? Plak hem op de beheerpagina bij **Bonuspunten (Tikkie)**
+   en klik op "Tikkie-link opslaan".
+2. Zie je in je Tikkie-app dat iemand betaald heeft? Kies op de beheerpagina
+   die speler, vul het betaalde bedrag in als punten (komma mag: 30,50) en
+   klik **Bonuspunten toekennen**.
+3. In de ranglijst en op de beamer staat alleen een 💰 achter de naam:
+   iedereen ziet dát iemand de clubkas gesteund heeft, maar niet voor hoeveel.
+   Alleen jij ziet de bedragen, op de beheerpagina.
+4. Betaalt iemand nóg een keer? Het nieuwe aantal VERVANGT het oude — tel
+   het er dus zelf bij op (had iemand 25 en betaalt hij nog 10, vul dan 35 in).
+5. Per ongeluk toegekend? Ken 0 punten toe en de bonus is weer weg.
+6. Link weghalen = veld leegmaken en opnieuw opslaan; de knop verdwijnt dan.
+
+## Wissen & resetten (drie aparte knoppen)
+
+Op de beheerpagina staan drie resets, elk met een eigen bevestigingswoord:
+
+| Knop | Typ | Wat het doet |
+|------|-----|--------------|
+| Wis alle spelscores | `SCORES` | Alleen de spelscores weg; spelers en bonuspunten blijven |
+| Wis alle bonuspunten | `BONUS` | Alleen de bonuspunten weg; spelers en scores blijven |
+| Alles wissen | `RESET` | Spelers, scores én bonuspunten weg — de grote reset vlak voor 28 augustus |
+
+Elke reset werkt op de database en geldt dus in één keer **voor iedereen**,
+op alle telefoons. Handig voor de testfase: je kunt je eigen testscores
+wissen zonder de bonuspunten aan te raken, en andersom.
 
 ---
 

@@ -143,6 +143,14 @@ export async function resetSpeler(sleutel, spelerId) {
   await roep('resetSpeler', { sleutel, spelerId });
 }
 
+export async function resetScores(sleutel) {
+  await roep('resetScores', { sleutel });
+}
+
+export async function resetBonus(sleutel) {
+  await roep('resetBonus', { sleutel });
+}
+
 export async function zetSpelStatus(sleutel, open) {
   await roep('zetSpelStatus', { sleutel, open });
   await verversStatus();
@@ -165,6 +173,13 @@ export async function zetTikkieLink(sleutel, link) {
 
 export async function zetBonus(sleutel, spelerId, punten) {
   await roep('zetBonus', { sleutel, spelerId, punten });
+}
+
+// Punten netjes tonen: hele getallen zonder komma, anders met komma
+// (30.5 → "30,5"). Bonuspunten kunnen decimalen hebben: 1 euro = 1 punt.
+export function toonPunten(n) {
+  const getal = Math.round((Number(n) || 0) * 100) / 100;
+  return String(getal).replace('.', ',');
 }
 
 // ── Wachtrij voor scores die niet verstuurd konden worden ─────────────────────
