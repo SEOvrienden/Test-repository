@@ -1,6 +1,6 @@
 // Gedeelde hulpfuncties voor alle pagina's
-import { haalConfig, haalTikkieLink } from './api.js?v=13';
-import { PLAAGTEKSTEN } from './teksten.js?v=13';
+import { haalConfig, haalTikkieLink } from './api.js?v=14';
+import { PLAAGTEKSTEN } from './teksten.js?v=14';
 
 // ── Voortgangsbalk ────────────────────────────────────────────────────────────
 

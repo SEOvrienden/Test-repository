@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Verslag</title>
-  <link rel="stylesheet" href="css/stijl.css?v=13">
+  <link rel="stylesheet" href="css/stijl.css?v=14">
 </head>
 <body>
 
@@ -53,9 +53,9 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=13';
-import { renderVoortgang, renderNav, urlParam, checkGesloten } from './js/app.js?v=13';
-import { VERSLAG_TITELS } from './js/titels.js?v=13';
+import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=14';
+import { renderVoortgang, renderNav, urlParam, checkGesloten } from './js/app.js?v=14';
+import { VERSLAG_TITELS } from './js/titels.js?v=14';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -86,7 +86,7 @@ renderVoortgang(document.getElementById('voortgang'), level, voortgang.level - 1
 // Verslagtekst laden (los HTML-bestand, makkelijk zelf aan te passen)
 const artikel = document.getElementById('verslag-artikel');
 try {
-  const res = await fetch(`verslag-teksten/verslag-${level}.html?v=13`);
+  const res = await fetch(`verslag-teksten/verslag-${level}.html?v=14`);
   if (!res.ok) throw new Error(res.status);
   artikel.innerHTML = await res.text();
   artikel.scrollTop = 0;

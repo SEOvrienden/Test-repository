@@ -2,8 +2,8 @@
 // Jij onderin, de computer bovenin. De bal wordt steeds sneller.
 // Hoe vaker jij hem terugslaat, hoe hoger je score. Mis = einde.
 // Oefenen: 20 seconden vrij spelen, gemiste bal komt gewoon terug.
-import { speel } from '../geluid.js?v=13';
-import { clamp } from '../app.js?v=13';
+import { speel } from '../geluid.js?v=14';
+import { clamp } from '../app.js?v=14';
 
 export const info = {
   naam: 'Pong',
