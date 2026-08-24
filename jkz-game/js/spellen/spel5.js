@@ -1,14 +1,15 @@
 // Spel 5 — Snake
 // Twee draaiknoppen. Canvas met requestAnimationFrame + delta-tijd.
 // Oefenen: 30 sec, botsen = waarschuwing (snake wrapt door muren).
-import { speel } from '../geluid.js?v=11';
-import { clamp } from '../app.js?v=11';
+import { speel } from '../geluid.js?v=12';
+import { clamp } from '../app.js?v=12';
 
 export const info = {
   naam: 'Snake',
   uitleg: 'Stuur de slang met de knoppen Linksom en Rechtsom. Eet de appels. '
-        + 'Loop niet in jezelf of tegen de muur.',
-  scoreRegel: 'Zo scoor je: 5 punten per appel. 20 appels = 100 punten.',
+        + 'Loop niet in jezelf of tegen de muur. Elke 5e appel is goud en telt dubbel!',
+  scoreRegel: 'Zo scoor je: 5 punten per appel, een gouden appel telt voor 2. '
+            + '20 appels = 100 punten.',
   demoHTML: `<div class="demo-snake"><div class="demo-snake-lichaam"></div></div>`,
 };
 
@@ -76,8 +77,9 @@ export function maakSpel(container, { modus, onKlaar }) {
   let richting = 'O';
   let volgendeRichting = 'O';
   let appel = plaatsAppel();
-  let appels = 0;
-  let aantalAppels = 0;
+  let appels = 0;        // telt mee voor de score (gouden appel = +2)
+  let aantalAppels = 0;  // aantal gegeten appels; elke 5e is goud
+  let appelIsGoud = false;
   let tijdSindsStap = 0;
   let snelheid = SNELHEID_BASIS;
   let vernietigd = false;
@@ -118,20 +120,31 @@ export function maakSpel(container, { modus, onKlaar }) {
       ctx.stroke();
     }
 
-    // Appel
+    // Appel (elke 5e is goud, met een pulserend randje, en telt dubbel)
     const ax = appel.x * cel + cel * 0.5;
     const ay = appel.y * cel + cel * 0.5;
-    ctx.fillStyle = '#e74c3c';
-    ctx.beginPath();
-    ctx.arc(ax, ay, cel * 0.4, 0, Math.PI * 2);
-    ctx.fill();
-    // Steeltje
-    ctx.strokeStyle = '#27ae60';
-    ctx.lineWidth = cel * 0.12;
-    ctx.beginPath();
-    ctx.moveTo(ax, ay - cel * 0.4);
-    ctx.lineTo(ax + cel * 0.15, ay - cel * 0.55);
-    ctx.stroke();
+    if (appelIsGoud) {
+      const puls = 1 + Math.sin(performance.now() / 180) * 0.12;
+      ctx.fillStyle = '#e0c766';
+      ctx.beginPath();
+      ctx.arc(ax, ay, cel * 0.42 * puls, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff2c4';
+      ctx.lineWidth = cel * 0.08;
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = '#e74c3c';
+      ctx.beginPath();
+      ctx.arc(ax, ay, cel * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      // Steeltje
+      ctx.strokeStyle = '#27ae60';
+      ctx.lineWidth = cel * 0.12;
+      ctx.beginPath();
+      ctx.moveTo(ax, ay - cel * 0.4);
+      ctx.lineTo(ax + cel * 0.15, ay - cel * 0.55);
+      ctx.stroke();
+    }
 
     // Slang
     slang.forEach((seg, idx) => {
@@ -195,11 +208,12 @@ export function maakSpel(container, { modus, onKlaar }) {
     // Appel gegeten?
     if (nx === appel.x && ny === appel.y) {
       speel('treffer');
-      appels++;
+      appels += appelIsGoud ? 2 : 1;
       aantalAppels++;
       appelsEl.textContent = appels;
       appel = plaatsAppel();
-      // Versnellen per 5 appels
+      appelIsGoud = (aantalAppels + 1) % 5 === 0;
+      // Versnellen per 5 punten
       snelheid = SNELHEID_BASIS + Math.floor(appels / 5) * SNELHEID_STAP;
     } else {
       slang.pop();

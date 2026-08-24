@@ -1691,6 +1691,56 @@ a.voortgang-blokje {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Bonuspunten-knop (Tikkie): opvallende gouden knop */
+.bonus-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 52px;
+  background: linear-gradient(180deg, #e0c766, var(--accent));
+  color: var(--jkz-groen);
+  font-weight: bold;
+  font-size: 1.05rem;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 2px 10px rgba(204, 171, 55, 0.35);
+  -webkit-tap-highlight-color: transparent;
+}
+.bonus-cta:active { transform: scale(0.98); }
+.bonus-cta-sub {
+  text-align: center;
+  color: var(--tekst-zwak);
+  margin-top: 0.4rem;
+}
+
+/* Uitlegpagina */
+.uitleg-blok { margin-bottom: 1.5rem; }
+.uitleg-blok h2 {
+  color: var(--accent);
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+}
+.uitleg-blok p, .uitleg-blok li {
+  color: var(--tekst);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+.uitleg-blok ul {
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Mepspel: gouden ster (telt voor 3 treffers) */
+.mep-cel.ster.actief {
+  background: #e0c766;
+  border-color: #fff2c4;
+  box-shadow: 0 0 14px rgba(224, 199, 102, 0.8);
+  font-size: 1.8rem;
+}
+
 /* Mepspel: bommen */
 .mep-cel.bom.actief {
   background: rgba(212, 84, 26, 0.25);

@@ -1,6 +1,6 @@
 // Gedeelde hulpfuncties voor alle pagina's
-import { haalConfig } from './api.js?v=11';
-import { PLAAGTEKSTEN } from './teksten.js?v=11';
+import { haalConfig, haalTikkieLink } from './api.js?v=12';
+import { PLAAGTEKSTEN } from './teksten.js?v=12';
 
 // ── Voortgangsbalk ────────────────────────────────────────────────────────────
 
@@ -31,6 +31,7 @@ export function renderNav(actief) {
     ['spelen',    'index.html',     '🎮', 'Spelen'],
     ['verslagen', 'verslagen.html', '📖', 'Verslagen'],
     ['ranglijst', 'ranglijst.html', '🏆', 'Ranglijst'],
+    ['uitleg',    'uitleg.html',    '❓', 'Uitleg'],
   ].map(([key, url, icoon, label]) =>
     `<a href="${url}" class="onder-nav-item${key === actief ? ' actief' : ''}">
        <span class="onder-nav-icoon">${icoon}</span><span>${label}</span>
@@ -39,6 +40,20 @@ export function renderNav(actief) {
   document.body.appendChild(nav);
   document.body.classList.add('met-nav');
   return nav;
+}
+
+// ── Bonuspunten-knop (Tikkie) ────────────────────────────────────────────────
+// Eén duidelijke gouden knop, op ranglijst, startscherm en uitlegpagina.
+// Verdwijnt vanzelf als er in het beheer geen Tikkie-link (meer) staat.
+
+export function renderBonusCTA(container) {
+  const link = haalTikkieLink();
+  if (!link) { container.innerHTML = ''; return; }
+  container.innerHTML = `
+    <a href="${link.replace(/"/g, '&quot;')}" target="_blank" rel="noopener" class="bonus-cta">
+      💰 Koop bonuspunten
+    </a>
+    <p class="klein bonus-cta-sub">1 euro = 1 punt. Betaal via Tikkie en stijg in de ranglijst.</p>`;
 }
 
 // ── Landschapswaarschuwing ────────────────────────────────────────────────────

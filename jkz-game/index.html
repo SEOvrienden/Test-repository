@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ Jaarverslag Game</title>
-  <link rel="stylesheet" href="css/stijl.css?v=11">
+  <link rel="stylesheet" href="css/stijl.css?v=12">
 </head>
 <body>
 
@@ -54,11 +54,15 @@ window.addEventListener('error', function (e) {
           </a>
           <a href="verslagen.html" class="knop secundair">Lees de verslagen</a>
           <a href="ranglijst.html" class="knop secundair">Bekijk ranglijst</a>
-          <button class="knop secundair klein" id="knop-iemand-anders"
-                  style="font-size:0.85rem;min-height:44px;border-width:1px;">
-            Ik ben iemand anders
-          </button>
         </div>
+        <div id="bonus-cta-vak" style="margin-top:1rem;width:100%;"></div>
+        <p class="klein ta-c" style="margin-top:1rem;">
+          <a href="uitleg.html" style="color:var(--accent);">❓ Hoe werkt het? Lees de korte uitleg</a>
+        </p>
+        <p class="klein ta-c" style="margin-top:0.75rem;color:var(--tekst-zwak);">
+          Ben je iemand anders?
+          <a href="#" id="knop-iemand-anders" style="color:var(--tekst-zwak);text-decoration:underline;">Tik dan hier</a>.
+        </p>
       </div>
     </div>
 
@@ -105,6 +109,9 @@ window.addEventListener('error', function (e) {
         Speelde je al eerder mee? Typ dan precies dezelfde naam,
         dan ga je verder waar je gebleven was.
       </p>
+      <p class="klein" style="margin-top:1rem;">
+        <a href="uitleg.html" style="color:var(--accent);">❓ Hoe werkt het? Lees de korte uitleg</a>
+      </p>
       <button class="knop secundair klein verborgen" id="knop-terug-naar-vorige"
               style="margin-top:1.25rem;font-size:0.85rem;min-height:44px;border-width:1px;">
         ← Ik ben toch <span id="terug-naam">…</span>
@@ -137,9 +144,9 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { registreerSpeler, haalVoortgang, haalSpelerUitStorage,
-         slaHuidigeSpelerOp, verwerkWachtrij, controleerVerbinding } from './js/api.js?v=11';
-import { renderNav, checkGesloten } from './js/app.js?v=11';
+import { registreerSpeler, haalVoortgang, haalSpelerUitStorage, slaHuidigeSpelerOp,
+         verwerkWachtrij, controleerVerbinding, verversStatus } from './js/api.js?v=12';
+import { renderNav, renderBonusCTA, checkGesloten } from './js/app.js?v=12';
 
 // Gesloten-check
 if (checkGesloten()) throw new Error('gesloten');
@@ -225,10 +232,18 @@ function toonAlleen(id) {
     document.getElementById(x).classList.toggle('verborgen', x !== id));
 }
 
-document.getElementById('knop-iemand-anders')?.addEventListener('click', () => {
+document.getElementById('knop-iemand-anders')?.addEventListener('click', (e) => {
+  e.preventDefault();
   document.getElementById('wissel-huidige-naam').textContent = huidig ? huidig.naam : '';
   toonAlleen('wissel-bevestig');
 });
+
+// Gouden bonuspunten-knop op het startscherm (alleen zichtbaar met speler)
+if (huidig) {
+  const ctaVak = document.getElementById('bonus-cta-vak');
+  renderBonusCTA(ctaVak);
+  verversStatus().then(() => renderBonusCTA(ctaVak));
+}
 
 document.getElementById('knop-wissel-nee').addEventListener('click', () => {
   toonAlleen('welkom-terug');

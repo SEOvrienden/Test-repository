@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Ranglijst</title>
-  <link rel="stylesheet" href="css/stijl.css?v=11">
+  <link rel="stylesheet" href="css/stijl.css?v=12">
 </head>
 <body>
 
@@ -68,9 +68,9 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalRanglijst, haalSpelerUitStorage, haalVoortgang, haalTikkieLink, verversStatus,
-         toonPunten } from './js/api.js?v=11';
-import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=11';
+import { haalRanglijst, haalSpelerUitStorage, haalVoortgang, verversStatus,
+         toonPunten } from './js/api.js?v=12';
+import { renderVoortgang, renderNav, renderBonusCTA, checkGesloten } from './js/app.js?v=12';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -78,26 +78,10 @@ renderNav('ranglijst');
 
 const speler = haalSpelerUitStorage();
 
-// Steun de clubkas: gouden blok met de Tikkie-link van de penningmeester
-async function toonClubkas() {
-  await verversStatus();
-  const link = haalTikkieLink();
-  const vak = document.getElementById('clubkas-vak');
-  if (!link) { vak.innerHTML = ''; return; }
-  vak.innerHTML = `
-    <a href="${link.replace(/"/g, '&quot;')}" target="_blank" rel="noopener"
-       style="display:block;background:rgba(204,171,55,0.12);border:1px solid var(--accent);
-              border-radius:12px;padding:0.8rem 1rem;margin-bottom:0.75rem;
-              text-decoration:none;color:var(--tekst);">
-      <strong style="color:var(--accent);">💰 Steun de clubkas — koop bonuspunten</strong><br>
-      <span class="klein" style="color:var(--tekst-zwak);">
-        Elke euro die je via Tikkie geeft is 1 bonuspunt (€30,50 = 30,5 punten).
-        Zodra je betaling binnen is, worden je punten toegekend en tellen ze
-        mee in je totaal.
-      </span>
-    </a>`;
-}
-toonClubkas();
+// Gouden bonuspunten-knop bovenaan (verdwijnt als er geen Tikkie-link is)
+const clubkasVak = document.getElementById('clubkas-vak');
+renderBonusCTA(clubkasVak);
+verversStatus().then(() => renderBonusCTA(clubkasVak));
 
 async function laadVoortgang() {
   if (speler) {
@@ -169,7 +153,7 @@ function renderRanglijst(data) {
       tekst: toonPunten(r.totaal) + (r.bonus > 0 ? ' <span style="font-size:0.75rem;">💰</span>' : ''),
       sorteer: r.totaal,
     }));
-    voetnoot.innerHTML = '💰 = heeft de clubkas gesteund &nbsp;·&nbsp; tik op een spelnaam voor de stand per spel';
+    voetnoot.innerHTML = '💰 = heeft extra punten gekocht &nbsp;·&nbsp; tik op een spelnaam voor de stand per spel';
   } else {
     const s = Number(actieveTab);
     kolom.textContent = 'Score';

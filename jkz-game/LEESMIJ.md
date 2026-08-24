@@ -92,17 +92,16 @@ Eén speler wissen kan ook, in het blok erboven: kies de naam en klik
 
 ## Bonuspunten via Tikkie (steun de clubkas)
 
-**1 euro = 1 bonuspunt.** Betaalt iemand €30,50, dan krijgt diegene 30,5
-punten. Ter vergelijking: elk spel is maximaal 100 punten, alle 7 spellen
-samen dus 700. Bonuspunten geven een zetje, maar spelen blijft het
-belangrijkste.
+**1 euro = 1 bonuspunt.** Ter vergelijking: elk spel is maximaal 100 punten,
+alle 7 spellen samen dus 700. Bonuspunten geven een zetje, maar spelen
+blijft het belangrijkste.
 
 1. Jouw Tikkie-link staat er standaard al in — je hoeft niets te doen.
-   Spelers zien op de ranglijstpagina de gouden knop "Steun de clubkas".
-   Andere link? Plak hem op de beheerpagina bij **Bonuspunten (Tikkie)**
-   en klik op "Tikkie-link opslaan".
+   Spelers zien op het startscherm, de ranglijst en de uitlegpagina de
+   gouden knop "Koop bonuspunten". Andere link? Plak hem op de beheerpagina
+   bij **Bonuspunten (Tikkie)** en klik op "Tikkie-link opslaan".
 2. Zie je in je Tikkie-app dat iemand betaald heeft? Kies op de beheerpagina
-   die speler, vul het betaalde bedrag in als punten (komma mag: 30,50) en
+   die speler, vul het betaalde bedrag in als punten (komma mag) en
    klik **Bonuspunten toekennen**.
 3. In de ranglijst en op de beamer staat alleen een 💰 achter de naam:
    iedereen ziet dát iemand de clubkas gesteund heeft, maar niet voor hoeveel.
@@ -138,6 +137,7 @@ jkz-game/
   verslagen.html      Overzicht van alle 7 verslagen (open/op slot)
   ranglijst.html      Scorebord (ververst elke 15 sec)
   eindstand.html      Beamerpagina voor op de vergadering
+  uitleg.html         Korte spelregels/uitleg voor de leden ("Hoe werkt het?")
   admin.html          Beheerpagina (?key=GEHEIM)
 
   eindkaart.html      Persoonlijke eindkaart na level 7 (screenshotbaar)
@@ -181,8 +181,8 @@ jkz-game/
    blokjes in de voortgangsbalk spring je naar elk eerder gespeeld level.
 5. Na spelen: verslag als tekstpagina in `verslag.html`.
 6. Onderaan elke pagina staat een vaste navigatiebalk: Spelen, Verslagen,
-   Ranglijst. Tijdens het spelen verdwijnt hij even, zodat je hem niet per
-   ongeluk aanraakt.
+   Ranglijst, Uitleg. Tijdens het spelen verdwijnt hij even, zodat je hem
+   niet per ongeluk aanraakt.
 
 ### Score-formules (niet aanpassen zonder backend-update)
 | Spel | Ruwe waarde | Formule |
@@ -190,8 +190,8 @@ jkz-game/
 | 1 Reactie | gem. ms | `(550 - gem) / 3.5` |
 | 2 Breakout | stenen + tijd | `stenen * 2` + tijdbonus (max 36) bij alles leeg |
 | 3 Simon | level | `level * 8` |
-| 4 Mepspel | treffers | `treffers * 4` |
-| 5 Snake | appels | `appels * 5` |
+| 4 Mepspel | treffers | `treffers * 4` (⭐ = 3 treffers, 💣 = −2) |
+| 5 Snake | appels | `appels * 5` (elke 5e appel is goud en telt voor 2) |
 | 6 One-button | palen | `palen * 5` |
 | 7 Pong | terugslagen | `terugslagen * 8` |
 Alle scores worden begrensd op 0–100.

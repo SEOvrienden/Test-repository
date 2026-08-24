@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Beheer</title>
-  <link rel="stylesheet" href="css/stijl.css?v=11">
+  <link rel="stylesheet" href="css/stijl.css?v=12">
 </head>
 <body>
 
@@ -44,7 +44,7 @@ window.addEventListener('error', function (e) {
 <script type="module">
 import { haalSpelersOverzicht, haalSpelStatus, zetSpelStatus, zetTestmodus,
          zetTikkieLink, zetBonus, resetAlles, resetSpeler, resetScores,
-         resetBonus, toonPunten } from './js/api.js?v=11';
+         resetBonus, toonPunten } from './js/api.js?v=12';
 
 // Sleutel uit URL halen; de server controleert of hij klopt
 const params = new URLSearchParams(window.location.search);
@@ -93,11 +93,12 @@ function renderBeheer(status) {
     <div class="admin-sectie">
       <h2>Bonuspunten (Tikkie)</h2>
       <p class="klein" style="margin-bottom:0.75rem;">
-        Spelers zien op de ranglijstpagina een knop "Steun de clubkas" met
-        deze Tikkie-link. <strong>Elke euro = 1 bonuspunt</strong> (€30,50 =
-        30,5 punten). Zie je in je Tikkie-app dat iemand betaald heeft?
-        Vul hieronder het betaalde bedrag in als punten (0 = weer weghalen).
-        Betaalt iemand nóg een keer? Tel het dan zelf bij het oude bedrag op.
+        Spelers zien op het startscherm, de ranglijst en de uitlegpagina de
+        gouden knop "Koop bonuspunten" met deze Tikkie-link.
+        <strong>1 euro = 1 punt.</strong> Zie je in je Tikkie-app dat iemand
+        betaald heeft? Vul hieronder het betaalde bedrag in als punten
+        (0 = weer weghalen). Betaalt iemand nóg een keer? Tel het dan zelf
+        bij het oude bedrag op.
       </p>
       <input type="text" id="tikkie-link" class="invoer" placeholder="https://tikkie.me/pay/..."
              value="${status.tikkie_link ? escapeHtml(status.tikkie_link) : ''}"
@@ -110,7 +111,7 @@ function renderBeheer(status) {
           ${spelers.map(s => `<option value="${s.id}">${escapeHtml(s.naam)}${s.bonus > 0 ? ' (heeft ' + toonPunten(s.bonus) + ' 💰)' : ''}</option>`).join('')}
         </select>
         <input type="text" inputmode="decimal" id="bonus-punten" class="invoer" value="25"
-               placeholder="30,50" style="width:90px;margin-bottom:0;">
+               placeholder="25" style="width:90px;margin-bottom:0;">
       </div>
       <button class="knop primair" id="knop-bonus-toekennen" style="margin-top:0.5rem;">
         Bonuspunten toekennen
@@ -188,7 +189,7 @@ function renderBeheer(status) {
     const punten = parseFloat(document.getElementById('bonus-punten').value.replace(',', '.'));
     if (!id) { toonMelding('Kies eerst een speler.', 'fout'); return; }
     if (isNaN(punten) || punten < 0 || punten > 250) {
-      toonMelding('Vul een aantal punten in tussen 0 en 250 (komma mag, bijv. 30,50).', 'fout'); return;
+      toonMelding('Vul een aantal punten in tussen 0 en 250 (komma mag).', 'fout'); return;
     }
     try {
       await zetBonus(sleutel, id, punten);
