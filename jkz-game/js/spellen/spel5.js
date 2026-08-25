@@ -1,8 +1,8 @@
 // Spel 5 — Snake
 // Twee draaiknoppen. Canvas met requestAnimationFrame + delta-tijd.
 // Oefenen: 30 sec, botsen = waarschuwing (snake wrapt door muren).
-import { speel } from '../geluid.js?v=18';
-import { clamp } from '../app.js?v=18';
+import { speel } from '../geluid.js?v=19';
+import { clamp } from '../app.js?v=19';
 
 export const info = {
   naam: 'Snake',
