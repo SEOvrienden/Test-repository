@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ Jaarverslag Game</title>
-  <link rel="stylesheet" href="css/stijl.css?v=21">
+  <link rel="stylesheet" href="css/stijl.css?v=22">
 </head>
 <body>
 
@@ -150,8 +150,9 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { registreerSpeler, haalVoortgang, haalSpelerUitStorage, slaHuidigeSpelerOp,
-         verwerkWachtrij, controleerVerbinding, verversStatus } from './js/api.js?v=21';
-import { renderNav, renderBonusCTA, checkGesloten, SPEL_NAMEN, AANTAL_SPELLEN } from './js/app.js?v=21';
+         verwerkWachtrij, controleerVerbinding, verversStatus } from './js/api.js?v=22';
+import { renderNav, renderBonusCTA, checkGesloten, initScrollHint,
+         SPEL_NAMEN, AANTAL_SPELLEN } from './js/app.js?v=22';
 
 // Gesloten-check
 if (checkGesloten()) throw new Error('gesloten');
@@ -225,6 +226,9 @@ if (huidig) {
       document.getElementById('knop-doorgaan').textContent =
         `Level ${level} spelen →`;
     }
+
+    // Onder de knoppen staat nog meer (bonuspunten, uitleg) — maak dat duidelijk
+    initScrollHint(400);
   });
 }
 

@@ -1,6 +1,6 @@
 // Gedeelde hulpfuncties voor alle pagina's
-import { haalConfig, haalTikkieLink } from './api.js?v=21';
-import { PLAAGTEKSTEN } from './teksten.js?v=21';
+import { haalConfig, haalTikkieLink } from './api.js?v=22';
+import { PLAAGTEKSTEN } from './teksten.js?v=22';
 
 // ── Spellen: het aantal en de namen, op één plek ─────────────────────────────
 
@@ -45,7 +45,70 @@ export function renderNav(actief) {
   ).join('');
   document.body.appendChild(nav);
   document.body.classList.add('met-nav');
+  verrijkHeader();
   return nav;
+}
+
+// ── Header: thematitel + Home-knop ───────────────────────────────────────────
+// Wordt automatisch aan de header toegevoegd op elke pagina met een navbalk:
+// rechts de titel "Game Changers 2025 – 2026", en (behalve op het startscherm
+// zelf) een duidelijke Home-knop.
+
+function verrijkHeader() {
+  const hoofd = document.querySelector('.hoofd');
+  if (!hoofd || hoofd.querySelector('.hoofd-titel')) return;
+
+  const titel = document.createElement('div');
+  titel.className = 'hoofd-titel';
+  titel.innerHTML = 'Game Changers<span>2025 – 2026</span>';
+
+  const pad = window.location.pathname;
+  const isHome = pad.endsWith('/') || pad.endsWith('index.html');
+  let homeKnop = null;
+  if (!isHome) {
+    homeKnop = document.createElement('a');
+    homeKnop.href = 'index.html';
+    homeKnop.className = 'home-knop';
+    homeKnop.innerHTML = '<span class="home-icoon">🏠</span><span>Home</span>';
+  }
+
+  // Sommige pagina's hebben al een rechterblok in de header (bijv. de
+  // geluidsknop op de spelpagina) — daar schuiven we netjes naast.
+  const rechts = hoofd.querySelector('.hoofd-rechts');
+  if (rechts) {
+    hoofd.insertBefore(titel, rechts);
+    if (homeKnop) rechts.insertBefore(homeKnop, rechts.firstChild);
+  } else {
+    hoofd.appendChild(titel);
+    if (homeKnop) hoofd.appendChild(homeKnop);
+  }
+}
+
+// ── Scroll-hint ──────────────────────────────────────────────────────────────
+// Toont "Scroll voor meer ↓" op pagina's waar meer onder de vouw staat.
+// Verdwijnt zodra er gescrold wordt (of na 8 seconden vanzelf).
+
+export function initScrollHint(wachtMs = 700) {
+  setTimeout(() => {
+    if (document.querySelector('.scroll-hint')) return;
+    const inhoud = document.querySelector('.inhoud');
+    const eigenScroll = inhoud &&
+      /(auto|scroll)/.test(getComputedStyle(inhoud).overflowY);
+    const kanScrollen = eigenScroll
+      ? inhoud.scrollHeight > inhoud.clientHeight + 24
+      : document.documentElement.scrollHeight > window.innerHeight + 24;
+    if (!kanScrollen) return;
+
+    const hint = document.createElement('div');
+    hint.className = 'scroll-hint';
+    hint.textContent = 'Scroll voor meer ↓';
+    document.body.appendChild(hint);
+
+    const doel = eigenScroll ? inhoud : window;
+    const weg = () => { hint.classList.add('weg'); doel.removeEventListener('scroll', weg); };
+    doel.addEventListener('scroll', weg, { passive: true });
+    setTimeout(weg, 8000);
+  }, wachtMs);
 }
 
 // ── Bonuspunten-knop (Tikkie) ────────────────────────────────────────────────

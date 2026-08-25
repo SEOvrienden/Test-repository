@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Verslagen</title>
-  <link rel="stylesheet" href="css/stijl.css?v=21">
+  <link rel="stylesheet" href="css/stijl.css?v=22">
 </head>
 <body>
 
@@ -39,38 +39,33 @@ window.addEventListener('error', function (e) {
 
   <div class="inhoud" style="overflow-y:auto;">
     <h1 style="margin-bottom:0.25rem;">Verslagen</h1>
-    <p class="klein" style="margin-bottom:1rem;">
-      Elk level dat je speelt, opent een verslag. Vrijgespeelde verslagen
-      kun je hier altijd teruglezen.
+    <p class="klein" style="margin-bottom:0.85rem;">
+      Elk level dat je speelt, opent een verslag. De historie en awards van
+      JKZ staan hieronder altijd voor je open:
     </p>
-    <div id="verslagen-lijst">
-      <div class="laadbericht">Laden…</div>
+
+    <div class="over-jkz-rij" style="margin:0 0 1.25rem;">
+      <a href="historie.html" class="over-jkz-kaart">
+        <span class="over-jkz-icoon">📜</span>
+        <span>Historie<br><small>Voorzitters, senatoren en ereleden</small></span>
+      </a>
+      <a href="awards.html" class="over-jkz-kaart">
+        <span class="over-jkz-icoon">🏆</span>
+        <span>Awards<br><small>Van Daan Bolding tot ShoarmAward</small></span>
+      </a>
     </div>
 
-    <div class="uitleg-blok" style="margin-top:1.75rem;">
-      <h2>Historie van JKZ</h2>
-      <p class="klein" style="margin-bottom:0.6rem;color:var(--tekst-zwak);">
-        Sinds 1957 — deze hoef je niet vrij te spelen.
-      </p>
-      <div class="over-jkz-rij">
-        <a href="historie.html" class="over-jkz-kaart">
-          <span class="over-jkz-icoon">📜</span>
-          <span>Historie<br><small>Voorzitters, senatoren en ereleden</small></span>
-        </a>
-        <a href="awards.html" class="over-jkz-kaart">
-          <span class="over-jkz-icoon">🏆</span>
-          <span>Awards<br><small>Van Daan Bolding tot ShoarmAward</small></span>
-        </a>
-      </div>
+    <div id="verslagen-lijst">
+      <div class="laadbericht">Laden…</div>
     </div>
   </div>
 
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=21';
-import { renderVoortgang, renderNav, checkGesloten } from './js/app.js?v=21';
-import { VERSLAG_TITELS } from './js/titels.js?v=21';
+import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=22';
+import { renderVoortgang, renderNav, checkGesloten, initScrollHint } from './js/app.js?v=22';
+import { VERSLAG_TITELS } from './js/titels.js?v=22';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -125,6 +120,8 @@ if (voortgang.level === 1 && !config.testmodus) {
   hint.innerHTML = 'Nog niets vrijgespeeld. <a href="spel.html?level=1" style="color:var(--accent);">Start level 1 →</a>';
   lijst.appendChild(hint);
 }
+
+initScrollHint(300);
 </script>
 </body>
 </html>

@@ -2153,3 +2153,45 @@ a.eindkaart-spel:active {
   0%, 100% { transform: translateX(-50%) translateY(0); }
   50%      { transform: translateX(-50%) translateY(5px); }
 }
+
+/* === HEADER: THEMATITEL + HOME-KNOP === */
+.hoofd-titel {
+  margin-left: auto;
+  text-align: right;
+  font-family: var(--font-kop);
+  font-weight: 400;
+  color: var(--accent);
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.hoofd-titel span {
+  display: block;
+  font-family: 'Courier New', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  color: var(--tekst-zwak);
+  margin-top: 3px;
+}
+.home-knop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 44px;
+  min-height: 44px;
+  margin-left: 0.75rem;
+  text-decoration: none;
+  color: var(--tekst-zwak);
+  font-size: 0.55rem;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.06em;
+  -webkit-tap-highlight-color: transparent;
+}
+.home-knop .home-icoon { font-size: 1.2rem; line-height: 1; }
+.home-knop:active { color: var(--accent); }
+/* Tijdens het spelen geen extra knop in beeld (misklikken voorkomen) */
+body.nav-verborgen .home-knop { display: none; }

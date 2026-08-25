@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Hoe werkt het?</title>
-  <link rel="stylesheet" href="css/stijl.css?v=21">
+  <link rel="stylesheet" href="css/stijl.css?v=22">
 </head>
 <body>
 
@@ -84,7 +84,22 @@ window.addEventListener('error', function (e) {
         <li>Speel met je <strong>echte voor- en achternaam</strong> — zo herkent iedereen je
             en komen je bonuspunten bij de juiste persoon terecht.</li>
         <li>Zelfde naam op een ander apparaat = gewoon verder waar je was.</li>
+        <li>Naam vergeten? Kijk op de
+            <a href="ranglijst.html" style="color:var(--accent);">ranglijst</a>
+            hoe je er precies bij staat, of stuur Jesse even een appje.</li>
       </ul>
+    </div>
+
+    <div class="uitleg-blok">
+      <h2>Historie &amp; awards 📜</h2>
+      <p>
+        Onder het tabblad <strong>Verslagen &amp; Historie</strong> vind je naast de
+        jaarverslagen ook de <a href="historie.html" style="color:var(--accent);">historie
+        van JKZ</a> (alle voorzitters sinds 1957, senatoren en ereleden) en
+        <a href="awards.html" style="color:var(--accent);">alle awards</a> — van de Daan
+        Bolding Award tot de ShoarmAward. Die hoef je niet vrij te spelen:
+        ze staan altijd open.
+      </p>
     </div>
 
     <p class="ta-c" style="color:var(--accent);margin:1rem 0 1.5rem;">
@@ -95,11 +110,12 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { verversStatus } from './js/api.js?v=21';
-import { renderNav, renderBonusCTA, checkGesloten } from './js/app.js?v=21';
+import { verversStatus } from './js/api.js?v=22';
+import { renderNav, renderBonusCTA, checkGesloten, initScrollHint } from './js/app.js?v=22';
 
 if (checkGesloten()) throw new Error('gesloten');
 renderNav('uitleg');
+initScrollHint();
 
 // Gouden bonusknop midden in de uitleg (verdwijnt als er geen link is)
 const ctaVak = document.getElementById('bonus-cta-vak');

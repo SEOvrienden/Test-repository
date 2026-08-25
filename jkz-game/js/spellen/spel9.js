@@ -2,8 +2,8 @@
 // Een wijzer draait rond; tik precies wanneer hij door het gouden vak gaat.
 // Elke treffer: vak wordt kleiner, wijzer sneller én wisselt van plek.
 // 3 levens. Oefenen: groot vak, vaste snelheid, 20 sec.
-import { speel } from '../geluid.js?v=21';
-import { clamp } from '../app.js?v=21';
+import { speel } from '../geluid.js?v=22';
+import { clamp } from '../app.js?v=22';
 
 export const info = {
   naam: 'Lucky Shot',

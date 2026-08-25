@@ -2,8 +2,8 @@
 // Een blok schuift heen en weer; tik om hem op de toren te laten vallen.
 // Wat oversteekt wordt afgezaagd, dus de toren wordt steeds smaller.
 // Het tempo loopt per laag op. Oefenen: 20 sec, zonder afzagen.
-import { speel } from '../geluid.js?v=21';
-import { clamp } from '../app.js?v=21';
+import { speel } from '../geluid.js?v=22';
+import { clamp } from '../app.js?v=22';
 
 export const info = {
   naam: 'Stapelen',
