@@ -1,7 +1,7 @@
 // Spel 3 — Simon
 // Herhaal de kleurenreeks. Score = level * 8. Oefenen stopt na level 3.
-import { speel, speelSimon } from '../geluid.js?v=17';
-import { clamp } from '../app.js?v=17';
+import { speel, speelSimon } from '../geluid.js?v=18';
+import { clamp } from '../app.js?v=18';
 
 export const info = {
   naam: 'Simon',

@@ -4,8 +4,8 @@
 // - Soms valt er een ster: vang hem en je krijgt een EXTRA bal (max 3).
 // - Pas als je álle ballen mist, is het voorbij.
 // Oefenen: 30 seconden vrij spelen, gemiste bal komt gewoon terug.
-import { speel } from '../geluid.js?v=17';
-import { clamp } from '../app.js?v=17';
+import { speel } from '../geluid.js?v=18';
+import { clamp } from '../app.js?v=18';
 
 export const info = {
   naam: 'JKZ Breakout',

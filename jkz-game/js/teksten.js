@@ -24,6 +24,7 @@ export const PLAAGTEKSTEN = [
     '“Wow, dit was echt vet geregeld”, zegt penningmeester Stam. Missie geslaagd.',
     'Je scheurt over de ranglijst alsof Rainbow Road tóch in de Zaanstreek ligt.',
     'Onvergetelijk, net als Kenia. Alleen word jij morgen niet wakker met zebra’s voor het raam.',
+    'Deze score gaat viral. Straks schrijft de burgemeester er nog een column over.',
   ]},
   { vanaf: 60, teksten: [
     'Prima fundering, zegt Van der Heide. Oplevering wel pas Q3 2027.',
@@ -35,6 +36,7 @@ export const PLAAGTEKSTEN = [
     'De ketel brandt, zou Wessels zeggen. Kan alleen nog een graadje warmer.',
     'Prima checkpoint. Even bijladen en door naar het volgende level.',
     'Sven noteert je netjes in de notulen. Wees blij — hij vergeet weleens iemand “per ongeluk”.',
+    'Begonnen als chocoladeletter, op weg naar negen ton. Blijven spelen dus!',
   ]},
   { vanaf: 40, teksten: [
     'Matig, matig… bel Jesse eens voor wat tips.',
@@ -50,6 +52,7 @@ export const PLAAGTEKSTEN = [
     'Volgens Kars is dit “ruim voldoende”. Maar Kars heeft ook de statuten als nachtlectuur.',
     'Banana Chaos, maar dan zonder de fun. Reflexen trainen en opnieuw!',
     'De Big Five gespot? Deze score haalt niet eens de fotorol van de Keniareis.',
+    'Nieuwjaarsborrel-op-oudjaarsdag-logica: het klopt nét niet, maar gezellig is het wel.',
   ]},
   { vanaf: 20, teksten: [
     'Tsjonge jonge, wat een drama — zo laag als de rente bij de ING.',
@@ -67,6 +70,8 @@ export const PLAAGTEKSTEN = [
     'Game over op een side quest. En de main quest moet nog beginnen…',
     'Jouw puntenoverzicht is als het jaaroverzicht van Broadcast: kort en overzichtelijk. Want leeg.',
     'De nieuwe eindbaas Joustra heeft dit gezien, hè.',
+    'De spoeling is dun vanavond, zou Thijs zeggen.',
+    'Zelfs Danny Vera kan deze score niet meer redden.',
   ]},
   { vanaf: 0, teksten: [
     'Wat een drama. Lijkt Patrick Stam in de sportschool wel.',
