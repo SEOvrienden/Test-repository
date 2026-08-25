@@ -9,6 +9,7 @@ export const PLAAGTEKSTEN = [
     'Honderd punten. Duisdecker zet er z’n handtekening onder en noemt het zijn ontwerp.',
     'Vlekkeloos. Zelfs Van der Laan legt z’n vloeren niet zó strak.',
     'LEVEL UP! Dit is precies wat Van der Heide bedoelde met Game Changers.',
+    'Drie sterren van de voorzitter. Level uitgespeeld!',
   ]},
   { vanaf: 80, teksten: [
     'Wauw, wat een score — jij staat vol in de spotlights van Nils!',
@@ -21,6 +22,8 @@ export const PLAAGTEKSTEN = [
     'Dik rendement. Hugo probeert je morgen een beleggingsrekening aan te smeren.',
     'Van side quest naar main quest — deze score mag zo het jaarplan in.',
     '“Wow, dit was echt vet geregeld”, zegt penningmeester Stam. Missie geslaagd.',
+    'Je scheurt over de ranglijst alsof Rainbow Road tóch in de Zaanstreek ligt.',
+    'Onvergetelijk, net als Kenia. Alleen word jij morgen niet wakker met zebra’s voor het raam.',
   ]},
   { vanaf: 60, teksten: [
     'Prima fundering, zegt Van der Heide. Oplevering wel pas Q3 2027.',
@@ -46,6 +49,7 @@ export const PLAAGTEKSTEN = [
     'Zaanse zuinigheid met punten strooien — Stam knikt goedkeurend, maar meer ook niet.',
     'Volgens Kars is dit “ruim voldoende”. Maar Kars heeft ook de statuten als nachtlectuur.',
     'Banana Chaos, maar dan zonder de fun. Reflexen trainen en opnieuw!',
+    'De Big Five gespot? Deze score haalt niet eens de fotorol van de Keniareis.',
   ]},
   { vanaf: 20, teksten: [
     'Tsjonge jonge, wat een drama — zo laag als de rente bij de ING.',
@@ -61,6 +65,8 @@ export const PLAAGTEKSTEN = [
     'Sven overweegt z’n lidmaatschap alwéér op te zeggen na het zien van deze score.',
     'Dit haalt de doelstelling niet. En die lag al op “minstens zes nieuwe leden”.',
     'Game over op een side quest. En de main quest moet nog beginnen…',
+    'Jouw puntenoverzicht is als het jaaroverzicht van Broadcast: kort en overzichtelijk. Want leeg.',
+    'De nieuwe eindbaas Joustra heeft dit gezien, hè.',
   ]},
   { vanaf: 0, teksten: [
     'Wat een drama. Lijkt Patrick Stam in de sportschool wel.',
@@ -76,5 +82,7 @@ export const PLAAGTEKSTEN = [
     'Press Start, zei Van der Heide. Niet Press Stop.',
     'Sven schrijft je uit de ledenlijst. Je merkt het waarschijnlijk niet eens.',
     'Deze score valt onder “falen” uit het jaarplan. Gelukkig stond erbij: samen winnen komt later.',
+    'Zelfs de anaconda van Fidel deinst hiervoor terug.',
+    'Game over? Zeker niet, zou de voorzitter zeggen. Continue!',
   ]},
 ];
