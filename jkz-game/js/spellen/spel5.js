@@ -1,25 +1,26 @@
 // Spel 5 — Snake
 // Twee draaiknoppen. Canvas met requestAnimationFrame + delta-tijd.
 // Oefenen: 30 sec, botsen = waarschuwing (snake wrapt door muren).
-import { speel } from '../geluid.js?v=15';
-import { clamp } from '../app.js?v=15';
+import { speel } from '../geluid.js?v=16';
+import { clamp } from '../app.js?v=16';
 
 export const info = {
   naam: 'Snake',
   uitleg: 'Stuur de slang met de knoppen Linksom en Rechtsom. Eet de appels. '
         + 'Loop niet in jezelf of tegen de muur. Elke 5e appel is goud en telt dubbel!',
-  scoreRegel: 'Zo scoor je: 5 punten per appel, een gouden appel telt voor 2. '
-            + '20 appels = 100 punten.',
+  scoreRegel: 'Zo scoor je: 4 punten per appel, een gouden appel telt voor 2. '
+            + '25 appels = 100 punten.',
   demoHTML: `<div class="demo-snake"><div class="demo-snake-lichaam"></div></div>`,
 };
 
 const RASTER = 15;
 const SNELHEID_BASIS  = 2.5; // cellen per seconde
-const SNELHEID_STAP   = 0.4; // sneller per 5 appels
+const SNELHEID_STAP   = 0.5; // sneller per 5 appels
 const OEFENEN_DUUR    = 30;  // seconden
 
 function berekenScore(appels) {
-  return clamp(appels * 5, 0, 100);
+  // 100 pas bij 25 appelpunten (≈ 21 gegeten appels) — dan is de slang al lang
+  return clamp(appels * 4, 0, 100);
 }
 
 const RICHTINGEN = {

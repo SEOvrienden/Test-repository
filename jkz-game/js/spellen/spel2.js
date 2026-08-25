@@ -4,14 +4,15 @@
 // - Soms valt er een ster: vang hem en je krijgt een EXTRA bal (max 3).
 // - Pas als je álle ballen mist, is het voorbij.
 // Oefenen: 30 seconden vrij spelen, gemiste bal komt gewoon terug.
-import { speel } from '../geluid.js?v=15';
-import { clamp } from '../app.js?v=15';
+import { speel } from '../geluid.js?v=16';
+import { clamp } from '../app.js?v=16';
 
 export const info = {
   naam: 'JKZ Breakout',
   uitleg: 'Kaats de bal omhoog en speel de letters JKZ zo snel mogelijk leeg. '
         + 'Lichte stenen moet je 2x raken. Vang de vallende ster voor een extra bal!',
-  scoreRegel: 'Zo scoor je: 2 punten per steen, plus een dikke tijdbonus als je alles leegspeelt.',
+  scoreRegel: 'Zo scoor je: 2 punten per steen. De volle tijdbonus krijg je alleen '
+            + 'als je álles leegspeelt binnen 35 seconden.',
   demoHTML: `<div class="demo-breakout">
     <div class="demo-bo-stenen">
       <div></div><div></div><div></div><div></div><div></div><div></div>
@@ -53,8 +54,9 @@ const MAX_BALLEN   = 3;
 function berekenScore(stenen, seconden, allesWeg) {
   let score = stenen * 2;
   if (allesWeg) {
-    // Tijdbonus: binnen 50 s de volle 36 punten, daarna langzaam minder
-    const bonus = seconden <= 50 ? 36 : Math.max(10, 36 - (seconden - 50) * 0.5);
+    // Tijdbonus: alleen de volle 36 punten bij leegspelen binnen 35 s,
+    // daarna loopt hij snel terug — 100 halen vergt dus écht tempo
+    const bonus = seconden <= 35 ? 36 : Math.max(6, 36 - (seconden - 35));
     score += bonus;
   }
   return clamp(Math.round(score), 0, 100);

@@ -1,14 +1,14 @@
 // Spel 3 — Simon
 // Herhaal de kleurenreeks. Score = level * 8. Oefenen stopt na level 3.
-import { speel, speelSimon } from '../geluid.js?v=15';
-import { clamp } from '../app.js?v=15';
+import { speel, speelSimon } from '../geluid.js?v=16';
+import { clamp } from '../app.js?v=16';
 
 export const info = {
   naam: 'Simon',
   uitleg: 'Onthoud de kleurenreeks en tik hem na. '
         + 'Elke ronde wordt de reeks één kleur langer.',
-  scoreRegel: 'Zo scoor je: 8 punten per level dat je haalt. '
-            + 'Level 12 of hoger geeft 100 punten.',
+  scoreRegel: 'Zo scoor je: 7 punten per level dat je haalt. '
+            + 'Pas bij level 15 heb je de volle 100 punten.',
   demoHTML: `<div class="demo-simon">
     <div></div><div></div><div></div><div></div>
   </div>`,
@@ -19,7 +19,8 @@ const FLASH_DUUR = 500;
 const FLASH_PAUZE = 150;
 
 function berekenScore(level) {
-  return clamp(level * 8, 0, 100);
+  // 100 pas bij 15 onthouden levels — dat is een reeks van 15 kleuren
+  return clamp(level * 7, 0, 100);
 }
 
 export function maakSpel(container, { modus, onKlaar }) {

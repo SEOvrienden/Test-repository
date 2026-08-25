@@ -1,14 +1,14 @@
 // Spel 4 — Mepspel
 // Tik het opduikende vakje in 30 seconden. Oefenen: 10 seconden.
-import { speel } from '../geluid.js?v=15';
-import { clamp } from '../app.js?v=15';
+import { speel } from '../geluid.js?v=16';
+import { clamp } from '../app.js?v=16';
 
 export const info = {
   naam: 'Mepspel',
   uitleg: 'Tik de gouden vakjes zo snel mogelijk weg — maar blijf van de bommen af! '
         + 'Zie je een ⭐? Die telt voor 3, maar is snel weer weg. Je hebt 30 seconden.',
-  scoreRegel: 'Zo scoor je: 4 punten per treffer, een ⭐ telt voor 3 treffers, '
-            + 'een bom kost je er 2. 25 treffers = 100 punten.',
+  scoreRegel: 'Zo scoor je: 3 punten per treffer, een ⭐ telt voor 3 treffers, '
+            + 'een bom kost je er 2. 34 treffers = 100 punten.',
   demoHTML: `<div class="demo-mep">
     <div></div><div></div><div></div><div></div>
   </div>`,
@@ -17,13 +17,14 @@ export const info = {
 const DUUR_ECHT    = 30;
 const DUUR_OEFENEN = 10;
 const MEP_ZICHTBAAR_START = 1200; // ms zichtbaar aan het begin
-const MEP_ZICHTBAAR_EIND  = 650;  // ms zichtbaar aan het einde (tempo loopt op)
+const MEP_ZICHTBAAR_EIND  = 550;  // ms zichtbaar aan het einde (tempo loopt op)
 const MEP_PAUZE     = 300;  // ms pauze na verdwijnen
 const BOM_KANS      = 0.22; // kans dat het vakje een bom is
 const STER_KANS     = 0.10; // kans op een ⭐ (telt voor 3, maar korter zichtbaar)
 
 function berekenScore(treffers) {
-  return clamp(treffers * 4, 0, 100);
+  // 100 pas bij 34 treffers in 30 seconden — sterren meepakken is verplicht
+  return clamp(treffers * 3, 0, 100);
 }
 
 export function maakSpel(container, { modus, onKlaar }) {

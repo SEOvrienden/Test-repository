@@ -1,14 +1,14 @@
 // Spel 1 — Reactietest
 // Tik zodra het vlak groen wordt. 5 rondes (oefenen: 2).
-import { speel } from '../geluid.js?v=15';
-import { clamp } from '../app.js?v=15';
+import { speel } from '../geluid.js?v=16';
+import { clamp } from '../app.js?v=16';
 
 export const info = {
   naam: 'Reactietest',
   uitleg: 'Wacht tot het vlak groen kleurt en tik dan zo snel mogelijk. '
         + 'Tik je te vroeg, dan telt die ronde als 600 ms.',
   scoreRegel: 'Zo scoor je: hoe sneller je gemiddelde, hoe meer punten. '
-            + 'Onder de 550 ms levert het altijd punten op.',
+            + 'De volle 100 haal je pas rond een gemiddelde van 180 ms — bloedsnel dus.',
   demoHTML: `<div class="demo-reactie-vlak"></div>`,
 };
 
@@ -20,7 +20,8 @@ const MAX_WACHT = 4000;
 
 function berekenScore(tijden) {
   const gem = tijden.reduce((s, t) => s + t, 0) / tijden.length;
-  return { score: clamp(Math.round((550 - gem) / 3.5), 0, 100), gem: Math.round(gem) };
+  // 100 punten pas bij een gemiddelde van 180 ms; 250 ms ≈ 77, 300 ms ≈ 60
+  return { score: clamp(Math.round((480 - gem) / 3), 0, 100), gem: Math.round(gem) };
 }
 
 export function maakSpel(container, { modus, onKlaar }) {

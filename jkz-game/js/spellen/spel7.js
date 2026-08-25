@@ -2,14 +2,15 @@
 // Jij onderin, de computer bovenin. De bal wordt steeds sneller.
 // Hoe vaker jij hem terugslaat, hoe hoger je score. Mis = einde.
 // Oefenen: 20 seconden vrij spelen, gemiste bal komt gewoon terug.
-import { speel } from '../geluid.js?v=15';
-import { clamp } from '../app.js?v=15';
+import { speel } from '../geluid.js?v=16';
+import { clamp } from '../app.js?v=16';
 
 export const info = {
   naam: 'Pong',
   uitleg: 'Sleep je peddel onderin heen en weer en sla de bal terug. '
         + 'De bal wordt steeds sneller én je peddel krimpt — hoe lang hou jij het vol?',
-  scoreRegel: 'Zo scoor je: 8 punten per keer dat jij de bal terugslaat. 13 keer = 100 punten.',
+  scoreRegel: 'Zo scoor je: 5 punten per keer dat jij de bal terugslaat. 20 keer = 100 punten. '
+            + 'De bal wordt steeds sneller en je batje steeds kleiner.',
   demoHTML: `<div class="demo-pong">
     <div class="demo-pong-cpu"></div>
     <div class="demo-pong-bal"></div>
@@ -23,10 +24,11 @@ const VERSNELLING   = 1.06;  // per terugslag van de speler
 const PEDDEL_B      = 92;
 const PEDDEL_H      = 12;
 const BAL_R         = 7;
-const CPU_MAX       = 210;   // px/s — haalbaar te verslaan zodra de bal sneller wordt
+const CPU_MAX       = 230;   // px/s — haalbaar te verslaan zodra de bal sneller wordt
 
 function berekenScore(terugslagen) {
-  return clamp(terugslagen * 8, 0, 100);
+  // 100 pas bij 20 terugslagen — dan gaat de bal ruim 3x zo snel als bij de start
+  return clamp(terugslagen * 5, 0, 100);
 }
 
 export function maakSpel(container, { modus, onKlaar }) {

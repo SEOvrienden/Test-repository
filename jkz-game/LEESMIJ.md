@@ -188,18 +188,18 @@ jkz-game/
    niet per ongeluk aanraakt.
 
 ### Score-formules (niet aanpassen zonder backend-update)
-| Spel | Ruwe waarde | Formule |
+| Spel | Ruwe waarde | Formule (100 punten is bewust moeilijk) |
 |------|-------------|---------|
-| 1 Reactie | gem. ms | `(550 - gem) / 3.5` |
-| 2 Breakout | stenen + tijd | `stenen * 2` + tijdbonus (max 36) bij alles leeg |
-| 3 Simon | level | `level * 8` |
-| 4 Mepspel | treffers | `treffers * 4` (⭐ = 3 treffers, 💣 = −2) |
-| 5 Snake | appels | `appels * 5` (elke 5e appel is goud en telt voor 2) |
-| 6 One-button | palen | `palen * 5` |
-| 7 Pong | terugslagen | `terugslagen * 8` |
-| 8 Stapelen | lagen | `lagen * 5` |
-| 9 Lucky Shot | raak | `raak * 7` |
-| 10 Hit & Run | seconden + munten | `seconden * 3 + munten * 2` |
+| 1 Reactie | gem. ms | `(480 - gem) / 3` — 100 bij gem. 180 ms |
+| 2 Breakout | stenen + tijd | `stenen * 2` + tijdbonus (36 alleen bij leeg binnen 35 s) |
+| 3 Simon | level | `level * 7` — 100 bij level 15 |
+| 4 Mepspel | treffers | `treffers * 3` (⭐ = 3 treffers, 💣 = −2) — 100 bij 34 |
+| 5 Snake | appels | `appels * 4` (elke 5e appel is goud en telt voor 2) — 100 bij 25 |
+| 6 One-button | palen | `palen * 1` — 100 bij 100 palen; gaten krimpen, palen gaan bewegen |
+| 7 Pong | terugslagen | `terugslagen * 5` — 100 bij 20 |
+| 8 Stapelen | lagen | `lagen * 5` — 100 bij 20 lagen |
+| 9 Lucky Shot | raak | `raak * 7` — 100 bij 15 rake shots |
+| 10 Hit & Run | seconden + munten | `seconden * 2 + munten * 2` — 100 rond 40 s |
 Alle scores worden begrensd op 0–100.
 
 ### Beheerpagina

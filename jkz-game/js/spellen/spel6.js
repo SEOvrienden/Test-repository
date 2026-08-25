@@ -1,14 +1,16 @@
 // Spel 6 — One-button (Flappy style)
 // Tik om te fladderen, ontwijkt palen. Canvas + delta-tijd.
 // Oefenen: eindigt na 3 palen, botsen herstart meteen.
-import { speel } from '../geluid.js?v=15';
-import { clamp } from '../app.js?v=15';
+import { speel } from '../geluid.js?v=16';
+import { clamp } from '../app.js?v=16';
 
 export const info = {
   naam: 'One-button',
   uitleg: 'Tik om omhoog te fladderen. Zwaartekracht trekt je naar beneden. '
-        + 'Ontwijkt de palen.',
-  scoreRegel: 'Zo scoor je: 5 punten per doorgekomen paal. 20 palen = 100 punten.',
+        + 'Ontwijk de palen. De gaten worden steeds smaller, het tempo loopt op '
+        + 'en verderop beginnen palen te bewegen…',
+  scoreRegel: 'Zo scoor je: 1 punt per doorgekomen paal. 100 palen = 100 punten. '
+            + 'Veel succes.',
   demoHTML: `<div class="demo-onebutton">
     <div class="demo-ob-vogel"></div>
     <div class="demo-ob-paal boven"></div>
@@ -18,14 +20,18 @@ export const info = {
 
 const ZWAARTEKRACHT   = 900;   // px/s²
 const FLAP_KRACHT     = -340;  // px/s (omhoog)
-const PAAL_SNELHEID   = 160;   // px/s
+const PAAL_SNELHEID   = 160;   // px/s aan het begin
+const SNELHEID_PER_PAAL = 1.4; // px/s erbij per gehaalde paal (max +120)
 const PAAL_BREEDTE    = 50;    // px
-const GAP_FRACTIE     = 0.38;  // gat als fractie van schermbreedte
-const PAAL_INTERVAL   = 2.2;   // seconden tussen palen
+const GAP_FRACTIE     = 0.38;  // gat aan het begin (fractie van schermhoogte)
+const GAP_MIN         = 0.26;  // smalste gat (bereikt rond paal 40)
+const PAAL_INTERVAL   = 2.2;   // seconden tussen palen aan het begin
+const INTERVAL_MIN    = 1.5;
+const BEWEEG_VANAF    = 15;    // vanaf deze paal kunnen palen gaan bewegen
 const OEFENEN_PALEN   = 3;
 
 function berekenScore(palen) {
-  return clamp(palen * 5, 0, 100);
+  return clamp(palen, 0, 100);
 }
 
 export function maakSpel(container, { modus, onKlaar }) {
@@ -78,13 +84,36 @@ export function maakSpel(container, { modus, onKlaar }) {
 
   const VOGEL_R = 14;
 
+  // Moeilijkheid loopt op met het aantal gehaalde palen (niet in oefenmodus)
+  function moeilijkheid() { return isOefenen ? 0 : palen_count; }
+  function gapNu() {
+    const f = GAP_FRACTIE - (GAP_FRACTIE - GAP_MIN) * Math.min(1, moeilijkheid() / 40);
+    return H() * f;
+  }
+  function snelheidNu() {
+    return PAAL_SNELHEID + Math.min(120, moeilijkheid() * SNELHEID_PER_PAAL);
+  }
+  function intervalNu() {
+    // Iets korter naarmate het sneller gaat, zodat de afstand gelijk aanvoelt
+    return Math.max(INTERVAL_MIN, PAAL_INTERVAL * (PAAL_SNELHEID / snelheidNu()));
+  }
+
   function maakPaal(x) {
     const h = H();
-    const gat = h * GAP_FRACTIE;
-    const minTop = h * 0.15;
-    const maxTop = h - gat - h * 0.15;
+    const gat = gapNu();
+    const minTop = h * 0.12;
+    const maxTop = h - gat - h * 0.12;
     const topHoogte = minTop + Math.random() * (maxTop - minTop);
-    return { x, topHoogte, gat, geteld: false };
+    // Verderop in het spel gaan sommige palen op en neer bewegen
+    const kans = Math.min(0.5, Math.max(0, (moeilijkheid() - BEWEEG_VANAF) * 0.03));
+    const beweegt = Math.random() < kans;
+    return {
+      x, topHoogte, gat, geteld: false,
+      beweegt,
+      basisTop: topHoogte,
+      fase: Math.random() * Math.PI * 2,
+      amplitude: h * 0.05,
+    };
   }
 
   function flap() {
@@ -136,14 +165,23 @@ export function maakSpel(container, { modus, onKlaar }) {
     volgende_paal -= delta;
     if (volgende_paal <= 0) {
       palen.push(maakPaal(w + PAAL_BREEDTE));
-      volgende_paal = PAAL_INTERVAL;
+      volgende_paal = intervalNu();
     }
 
     // Palen bewegen + botsing
     const vogelX = w * 0.25;
+    const snelheid = snelheidNu();
     for (let i = palen.length - 1; i >= 0; i--) {
       const p = palen[i];
-      p.x -= PAAL_SNELHEID * delta;
+      p.x -= snelheid * delta;
+
+      // Bewegende palen schuiven langzaam op en neer
+      if (p.beweegt) {
+        p.fase += delta * 1.6;
+        const minTop = h * 0.08;
+        const maxTop = h - p.gat - h * 0.08;
+        p.topHoogte = clamp(p.basisTop + Math.sin(p.fase) * p.amplitude, minTop, maxTop);
+      }
 
       // Score tellen
       if (!p.geteld && p.x + PAAL_BREEDTE < vogelX) {
@@ -180,11 +218,11 @@ export function maakSpel(container, { modus, onKlaar }) {
     ctx.fillStyle = '#0f333c';
     ctx.fillRect(0, 0, w, h);
 
-    // Palen
-    ctx.fillStyle = '#204634';
-    ctx.strokeStyle = 'rgba(232,163,61,0.3)';
+    // Palen (bewegende palen krijgen een roze rand, dan zie je ze aankomen)
     ctx.lineWidth = 1.5;
     for (const p of palen) {
+      ctx.fillStyle = p.beweegt ? '#28454f' : '#1c525f';
+      ctx.strokeStyle = p.beweegt ? 'rgba(216,84,143,0.8)' : 'rgba(232,163,61,0.3)';
       // Bovenpaal
       ctx.fillRect(p.x, 0, PAAL_BREEDTE, p.topHoogte);
       ctx.strokeRect(p.x, 0, PAAL_BREEDTE, p.topHoogte);

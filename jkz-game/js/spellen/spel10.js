@@ -2,16 +2,16 @@
 // Sleep je speler onderin heen en weer: ontwijk de vallende blokken en
 // vang de gouden munten (Credits & Coins!). Het tempo loopt steeds op.
 // Eén blok tegen je hoofd = klaar. Oefenen: 20 sec, botsen mag.
-import { speel } from '../geluid.js?v=15';
-import { clamp } from '../app.js?v=15';
+import { speel } from '../geluid.js?v=16';
+import { clamp } from '../app.js?v=16';
 
 export const info = {
   naam: 'Hit & Run',
   uitleg: 'Sleep je speler met je vinger naar links en rechts. Ontwijk de '
         + 'vallende blokken en vang de gouden munten. Het regent steeds harder — '
         + 'één blok tegen je hoofd en het is klaar.',
-  scoreRegel: 'Zo scoor je: 3 punten per overleefde seconde + 2 per munt. '
-            + 'Ongeveer 25 seconden vol munten = 100 punten.',
+  scoreRegel: 'Zo scoor je: 2 punten per overleefde seconde + 2 per munt. '
+            + 'Zo’n 40 seconden overleven én munten pakken = 100 punten.',
   demoHTML: `<div class="demo-hitrun">
     <div class="demo-hitrun-blok"></div>
     <div class="demo-hitrun-munt"></div>
@@ -22,14 +22,15 @@ export const info = {
 const SPELER_B      = 42;    // breedte speler (px)
 const SPELER_H      = 20;
 const VAL_START     = 170;   // px/s valsnelheid
-const VAL_RAMP      = 9;     // sneller per seconde
+const VAL_RAMP      = 11;    // sneller per seconde
 const SPAWN_START   = 0.85;  // seconden tussen blokken
 const SPAWN_MIN     = 0.32;
 const MUNT_KANS     = 0.3;
 const OEFENEN_DUUR  = 20;
 
 function berekenScore(sec, munten) {
-  return clamp(Math.floor(sec) * 3 + munten * 2, 0, 100);
+  // 100 pas rond 40 seconden overleven mét munten — tegen die tijd is het spervuur
+  return clamp(Math.floor(sec) * 2 + munten * 2, 0, 100);
 }
 
 export function maakSpel(container, { modus, onKlaar }) {

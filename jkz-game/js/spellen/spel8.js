@@ -2,8 +2,8 @@
 // Een blok schuift heen en weer; tik om hem op de toren te laten vallen.
 // Wat oversteekt wordt afgezaagd, dus de toren wordt steeds smaller.
 // Het tempo loopt per laag op. Oefenen: 20 sec, zonder afzagen.
-import { speel } from '../geluid.js?v=15';
-import { clamp } from '../app.js?v=15';
+import { speel } from '../geluid.js?v=16';
+import { clamp } from '../app.js?v=16';
 
 export const info = {
   naam: 'Stapelen',
@@ -21,7 +21,7 @@ export const info = {
 const START_BREEDTE = 0.55;  // deel van de veldbreedte
 const BLOK_HOOGTE   = 26;    // px (css-pixels)
 const SNELHEID_START = 150;  // px per seconde
-const SNELHEID_STAP  = 14;   // sneller per laag
+const SNELHEID_STAP  = 16;   // sneller per laag
 const OEFENEN_DUUR   = 20;
 
 function berekenScore(lagen) {
