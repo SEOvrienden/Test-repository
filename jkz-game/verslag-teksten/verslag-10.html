@@ -1,9 +1,10 @@
 <!-- ══════════════════════════════════════════════════════════════
      VERSLAG 10 — Commissie Multiplayer (Thijs Aafjes)
 
-     De foto: zet het fotobestand met de naam  multiplayer.jpg
-     in de map /img/ op de server. Tot die tijd verbergt de pagina
-     de foto automatisch (geen kapot plaatje dus).
+     De foto: multiplayer.jpg mag in de map /img/ staan, maar
+     gewoon naast index.html (in de hoofdmap) werkt ook — de pagina
+     probeert allebei de plekken. Staat hij nergens, dan verbergt
+     de pagina de foto automatisch (geen kapot plaatje dus).
      ══════════════════════════════════════════════════════════════ -->
 
 <h2>Commissie Multiplayer</h2>
@@ -25,7 +26,7 @@ Zaanstad soms wat dun is.</p>
 we die gewoon weten te dekken!</p>
 
 <img src="img/multiplayer.jpg" alt="Kameravond in de buitenlucht"
-     onerror="this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='none';">
+     onerror="if(!this.dataset.p2){this.dataset.p2='1';this.src='multiplayer.jpg';}else{this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='none';}">
 <p class="foto-onderschrift">Samen spelen doe je buiten — Kameravond in de zon</p>
 
 <p>Maar genoeg over onze commissie. Het JKZ-jaar 2025/2026 was vooral

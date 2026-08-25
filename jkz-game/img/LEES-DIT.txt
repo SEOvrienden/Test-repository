@@ -1,2 +1,13 @@
-In deze map zet je de foto's voor de verslagen.
-Voor het Multiplayer-verslag: sleep de groepsfoto hierin met de naam multiplayer.jpg
+In deze map horen de foto's voor de verslagen.
+
+Voor het verslag van Multiplayer (verslag 10):
+zet de groepsfoto hier neer met precies deze naam:
+
+    multiplayer.jpg
+
+Staat de foto per ongeluk in de hoofdmap (naast index.html)?
+Geen probleem — daar kijkt de pagina ook. Zolang het bestand
+maar multiplayer.jpg heet (kleine letters).
+
+Tip: staat de foto er wel maar zie je hem niet? Controleer de
+naam (geen hoofdletters, geen spaties) en ververs de pagina.

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Hoe werkt het?</title>
-  <link rel="stylesheet" href="css/stijl.css?v=20">
+  <link rel="stylesheet" href="css/stijl.css?v=21">
 </head>
 <body>
 
@@ -87,20 +87,6 @@ window.addEventListener('error', function (e) {
       </ul>
     </div>
 
-    <div class="uitleg-blok">
-      <h2>Meer JKZ</h2>
-      <div class="over-jkz-rij">
-        <a href="historie.html" class="over-jkz-kaart">
-          <span class="over-jkz-icoon">📜</span>
-          <span>Historie<br><small>Voorzitters sinds 1957</small></span>
-        </a>
-        <a href="awards.html" class="over-jkz-kaart">
-          <span class="over-jkz-icoon">🏆</span>
-          <span>Awards<br><small>Winnaars &amp; verhalen</small></span>
-        </a>
-      </div>
-    </div>
-
     <p class="ta-c" style="color:var(--accent);margin:1rem 0 1.5rem;">
       Veel speelplezier — learning by doing!
     </p>
@@ -109,8 +95,8 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { verversStatus } from './js/api.js?v=20';
-import { renderNav, renderBonusCTA, checkGesloten } from './js/app.js?v=20';
+import { verversStatus } from './js/api.js?v=21';
+import { renderNav, renderBonusCTA, checkGesloten } from './js/app.js?v=21';
 
 if (checkGesloten()) throw new Error('gesloten');
 renderNav('uitleg');

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Historie</title>
-  <link rel="stylesheet" href="css/stijl.css?v=20">
+  <link rel="stylesheet" href="css/stijl.css?v=21">
 </head>
 <body>
 
@@ -186,13 +186,22 @@ window.addEventListener('error', function (e) {
     </a>
 
   </div>
+
+  <div class="scroll-hint" id="scroll-hint">Scroll voor meer ↓</div>
 </div>
 
 <script type="module">
-import { renderNav, checkGesloten } from './js/app.js?v=20';
+import { renderNav, checkGesloten } from './js/app.js?v=21';
 
 if (checkGesloten()) throw new Error('gesloten');
-renderNav('spelen');
+renderNav('verslagen');
+
+// Scroll-hint: verdwijnt zodra je scrolt (of na 8 seconden vanzelf)
+const inhoud = document.querySelector('.inhoud');
+const hint = document.getElementById('scroll-hint');
+function verbergHint() { hint.classList.add('weg'); inhoud.removeEventListener('scroll', verbergHint); }
+inhoud.addEventListener('scroll', verbergHint, { passive: true });
+setTimeout(verbergHint, 8000);
 </script>
 </body>
 </html>

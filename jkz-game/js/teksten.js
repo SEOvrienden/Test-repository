@@ -10,6 +10,7 @@ export const PLAAGTEKSTEN = [
     'Honderd punten, vlekkeloos gelegd. Zelfs Van der Laan krijgt z’n vloeren niet zó strak.',
     'De volle honderd! Dit is precies wat Van der Heide bedoelde met Game Changers.',
     'Drie sterren van de voorzitter. Level uitgespeeld!',
+    'Honderd punten. Als er een Daan Bolding Award voor scores bestond, hing jouw naam nu ingelijst aan de muur.',
   ]},
   { vanaf: 80, teksten: [
     'Wauw, wat een score — jij staat vol in de spotlights van Nils!',
@@ -25,6 +26,7 @@ export const PLAAGTEKSTEN = [
     'Je scheurt over de ranglijst alsof Rainbow Road tóch in de Zaanstreek ligt.',
     'Een score om nooit te vergeten — net als Kenia. Alleen word jij morgen niet wakker met zebra’s voor het raam.',
     'Deze score gaat viral. Straks schrijft de burgemeester er nog een column over.',
+    'Deze score is Grand Cru: complex, gelaagd en van uitzonderlijke kwaliteit. Proost.',
   ]},
   { vanaf: 60, teksten: [
     'Deze score is een prima fundering, zegt Van der Heide. Oplevering van de top 3 wel pas Q3 2027.',
@@ -53,6 +55,8 @@ export const PLAAGTEKSTEN = [
     'Deze score is pure Banana Chaos, maar dan zonder de fun. Reflexen trainen en opnieuw!',
     'De Big Five gespot? Deze score haalt niet eens de fotorol van de Keniareis.',
     'Deze score heeft nieuwjaarsborrel-op-oudjaarsdag-logica: het klopt nét niet, maar gezellig was het wel.',
+    'Een gok wagen mag van de GOK-Award. Maar deze score bewijst: gokken is geen strategie.',
+    'Deze score heeft Hangjas Award-potentie: voorlopig even niks, maar op het laatste moment kan het zomaar groots worden.',
   ]},
   { vanaf: 20, teksten: [
     'Tsjonge jonge, wat een drama — deze score is zo laag als de rente bij de ING.',
@@ -71,6 +75,7 @@ export const PLAAGTEKSTEN = [
     'Jouw puntenoverzicht is als het jaaroverzicht van Broadcast: kort en overzichtelijk. Want leeg.',
     'De nieuwe eindbaas Joustra heeft deze score gezien, hè.',
     'Zelfs Danny Vera kan deze score niet meer redden.',
+    'Deze score verdient de Pleegzuster Bloedwijn Award: duidelijk toe aan een oppepper.',
   ]},
   { vanaf: 0, teksten: [
     'Deze score is een drama. Lijkt Patrick Stam in de sportschool wel.',
@@ -88,5 +93,7 @@ export const PLAAGTEKSTEN = [
     'Deze score valt onder “falen” uit het jaarplan. Gelukkig stond erbij: samen winnen komt later.',
     'Zelfs de anaconda van Fidel deinst terug voor deze score.',
     'Game over? Zeker niet, zou de voorzitter zeggen. Continue!',
+    'Deze score is een echte N.O.O.M.: om een ondeugdelijke reden veel te vroeg opgehouden.',
+    'Even gestrekt gaan liggen na deze score? Thijs kan het je uitleggen — die won er de Corona Award mee.',
   ]},
 ];

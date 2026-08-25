@@ -53,7 +53,7 @@
   --hoofd-hoogte: 56px;
   --voortgang-hoogte: 36px;
   --safe-b: env(safe-area-inset-bottom, 0px);
-  --nav-hoogte: 56px;
+  --nav-hoogte: 64px;
 }
 
 /* === KOPPEN IN MAGAZINE-STIJL === */
@@ -236,13 +236,20 @@ body::after {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
   text-decoration: none;
   color: var(--tekst-zwak);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-family: 'Courier New', monospace;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Labels mogen over twee regels lopen ("Verslagen & Historie") */
+.onder-nav-item span:last-child {
+  text-align: center;
+  line-height: 1.15;
+  padding: 0 2px;
 }
 
 .onder-nav-item .onder-nav-icoon {
@@ -2121,4 +2128,28 @@ a.eindkaart-spel:active {
   font-size: 0.88rem;
   line-height: 1.55;
   font-style: italic;
+}
+
+/* Scroll-hint op lange informatiepagina's: verdwijnt zodra je scrolt */
+.scroll-hint {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--nav-hoogte) + var(--safe-b) + 12px);
+  background: var(--jkz-groen-paneel);
+  border: 1px solid rgba(232, 163, 61, 0.45);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-size: 0.78rem;
+  z-index: 400;
+  pointer-events: none;
+  animation: hint-stuiter 1.6s ease-in-out infinite;
+  transition: opacity 0.4s;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+.scroll-hint.weg { opacity: 0; }
+@keyframes hint-stuiter {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(5px); }
 }

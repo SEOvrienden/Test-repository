@@ -1,6 +1,6 @@
 // Gedeelde hulpfuncties voor alle pagina's
-import { haalConfig, haalTikkieLink } from './api.js?v=20';
-import { PLAAGTEKSTEN } from './teksten.js?v=20';
+import { haalConfig, haalTikkieLink } from './api.js?v=21';
+import { PLAAGTEKSTEN } from './teksten.js?v=21';
 
 // ── Spellen: het aantal en de namen, op één plek ─────────────────────────────
 
@@ -35,7 +35,7 @@ export function renderNav(actief) {
   nav.className = 'onder-nav';
   nav.innerHTML = [
     ['spelen',    'index.html',     '🎮', 'Spelen'],
-    ['verslagen', 'verslagen.html', '📖', 'Verslagen'],
+    ['verslagen', 'verslagen.html', '📖', 'Verslagen &amp; Historie'],
     ['ranglijst', 'ranglijst.html', '🏆', 'Ranglijst'],
     ['uitleg',    'uitleg.html',    '❓', 'Uitleg'],
   ].map(([key, url, icoon, label]) =>
