@@ -1,13 +1,18 @@
 // Spel 5 — Snake
-// Twee draaiknoppen. Canvas met requestAnimationFrame + delta-tijd.
+// Vloeiend: de slang glijdt tussen de vakjes (interpolatie) en je tikjes
+// komen in een rijtje te staan — draaien gebeurt netjes op de volgende stap,
+// dus je hoeft nooit "op precies het juiste moment" te klikken.
+// Sturen kan met de knoppen én door links/rechts op het veld te tikken.
 // Oefenen: 30 sec, botsen = waarschuwing (snake wrapt door muren).
-import { speel } from '../geluid.js?v=19';
-import { clamp } from '../app.js?v=19';
+import { speel } from '../geluid.js?v=20';
+import { clamp } from '../app.js?v=20';
 
 export const info = {
   naam: 'Snake',
-  uitleg: 'Stuur de slang met de knoppen Linksom en Rechtsom. Eet de appels. '
-        + 'Loop niet in jezelf of tegen de muur. Elke 5e appel is goud en telt dubbel!',
+  uitleg: 'Stuur de slang linksom of rechtsom: met de knoppen, of door links '
+        + 'of rechts op het veld te tikken. Tik gerust vooruit — je bochten '
+        + 'worden onthouden en netjes na elkaar genomen. Eet de appels, '
+        + 'elke 5e is goud en telt dubbel!',
   scoreRegel: 'Zo scoor je: 4 punten per appel, een gouden appel telt voor 2. '
             + '25 appels = 100 punten.',
   demoHTML: `<div class="demo-snake"><div class="demo-snake-lichaam"></div></div>`,
@@ -17,6 +22,7 @@ const RASTER = 15;
 const SNELHEID_BASIS  = 2.5; // cellen per seconde
 const SNELHEID_STAP   = 0.5; // sneller per 5 appels
 const OEFENEN_DUUR    = 30;  // seconden
+const MAX_WACHTRIJ    = 3;   // zoveel bochten mag je vooruit tikken
 
 function berekenScore(appels) {
   // 100 pas bij 25 appelpunten (≈ 21 gegeten appels) — dan is de slang al lang
@@ -75,8 +81,9 @@ export function maakSpel(container, { modus, onKlaar }) {
 
   // Spelstatus
   let slang = [{ x: 7, y: 7 }];
+  let vorigeSlang = slang.map(s => ({ ...s })); // voor de vloeiende animatie
   let richting = 'O';
-  let volgendeRichting = 'O';
+  let wachtrij = [];     // 'L' / 'R' — bochten die nog genomen moeten worden
   let appel = plaatsAppel();
   let appels = 0;        // telt mee voor de score (gouden appel = +2)
   let aantalAppels = 0;  // aantal gegeten appels; elke 5e is goud
@@ -88,7 +95,6 @@ export function maakSpel(container, { modus, onKlaar }) {
   let animId = null;
   let oefenRestTijd = OEFENEN_DUUR;
   let oefenInterval = null;
-  let inHerstart = false;
 
   function plaatsAppel() {
     let pos;
@@ -108,7 +114,7 @@ export function maakSpel(container, { modus, onKlaar }) {
     ctx.fillRect(0, 0, w, h);
 
     // Grid (subtiel)
-    ctx.strokeStyle = 'rgba(31,77,88,0.5)';
+    ctx.strokeStyle = 'rgba(31,77,88,0.35)';
     ctx.lineWidth = 0.5;
     for (let i = 0; i <= RASTER; i++) {
       ctx.beginPath();
@@ -147,21 +153,52 @@ export function maakSpel(container, { modus, onKlaar }) {
       ctx.stroke();
     }
 
-    // Slang
-    slang.forEach((seg, idx) => {
-      const x = seg.x * cel + 1;
-      const y = seg.y * cel + 1;
-      const s = cel - 2;
-      const alpha = idx === 0 ? 1 : 1 - (idx / slang.length) * 0.4;
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = idx === 0 ? '#e8a33d' : '#b5812e';
-      ctx.beginPath();
-      ctx.roundRect
-        ? ctx.roundRect(x, y, s, s, cel * 0.25)
-        : ctx.rect(x, y, s, s);
-      ctx.fill();
+    // Slang: vloeiend getekend als één lijn door de tussen-de-vakjes-posities
+    const t = clamp(tijdSindsStap * snelheid, 0, 1); // hoe ver in de huidige stap
+    const punten = slang.map((seg, idx) => {
+      const oud = vorigeSlang[idx] || vorigeSlang[vorigeSlang.length - 1] || seg;
+      // Geen rare veeg over het veld bij een wrap (alleen in oefenmodus)
+      const spring = Math.abs(seg.x - oud.x) > 1 || Math.abs(seg.y - oud.y) > 1;
+      const lx = spring ? seg.x : oud.x + (seg.x - oud.x) * t;
+      const ly = spring ? seg.y : oud.y + (seg.y - oud.y) * t;
+      return { x: lx * cel + cel * 0.5, y: ly * cel + cel * 0.5 };
     });
-    ctx.globalAlpha = 1;
+
+    if (punten.length === 1) {
+      ctx.fillStyle = '#e8a33d';
+      ctx.beginPath();
+      ctx.arc(punten[0].x, punten[0].y, cel * 0.44, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.strokeStyle = '#b5812e';
+      ctx.lineWidth = cel * 0.78;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(punten[0].x, punten[0].y);
+      for (let i = 1; i < punten.length; i++) {
+        // Sprong (wrap in oefenmodus): lijn onderbreken i.p.v. dwars over het veld
+        const afstand = Math.hypot(punten[i].x - punten[i - 1].x, punten[i].y - punten[i - 1].y);
+        if (afstand > cel * 2.5) { ctx.moveTo(punten[i].x, punten[i].y); continue; }
+        ctx.lineTo(punten[i].x, punten[i].y);
+      }
+      ctx.stroke();
+    }
+
+    // Kop (goud, met oogjes zodat je de richting ziet)
+    const kop = punten[0];
+    ctx.fillStyle = '#e8a33d';
+    ctx.beginPath();
+    ctx.arc(kop.x, kop.y, cel * 0.46, 0, Math.PI * 2);
+    ctx.fill();
+    const dir = RICHTINGEN[richting];
+    ctx.fillStyle = '#0f333c';
+    ctx.beginPath();
+    ctx.arc(kop.x + dir.x * cel * 0.18 - dir.y * cel * 0.14,
+            kop.y + dir.y * cel * 0.18 - dir.x * cel * 0.14, cel * 0.07, 0, Math.PI * 2);
+    ctx.arc(kop.x + dir.x * cel * 0.18 + dir.y * cel * 0.14,
+            kop.y + dir.y * cel * 0.18 + dir.x * cel * 0.14, cel * 0.07, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   function stap(delta) {
@@ -171,11 +208,17 @@ export function maakSpel(container, { modus, onKlaar }) {
     while (tijdSindsStap >= stapInterval) {
       tijdSindsStap -= stapInterval;
       beweeg();
+      if (vernietigd) return;
     }
   }
 
   function beweeg() {
-    richting = volgendeRichting;
+    // Neem de volgende bocht uit de wachtrij (één per stap)
+    if (wachtrij.length) {
+      const b = wachtrij.shift();
+      richting = b === 'L' ? LINKS_VAN[richting] : RECHTS_VAN[richting];
+    }
+    vorigeSlang = slang.map(s => ({ ...s }));
     const dir = RICHTINGEN[richting];
     const hoofd = slang[0];
     let nx = hoofd.x + dir.x;
@@ -243,7 +286,7 @@ export function maakSpel(container, { modus, onKlaar }) {
     const delta = Math.min((ts - vorigeTs) / 1000, 0.1);
     vorigeTs = ts;
     stap(delta);
-    tekenAlles();
+    if (!vernietigd) tekenAlles();
     animId = requestAnimationFrame(gameLoop);
   }
 
@@ -263,17 +306,30 @@ export function maakSpel(container, { modus, onKlaar }) {
     }, 1000);
   }
 
-  // Besturing
-  function draaiLinks(e) { e.preventDefault(); speel('tik'); volgendeRichting = LINKS_VAN[richting]; }
-  function draaiRechts(e) { e.preventDefault(); speel('tik'); volgendeRichting = RECHTS_VAN[richting]; }
+  // Besturing: bochten komen in een wachtrij, dus tikken kan nooit "te vroeg"
+  function draai(kant) {
+    if (wachtrij.length >= MAX_WACHTRIJ) return;
+    speel('tik');
+    wachtrij.push(kant);
+  }
+  function draaiLinks(e)  { e.preventDefault(); draai('L'); }
+  function draaiRechts(e) { e.preventDefault(); draai('R'); }
 
   linksKnop.addEventListener('pointerdown', draaiLinks);
   rechtsKnop.addEventListener('pointerdown', draaiRechts);
 
+  // Extra: tik links of rechts op het speelveld zelf
+  function onVeldTik(e) {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    draai(e.clientX - rect.left < rect.width / 2 ? 'L' : 'R');
+  }
+  canvas.addEventListener('pointerdown', onVeldTik);
+
   // Keyboard fallback (desktop)
   function onKey(e) {
-    if (e.key === 'ArrowLeft')  { volgendeRichting = LINKS_VAN[richting];  }
-    if (e.key === 'ArrowRight') { volgendeRichting = RECHTS_VAN[richting]; }
+    if (e.key === 'ArrowLeft')  draai('L');
+    if (e.key === 'ArrowRight') draai('R');
   }
   window.addEventListener('keydown', onKey);
 
@@ -294,6 +350,7 @@ export function maakSpel(container, { modus, onKlaar }) {
       clearInterval(oefenInterval);
       linksKnop.removeEventListener('pointerdown', draaiLinks);
       rechtsKnop.removeEventListener('pointerdown', draaiRechts);
+      canvas.removeEventListener('pointerdown', onVeldTik);
       window.removeEventListener('keydown', onKey);
     },
   };

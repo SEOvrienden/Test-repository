@@ -1986,3 +1986,139 @@ a.eindkaart-spel:active {
   background: var(--vlak);
   outline: 1px solid var(--accent);
 }
+
+/* === HISTORIE & AWARDS (nieuwe informatiepagina's) === */
+
+/* Twee kaartjes op het startscherm */
+.over-jkz-rij {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  margin-top: 0.75rem;
+}
+.over-jkz-kaart {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--jkz-groen-paneel);
+  border: 1px solid rgba(232, 163, 61, 0.3);
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+  min-height: 56px;
+  text-decoration: none;
+  color: var(--tekst);
+  font-size: 0.85rem;
+  font-weight: bold;
+  line-height: 1.25;
+}
+.over-jkz-kaart small {
+  display: block;
+  color: var(--tekst-zwak);
+  font-weight: normal;
+  font-size: 0.72rem;
+  margin-top: 2px;
+}
+.over-jkz-kaart:active {
+  border-color: var(--accent);
+  background: var(--vlak);
+}
+.over-jkz-icoon { font-size: 1.5rem; flex-shrink: 0; }
+
+/* Tijdlijn/tabellen op de historiepagina */
+.info-intro {
+  color: var(--tekst);
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+.historie-tabel {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+.historie-tabel td, .historie-tabel th {
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(232, 163, 61, 0.15);
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.4;
+}
+.historie-tabel th {
+  color: var(--accent);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.historie-tabel .jaar-cel {
+  color: var(--tekst-zwak);
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+  width: 1%;
+  padding-right: 14px;
+}
+.historie-tabel .nummer-cel {
+  color: var(--tekst-zwak);
+  font-family: 'Courier New', monospace;
+  text-align: right;
+  white-space: nowrap;
+}
+.historie-tabel tr.decennium td {
+  border-bottom: none;
+  padding-top: 1.1rem;
+  color: var(--accent);
+  font-family: var(--font-kop, 'Bebas Neue'), 'Arial Narrow', sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+}
+
+/* Uitklapbare awardbeschrijvingen */
+.award-lijst { margin-bottom: 1.5rem; }
+.award-lijst details {
+  background: var(--jkz-groen-paneel);
+  border: 1px solid rgba(232, 163, 61, 0.25);
+  border-radius: 12px;
+  margin-bottom: 0.6rem;
+  overflow: hidden;
+}
+.award-lijst summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.85rem 1rem;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: bold;
+  font-size: 0.95rem;
+  color: var(--tekst);
+}
+.award-lijst summary::-webkit-details-marker { display: none; }
+.award-lijst summary::after {
+  content: '▾';
+  margin-left: auto;
+  color: var(--accent);
+  transition: transform 0.15s;
+}
+.award-lijst details[open] summary::after { transform: rotate(180deg); }
+.award-lijst details[open] summary { border-bottom: 1px solid rgba(232, 163, 61, 0.15); }
+.award-lijst .award-tekst {
+  padding: 0.75rem 1rem 1rem;
+  color: var(--tekst);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.award-lijst .award-tekst em { color: var(--tekst-zwak); }
+
+/* Citaat-/definitieblokje (statuten, awardomschrijvingen bovenaan) */
+.info-citaat {
+  border-left: 3px solid var(--accent);
+  background: var(--jkz-groen-paneel);
+  border-radius: 0 10px 10px 0;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0 1.25rem;
+  color: var(--tekst-zwak);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  font-style: italic;
+}

@@ -2,15 +2,15 @@
 // Een blok schuift heen en weer; tik om hem op de toren te laten vallen.
 // Wat oversteekt wordt afgezaagd, dus de toren wordt steeds smaller.
 // Het tempo loopt per laag op. Oefenen: 20 sec, zonder afzagen.
-import { speel } from '../geluid.js?v=19';
-import { clamp } from '../app.js?v=19';
+import { speel } from '../geluid.js?v=20';
+import { clamp } from '../app.js?v=20';
 
 export const info = {
   naam: 'Stapelen',
   uitleg: 'Tik om het schuivende blok op de toren te laten vallen. Alles wat '
         + 'oversteekt, wordt afgezaagd — dus mik precies! Elke laag gaat sneller. '
         + 'Mis je de toren helemaal, dan is het klaar.',
-  scoreRegel: 'Zo scoor je: 5 punten per gestapelde laag. 20 lagen = 100 punten.',
+  scoreRegel: 'Zo scoor je: 4 punten per gestapelde laag. 25 lagen = 100 punten.',
   demoHTML: `<div class="demo-stapel">
     <div class="demo-stapel-blok b1"></div>
     <div class="demo-stapel-blok b2"></div>
@@ -18,14 +18,15 @@ export const info = {
   </div>`,
 };
 
-const START_BREEDTE = 0.55;  // deel van de veldbreedte
+const START_BREEDTE = 0.5;   // deel van de veldbreedte
 const BLOK_HOOGTE   = 26;    // px (css-pixels)
-const SNELHEID_START = 150;  // px per seconde
-const SNELHEID_STAP  = 16;   // sneller per laag
+const SNELHEID_START = 160;  // px per seconde
+const SNELHEID_STAP  = 19;   // sneller per laag
 const OEFENEN_DUUR   = 20;
 
 function berekenScore(lagen) {
-  return clamp(lagen * 5, 0, 100);
+  // 100 pas bij 25 lagen — tegen die tijd vliegt het blok over het scherm
+  return clamp(lagen * 4, 0, 100);
 }
 
 export function maakSpel(container, { modus, onKlaar }) {

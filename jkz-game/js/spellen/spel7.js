@@ -2,14 +2,14 @@
 // Jij onderin, de computer bovenin. De bal wordt steeds sneller.
 // Hoe vaker jij hem terugslaat, hoe hoger je score. Mis = einde.
 // Oefenen: 20 seconden vrij spelen, gemiste bal komt gewoon terug.
-import { speel } from '../geluid.js?v=19';
-import { clamp } from '../app.js?v=19';
+import { speel } from '../geluid.js?v=20';
+import { clamp } from '../app.js?v=20';
 
 export const info = {
   naam: 'Pong',
   uitleg: 'Sleep je peddel onderin heen en weer en sla de bal terug. '
         + 'De bal wordt steeds sneller én je peddel krimpt — hoe lang hou jij het vol?',
-  scoreRegel: 'Zo scoor je: 5 punten per keer dat jij de bal terugslaat. 20 keer = 100 punten. '
+  scoreRegel: 'Zo scoor je: 4 punten per keer dat jij de bal terugslaat. 25 keer = 100 punten. '
             + 'De bal wordt steeds sneller en je batje steeds kleiner.',
   demoHTML: `<div class="demo-pong">
     <div class="demo-pong-cpu"></div>
@@ -20,15 +20,16 @@ export const info = {
 
 const OEFEN_DUUR    = 20;    // seconden
 const BAL_SNELHEID  = 260;   // px/s start
-const VERSNELLING   = 1.06;  // per terugslag van de speler
+const VERSNELLING   = 1.07;  // per terugslag van de speler
 const PEDDEL_B      = 92;
 const PEDDEL_H      = 12;
 const BAL_R         = 7;
-const CPU_MAX       = 230;   // px/s — haalbaar te verslaan zodra de bal sneller wordt
+const CPU_MAX       = 255;   // px/s — haalbaar te verslaan zodra de bal sneller wordt
+const SERVE_PAUZE   = 0.9;   // seconden rust voordat een nieuwe bal vertrekt
 
 function berekenScore(terugslagen) {
-  // 100 pas bij 20 terugslagen — dan gaat de bal ruim 3x zo snel als bij de start
-  return clamp(terugslagen * 5, 0, 100);
+  // 100 pas bij 25 terugslagen — dan gaat de bal ruim 4x zo snel als bij de start
+  return clamp(terugslagen * 4, 0, 100);
 }
 
 export function maakSpel(container, { modus, onKlaar }) {
@@ -68,6 +69,7 @@ export function maakSpel(container, { modus, onKlaar }) {
   let balX = 0, balY = 0, balVX = 0, balVY = 0;
   let terugslagen = 0;
   let tijd        = 0;
+  let serveWacht  = 0;      // nieuwe bal wacht even in het midden
   let isGestart   = false;
   let vernietigd  = false;
   let gepauzeerd  = false;
@@ -77,12 +79,16 @@ export function maakSpel(container, { modus, onKlaar }) {
   function resetBal(richtingOmlaag) {
     balX = W() / 2;
     balY = H() / 2;
-    const snelheid = BAL_SNELHEID * Math.pow(VERSNELLING, terugslagen);
+    // Een nieuwe bal begint altijd rustig (kleine opbouw met je rally-teller),
+    // nooit op volle snelheid — en hij wacht eerst even in het midden.
+    const snelheid = BAL_SNELHEID * (1 + Math.min(0.5, terugslagen * 0.025));
     const hoek = (Math.random() * 0.6 - 0.3); // licht schuin
     balVX = Math.sin(hoek) * snelheid;
     balVY = (richtingOmlaag ? 1 : -1) * Math.cos(hoek) * snelheid;
+    serveWacht = SERVE_PAUZE;
   }
   resetBal(true);
+  serveWacht = 0; // de allereerste bal mag meteen los zodra je start
 
   function start() {
     if (isGestart || vernietigd) return;
@@ -108,6 +114,16 @@ export function maakSpel(container, { modus, onKlaar }) {
     if (isOefenen && tijd >= OEFEN_DUUR) { eindeSpel(); return; }
 
     const w = W(), h = H();
+
+    // Serveerpauze: de bal ligt even stil in het midden, zodat je hem
+    // altijd ziet aankomen (de computer schuift alvast naar het midden)
+    if (serveWacht > 0) {
+      serveWacht -= delta;
+      const stapCpu = clamp(w / 2 - cpuX, -CPU_MAX * delta, CPU_MAX * delta);
+      cpuX = clamp(cpuX + stapCpu, PEDDEL_B / 2, w - PEDDEL_B / 2);
+      return;
+    }
+
     balX += balVX * delta;
     balY += balVY * delta;
 
@@ -142,8 +158,8 @@ export function maakSpel(container, { modus, onKlaar }) {
         balY = spelerY - BAL_R;
         terugslagen++;
         speel('treffer');
-        // Elke 3 terugslagen krimpt je peddel een stukje (minimaal 56 px)
-        if (terugslagen % 3 === 0) spelerB = Math.max(56, spelerB - 7);
+        // Elke 3 terugslagen krimpt je peddel een stukje (minimaal 50 px)
+        if (terugslagen % 3 === 0) spelerB = Math.max(50, spelerB - 7);
         const rel = (balX - spelerX) / (spelerB / 2);
         const snelheid = Math.hypot(balVX, balVY) * VERSNELLING;
         const hoek = rel * 0.85;
@@ -182,11 +198,19 @@ export function maakSpel(container, { modus, onKlaar }) {
     ctx.fillStyle = '#f2c069';
     ctx.fillRect(spelerX - spelerB / 2, h - 34, spelerB, PEDDEL_H);
 
-    // Bal
+    // Bal (met pulserende ring als hij nog even wacht met serveren)
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.arc(balX, balY, BAL_R, 0, Math.PI * 2);
     ctx.fill();
+    if (isGestart && serveWacht > 0) {
+      const puls = BAL_R + 6 + Math.sin(performance.now() / 90) * 3;
+      ctx.strokeStyle = 'rgba(242,192,105,0.8)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(balX, balY, puls, 0, Math.PI * 2);
+      ctx.stroke();
+    }
 
     // Teller
     ctx.fillStyle = 'rgba(232,163,61,0.9)';

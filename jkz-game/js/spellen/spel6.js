@@ -1,16 +1,17 @@
 // Spel 6 — One-button (Flappy style)
 // Tik om te fladderen, ontwijkt palen. Canvas + delta-tijd.
 // Oefenen: eindigt na 3 palen, botsen herstart meteen.
-import { speel } from '../geluid.js?v=19';
-import { clamp } from '../app.js?v=19';
+import { speel } from '../geluid.js?v=20';
+import { clamp } from '../app.js?v=20';
 
 export const info = {
   naam: 'One-button',
   uitleg: 'Tik om omhoog te fladderen. Zwaartekracht trekt je naar beneden. '
-        + 'Ontwijk de palen. De gaten worden steeds smaller, het tempo loopt op '
-        + 'en verderop beginnen palen te bewegen…',
-  scoreRegel: 'Zo scoor je: 1 punt per doorgekomen paal. 100 palen = 100 punten. '
-            + 'Veel succes.',
+        + 'Ontwijk de palen en pak onderweg de sterretjes — die hangen wel op '
+        + 'gevaarlijke plekken. De gaten worden steeds smaller, het tempo '
+        + 'loopt op en verderop beginnen palen te bewegen…',
+  scoreRegel: 'Zo scoor je: 1 punt per doorgekomen paal en 1 punt per gepakt '
+            + 'sterretje. Veel succes.',
   demoHTML: `<div class="demo-onebutton">
     <div class="demo-ob-vogel"></div>
     <div class="demo-ob-paal boven"></div>
@@ -24,14 +25,15 @@ const PAAL_SNELHEID   = 160;   // px/s aan het begin
 const SNELHEID_PER_PAAL = 1.4; // px/s erbij per gehaalde paal (max +120)
 const PAAL_BREEDTE    = 50;    // px
 const GAP_FRACTIE     = 0.38;  // gat aan het begin (fractie van schermhoogte)
-const GAP_MIN         = 0.26;  // smalste gat (bereikt rond paal 40)
+const GAP_MIN         = 0.25;  // smalste gat (bereikt rond paal 40)
 const PAAL_INTERVAL   = 2.2;   // seconden tussen palen aan het begin
 const INTERVAL_MIN    = 1.5;
 const BEWEEG_VANAF    = 15;    // vanaf deze paal kunnen palen gaan bewegen
+const STER_KANS       = 0.45;  // kans dat er een ster in het gat hangt
 const OEFENEN_PALEN   = 3;
 
-function berekenScore(palen) {
-  return clamp(palen, 0, 100);
+function berekenScore(palen, sterren) {
+  return clamp(palen + sterren, 0, 100);
 }
 
 export function maakSpel(container, { modus, onKlaar }) {
@@ -69,6 +71,7 @@ export function maakSpel(container, { modus, onKlaar }) {
   let vogelVY = 0;
   let palen   = [];
   let palen_count = 0;
+  let sterren = 0;
   let volgende_paal = PAAL_INTERVAL;
   let vernietigd = false;
   let gepauzeerd = false;
@@ -105,14 +108,19 @@ export function maakSpel(container, { modus, onKlaar }) {
     const maxTop = h - gat - h * 0.12;
     const topHoogte = minTop + Math.random() * (maxTop - minTop);
     // Verderop in het spel gaan sommige palen op en neer bewegen
-    const kans = Math.min(0.5, Math.max(0, (moeilijkheid() - BEWEEG_VANAF) * 0.03));
+    const kans = Math.min(0.55, Math.max(0, (moeilijkheid() - BEWEEG_VANAF) * 0.03));
     const beweegt = Math.random() < kans;
+    // Soms hangt er een ster in het gat — expres vlak bij de rand,
+    // dus een ster pakken is altijd een klein risico
+    const ster = !isOefenen && palen_count >= 2 && Math.random() < STER_KANS
+      ? { dy: Math.random() < 0.5 ? gat * 0.18 : gat * 0.82, gepakt: false }
+      : null;
     return {
       x, topHoogte, gat, geteld: false,
-      beweegt,
+      beweegt, ster,
       basisTop: topHoogte,
       fase: Math.random() * Math.PI * 2,
-      amplitude: h * 0.05,
+      amplitude: h * 0.055,
     };
   }
 
@@ -142,8 +150,8 @@ export function maakSpel(container, { modus, onKlaar }) {
   function eindeSpel() {
     vernietigd = true;
     cancelAnimationFrame(animId);
-    const score = berekenScore(palen_count);
-    onKlaar(`${palen_count} palen`, score);
+    const score = berekenScore(palen_count, sterren);
+    onKlaar(`${palen_count} palen + ${sterren} sterren`, score);
   }
 
   function update(delta) {
@@ -195,6 +203,17 @@ export function maakSpel(container, { modus, onKlaar }) {
         }
       }
 
+      // Ster pakken (hangt midden in de paalopening)
+      if (p.ster && !p.ster.gepakt) {
+        const sx = p.x + PAAL_BREEDTE / 2;
+        const sy = p.topHoogte + p.ster.dy;
+        if (Math.hypot(vogelX - sx, vogelY - sy) < VOGEL_R + 10) {
+          p.ster.gepakt = true;
+          sterren++;
+          speel('nieuwRecord');
+        }
+      }
+
       // Botsing
       if (
         vogelX + VOGEL_R > p.x &&
@@ -230,6 +249,12 @@ export function maakSpel(container, { modus, onKlaar }) {
       const onderY = p.topHoogte + p.gat;
       ctx.fillRect(p.x, onderY, PAAL_BREEDTE, h - onderY);
       ctx.strokeRect(p.x, onderY, PAAL_BREEDTE, h - onderY);
+      // Ster in het gat
+      if (p.ster && !p.ster.gepakt) {
+        ctx.font = '18px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('⭐', p.x + PAAL_BREEDTE / 2, p.topHoogte + p.ster.dy + 6);
+      }
     }
 
     // Vogel (gouden bol)
@@ -248,11 +273,11 @@ export function maakSpel(container, { modus, onKlaar }) {
     ctx.arc(vogelX + 5, vogelY - 4, 3, 0, Math.PI * 2);
     ctx.fill();
 
-    // Score overlay
+    // Score overlay (palen + sterren)
     ctx.fillStyle = 'rgba(232,163,61,0.9)';
     ctx.font = `bold ${Math.round(h * 0.055)}px 'Courier New', monospace`;
     ctx.textAlign = 'center';
-    ctx.fillText(palen_count, w * 0.5, h * 0.08);
+    ctx.fillText(sterren > 0 ? `${palen_count} +${sterren}⭐` : palen_count, w * 0.5, h * 0.08);
 
     // Start-hint
     if (!isGestart) {

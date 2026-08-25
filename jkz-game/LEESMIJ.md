@@ -168,6 +168,8 @@ jkz-game/
   verslag-teksten/
     verslag-1.html ... verslag-10.html   (nu: voorbeeldtekst, zelf invullen)
   img/                Hier zet je foto's voor in de verslagen
+  historie.html       Voorzitters sinds 1957, senatoren en ereleden
+  awards.html         Alle (inter)nationale awards en kamerawards
 ```
 
 ---
@@ -191,15 +193,15 @@ jkz-game/
 | Spel | Ruwe waarde | Formule (100 punten is bewust moeilijk) |
 |------|-------------|---------|
 | 1 Reactie | gem. ms | `(480 - gem) / 3` — 100 bij gem. 180 ms |
-| 2 Breakout | stenen + tijd | `stenen * 2` + tijdbonus (36 alleen bij leeg binnen 35 s) |
+| 2 Breakout | stenen + tijd | `stenen * 2` + tijdbonus (36 alleen bij leeg binnen 30 s); met 2+ ballen vallen er bommen |
 | 3 Simon | level | `level * 7` — 100 bij level 15 |
 | 4 Mepspel | treffers | `treffers * 3` (⭐ = 3 treffers, 💣 = −2) — 100 bij 34 |
 | 5 Snake | appels | `appels * 4` (elke 5e appel is goud en telt voor 2) — 100 bij 25 |
-| 6 One-button | palen | `palen * 1` — 100 bij 100 palen; gaten krimpen, palen gaan bewegen |
-| 7 Pong | terugslagen | `terugslagen * 5` — 100 bij 20 |
-| 8 Stapelen | lagen | `lagen * 5` — 100 bij 20 lagen |
+| 6 One-button | palen + sterren | `palen + sterren` — gaten krimpen, palen gaan bewegen, sterren hangen op linke plekken |
+| 7 Pong | terugslagen | `terugslagen * 4` — 100 bij 25; nieuwe bal serveert rustig vanuit het midden |
+| 8 Stapelen | lagen | `lagen * 4` — 100 bij 25 lagen |
 | 9 Lucky Shot | raak | `raak * 7` — 100 bij 15 rake shots |
-| 10 Hit & Run | seconden + munten | `seconden * 2 + munten * 2` — 100 rond 40 s |
+| 10 Hit & Run | seconden + munten | `seconden * 2 + munten * 1` — 100 rond 40 s |
 Alle scores worden begrensd op 0–100.
 
 ### Beheerpagina

@@ -2,17 +2,23 @@
 // Kaats de bal met je plateau omhoog en speel de letters J K Z leeg.
 // - De middelste rij van elke letter is HARD: die stenen moet je 2x raken.
 // - Soms valt er een ster: vang hem en je krijgt een EXTRA bal (max 3).
-// - Pas als je álle ballen mist, is het voorbij.
+// - Soms valt er een roze bol: vang hem en elke bal splitst tijdelijk in 3!
+// - LET OP: zodra je 2 of meer ballen hebt, vallen er bommen. Raakt een bom
+//   je plateau, dan ben je al je extra ballen in één klap kwijt.
+// - Pas als je álle (grote) ballen mist, is het voorbij.
 // Oefenen: 30 seconden vrij spelen, gemiste bal komt gewoon terug.
-import { speel } from '../geluid.js?v=19';
-import { clamp } from '../app.js?v=19';
+import { speel } from '../geluid.js?v=20';
+import { clamp } from '../app.js?v=20';
 
 export const info = {
   naam: 'JKZ Breakout',
   uitleg: 'Kaats de bal omhoog en speel de letters JKZ zo snel mogelijk leeg. '
-        + 'Lichte stenen moet je 2x raken. Vang de vallende ster voor een extra bal!',
+        + 'Lichte stenen moet je 2x raken. Vang ⭐ voor een extra bal en de '
+        + 'roze bol om elke bal tijdelijk in 3 te splitsen. Maar pas op: met '
+        + '2 of meer ballen vallen er bommen — raakt een bom je plateau, dan '
+        + 'ben je je extra ballen kwijt!',
   scoreRegel: 'Zo scoor je: 2 punten per steen. De volle tijdbonus krijg je alleen '
-            + 'als je álles leegspeelt binnen 35 seconden.',
+            + 'als je álles leegspeelt binnen 30 seconden.',
   demoHTML: `<div class="demo-breakout">
     <div class="demo-bo-stenen">
       <div></div><div></div><div></div><div></div><div></div><div></div>
@@ -43,20 +49,24 @@ const LETTERS = [
 
 const OEFEN_DUUR   = 30;    // seconden
 const BAL_SNELHEID = 300;   // px/s startsnelheid
-const VERSNELLING  = 1.045; // per 5 stenen
+const VERSNELLING  = 1.05;  // per 5 stenen
 const PEDDEL_B     = 92;
 const PEDDEL_H     = 12;
 const BAL_R        = 7;
-const STER_KANS    = 0.18;  // kans op een ster bij een kapotte steen
-const STER_SNELHEID = 150;  // px/s omlaag
-const MAX_BALLEN   = 3;
+const MINI_R       = 4;     // straal van de tijdelijke splitballetjes
+const MINI_DUUR    = 6;     // seconden dat splitballetjes bestaan
+const STER_KANS    = 0.13;  // kans op een ster bij een kapotte steen
+const SPLIT_KANS   = 0.10;  // kans op een split-bol bij een kapotte steen
+const VAL_SNELHEID = 150;   // px/s omlaag (sterren en bollen)
+const BOM_SNELHEID = 200;   // px/s omlaag (bommen)
+const MAX_BALLEN   = 3;     // maximum aantal GROTE ballen
 
 function berekenScore(stenen, seconden, allesWeg) {
   let score = stenen * 2;
   if (allesWeg) {
-    // Tijdbonus: alleen de volle 36 punten bij leegspelen binnen 35 s,
+    // Tijdbonus: alleen de volle 36 punten bij leegspelen binnen 30 s,
     // daarna loopt hij snel terug — 100 halen vergt dus écht tempo
-    const bonus = seconden <= 35 ? 36 : Math.max(6, 36 - (seconden - 35));
+    const bonus = seconden <= 30 ? 36 : Math.max(4, Math.round(36 - (seconden - 30) * 1.5));
     score += bonus;
   }
   return clamp(Math.round(score), 0, 100);
@@ -70,7 +80,7 @@ export function maakSpel(container, { modus, onKlaar }) {
       <div class="onebutton-canvas-wrap">
         <canvas id="bo-canvas"></canvas>
       </div>
-      <div class="onebutton-hint">Sleep om je plateau te bewegen &nbsp;🧱&nbsp; Vang ⭐ voor een extra bal</div>
+      <div class="onebutton-hint">Sleep om te bewegen &nbsp;🧱&nbsp; Vang ⭐ en de roze bol, ontwijk 💣</div>
     </div>`;
 
   const canvas = container.querySelector('#bo-canvas');
@@ -126,10 +136,13 @@ export function maakSpel(container, { modus, onKlaar }) {
 
   // ── Spelstatus ────────────────────────────────────────────────────────────
   let peddelX    = W() / 2;
-  let ballen     = [];
-  let sterren    = [];
+  let ballen     = [];      // {x, y, vx, vy, mini, tot?}
+  let bonussen   = [];      // vallende power-ups: {x, y, type: 'ster'|'split'}
+  let bommen     = [];      // vallende bommen: {x, y}
+  let bomTimer   = 0;
   let kapot      = 0;
   let tijd       = 0;
+  let flitsTot   = 0;       // rood flitsje na een bominslag
   let isGestart  = false;
   let vernietigd = false;
   let gepauzeerd = false;
@@ -140,14 +153,18 @@ export function maakSpel(container, { modus, onKlaar }) {
     return BAL_SNELHEID * Math.pow(VERSNELLING, Math.floor(kapot / 5));
   }
 
-  function maakBal(x, y) {
+  function maakBal(x, y, mini) {
     const hoek = (Math.random() * 0.5 + 0.35) * Math.PI; // 63°–153°
     const s = balSnelheid();
-    return { x, y, vx: Math.cos(hoek) * s, vy: -Math.abs(Math.sin(hoek) * s) };
+    const bal = { x, y, vx: Math.cos(hoek) * s, vy: -Math.abs(Math.sin(hoek) * s), mini: !!mini };
+    if (mini) bal.tot = tijd + MINI_DUUR;
+    return bal;
   }
 
+  function groteBallen() { return ballen.filter(b => !b.mini); }
+
   function resetBallen() {
-    ballen = [maakBal(peddelX, H() - 60)];
+    ballen = [maakBal(peddelX, H() - 60, false)];
   }
   resetBallen();
 
@@ -175,24 +192,56 @@ export function maakSpel(container, { modus, onKlaar }) {
     eindeSpel(false);
   }
 
+  function bomInslag() {
+    // Een bom op je plateau: alle ballen weg behalve één grote —
+    // je bent dus in één klap al je extra's kwijt.
+    speel('fout');
+    if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+    flitsTot = performance.now() + 260;
+    const groot = groteBallen();
+    ballen = groot.length ? [groot[0]] : [ballen[0]];
+    ballen[0].mini = false;
+    delete ballen[0].tot;
+  }
+
   function raakSteen(bal, s) {
     s.hits--;
     speel('treffer');
     if (s.hits <= 0) {
       s.weg = true;
       kapot++;
-      // Soms valt er een ster (alleen als er nog niet te veel ballen zijn)
-      if (Math.random() < STER_KANS && ballen.length < MAX_BALLEN) {
-        sterren.push({ x: s.x + s.b / 2, y: s.y + s.h });
+      // Soms valt er een power-up uit de kapotte steen
+      const r = Math.random();
+      if (r < SPLIT_KANS) {
+        bonussen.push({ x: s.x + s.b / 2, y: s.y + s.h, type: 'split' });
+      } else if (r < SPLIT_KANS + STER_KANS && groteBallen().length < MAX_BALLEN) {
+        bonussen.push({ x: s.x + s.b / 2, y: s.y + s.h, type: 'ster' });
       }
     }
     // Kaatsrichting: van de kant die het dichtstbij is
-    const overlX = Math.min(bal.x + BAL_R - s.x, s.x + s.b - (bal.x - BAL_R));
-    const overlY = Math.min(bal.y + BAL_R - s.y, s.y + s.h - (bal.y - BAL_R));
+    const r2 = bal.mini ? MINI_R : BAL_R;
+    const overlX = Math.min(bal.x + r2 - s.x, s.x + s.b - (bal.x - r2));
+    const overlY = Math.min(bal.y + r2 - s.y, s.y + s.h - (bal.y - r2));
     if (overlX < overlY) bal.vx = -bal.vx; else bal.vy = -bal.vy;
     // Iets sneller per 5 stenen
     if (s.weg && kapot % 5 === 0) {
       for (const b of ballen) { b.vx *= VERSNELLING; b.vy *= VERSNELLING; }
+    }
+  }
+
+  function splits() {
+    // Elke huidige grote bal krijgt er 2 tijdelijke mini-balletjes bij.
+    // Mini's breken stenen mee, maar mogen missen zonder straf.
+    speel('nieuwRecord');
+    for (const b of groteBallen()) {
+      for (let i = 0; i < 2; i++) {
+        const mini = maakBal(b.x, b.y, true);
+        const hoek = Math.atan2(b.vy, b.vx) + (i === 0 ? -0.55 : 0.55);
+        const s = Math.hypot(b.vx, b.vy);
+        mini.vx = Math.cos(hoek) * s;
+        mini.vy = Math.sin(hoek) * s;
+        ballen.push(mini);
+      }
     }
   }
 
@@ -203,38 +252,66 @@ export function maakSpel(container, { modus, onKlaar }) {
     const w = W(), h = H();
     const peddelY = h - 34;
 
-    // Sterren vallen
-    for (let i = sterren.length - 1; i >= 0; i--) {
-      const st = sterren[i];
-      st.y += STER_SNELHEID * delta;
+    // Verlopen mini-balletjes opruimen
+    ballen = ballen.filter(b => !b.mini || tijd < b.tot);
+
+    // Power-ups vallen
+    for (let i = bonussen.length - 1; i >= 0; i--) {
+      const st = bonussen[i];
+      st.y += VAL_SNELHEID * delta;
       // Gevangen met het plateau?
       if (st.y >= peddelY - 6 && st.y <= peddelY + PEDDEL_H + 10 &&
           st.x >= peddelX - PEDDEL_B / 2 - 10 && st.x <= peddelX + PEDDEL_B / 2 + 10) {
-        sterren.splice(i, 1);
-        if (ballen.length < MAX_BALLEN) {
-          ballen.push(maakBal(peddelX, peddelY - 20));
+        bonussen.splice(i, 1);
+        if (st.type === 'split') {
+          splits();
+        } else if (groteBallen().length < MAX_BALLEN) {
+          ballen.push(maakBal(peddelX, peddelY - 20, false));
           speel('nieuwRecord');
         }
         continue;
       }
-      if (st.y > h + 20) sterren.splice(i, 1);
+      if (st.y > h + 20) bonussen.splice(i, 1);
+    }
+
+    // Bommen: alleen zodra je 2 of meer ballen in de lucht hebt
+    if (!isOefenen && ballen.length >= 2) {
+      bomTimer -= delta;
+      if (bomTimer <= 0) {
+        bommen.push({ x: 24 + Math.random() * (w - 48), y: -14 });
+        bomTimer = 2.0 + Math.random() * 1.4;
+      }
+    } else {
+      bomTimer = Math.max(bomTimer, 0.8);
+    }
+    for (let i = bommen.length - 1; i >= 0; i--) {
+      const bm = bommen[i];
+      bm.y += BOM_SNELHEID * delta;
+      if (bm.y >= peddelY - 6 && bm.y <= peddelY + PEDDEL_H + 10 &&
+          bm.x >= peddelX - PEDDEL_B / 2 - 8 && bm.x <= peddelX + PEDDEL_B / 2 + 8) {
+        bommen.splice(i, 1);
+        bomInslag();
+        continue;
+      }
+      if (bm.y > h + 20) bommen.splice(i, 1);
     }
 
     // Ballen
     for (let bi = ballen.length - 1; bi >= 0; bi--) {
       const bal = ballen[bi];
+      const r = bal.mini ? MINI_R : BAL_R;
       bal.x += bal.vx * delta;
       bal.y += bal.vy * delta;
 
       // Muren
-      if (bal.x - BAL_R < 0)  { bal.x = BAL_R;      bal.vx =  Math.abs(bal.vx); }
-      if (bal.x + BAL_R > w)  { bal.x = w - BAL_R;  bal.vx = -Math.abs(bal.vx); }
-      if (bal.y - BAL_R < 0)  { bal.y = BAL_R;      bal.vy =  Math.abs(bal.vy); }
+      if (bal.x - r < 0)  { bal.x = r;      bal.vx =  Math.abs(bal.vx); }
+      if (bal.x + r > w)  { bal.x = w - r;  bal.vx = -Math.abs(bal.vx); }
+      if (bal.y - r < 0)  { bal.y = r;      bal.vy =  Math.abs(bal.vy); }
 
       // Plateau
-      if (bal.vy > 0 && bal.y + BAL_R >= peddelY && bal.y + BAL_R <= peddelY + PEDDEL_H + 14) {
-        if (bal.x >= peddelX - PEDDEL_B / 2 - BAL_R && bal.x <= peddelX + PEDDEL_B / 2 + BAL_R) {
-          bal.y = peddelY - BAL_R;
+      if (bal.vy > 0 && bal.y + r >= peddelY && bal.y + r <= peddelY + PEDDEL_H + 14) {
+        if (bal.x >= peddelX - PEDDEL_B / 2 - r && bal.x <= peddelX + PEDDEL_B / 2 + r) {
+          bal.y = peddelY - r;
           const rel = (bal.x - peddelX) / (PEDDEL_B / 2);
           const snelheid = Math.hypot(bal.vx, bal.vy);
           const hoek = rel * 0.9;
@@ -244,18 +321,18 @@ export function maakSpel(container, { modus, onKlaar }) {
         }
       }
 
-      // Onder het scherm: deze bal is weg
-      if (bal.y - BAL_R > h) {
+      // Onder het scherm: deze bal is weg (een mini kost je niets)
+      if (bal.y - r > h) {
         ballen.splice(bi, 1);
-        if (ballen.length === 0) { alleBallenWeg(); return; }
+        if (groteBallen().length === 0) { alleBallenWeg(); return; }
         continue;
       }
 
       // Stenen
       for (const s of stenen) {
         if (s.weg) continue;
-        if (bal.x + BAL_R > s.x && bal.x - BAL_R < s.x + s.b &&
-            bal.y + BAL_R > s.y && bal.y - BAL_R < s.y + s.h) {
+        if (bal.x + r > s.x && bal.x - r < s.x + s.b &&
+            bal.y + r > s.y && bal.y - r < s.y + s.h) {
           raakSteen(bal, s);
           if (kapot >= TOTAAL_STENEN) { eindeSpel(true); return; }
           break;
@@ -278,21 +355,37 @@ export function maakSpel(container, { modus, onKlaar }) {
       ctx.strokeRect(s.x, s.y, s.b, s.h);
     }
 
-    // Sterren
-    ctx.font = '16px system-ui, sans-serif';
+    // Power-ups: ster of roze split-bol
     ctx.textAlign = 'center';
-    for (const st of sterren) ctx.fillText('⭐', st.x, st.y);
+    for (const st of bonussen) {
+      if (st.type === 'ster') {
+        ctx.font = '16px system-ui, sans-serif';
+        ctx.fillText('⭐', st.x, st.y);
+      } else {
+        ctx.fillStyle = '#d8548f';
+        ctx.beginPath();
+        ctx.arc(st.x, st.y - 5, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 10px system-ui, sans-serif';
+        ctx.fillText('3', st.x, st.y - 1.5);
+      }
+    }
 
-    // Plateau
+    // Bommen
+    ctx.font = '16px system-ui, sans-serif';
+    for (const bm of bommen) ctx.fillText('💣', bm.x, bm.y);
+
+    // Plateau (flitst rood na een bominslag)
     const peddelY = h - 34;
-    ctx.fillStyle = '#f2c069';
+    ctx.fillStyle = performance.now() < flitsTot ? '#d4541a' : '#f2c069';
     ctx.fillRect(peddelX - PEDDEL_B / 2, peddelY, PEDDEL_B, PEDDEL_H);
 
-    // Ballen
-    ctx.fillStyle = '#ffffff';
+    // Ballen (mini's zijn kleiner en roze)
     for (const bal of ballen) {
+      ctx.fillStyle = bal.mini ? '#d8548f' : '#ffffff';
       ctx.beginPath();
-      ctx.arc(bal.x, bal.y, BAL_R, 0, Math.PI * 2);
+      ctx.arc(bal.x, bal.y, bal.mini ? MINI_R : BAL_R, 0, Math.PI * 2);
       ctx.fill();
     }
 

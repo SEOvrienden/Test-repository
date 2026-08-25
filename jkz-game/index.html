@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ Jaarverslag Game</title>
-  <link rel="stylesheet" href="css/stijl.css?v=19">
+  <link rel="stylesheet" href="css/stijl.css?v=20">
 </head>
 <body>
 
@@ -56,6 +56,16 @@ window.addEventListener('error', function (e) {
           <a href="ranglijst.html" class="knop secundair">Bekijk ranglijst</a>
         </div>
         <div id="bonus-cta-vak" style="margin-top:1rem;width:100%;"></div>
+        <div class="over-jkz-rij">
+          <a href="historie.html" class="over-jkz-kaart">
+            <span class="over-jkz-icoon">📜</span>
+            <span>Historie<br><small>Voorzitters sinds 1957</small></span>
+          </a>
+          <a href="awards.html" class="over-jkz-kaart">
+            <span class="over-jkz-icoon">🏆</span>
+            <span>Awards<br><small>Van Daan Bolding tot ShoarmAward</small></span>
+          </a>
+        </div>
         <p class="klein ta-c" style="margin-top:1rem;">
           <a href="uitleg.html" style="color:var(--accent);">❓ Hoe werkt het? Lees de korte uitleg</a>
         </p>
@@ -109,6 +119,11 @@ window.addEventListener('error', function (e) {
         Speelde je al eerder mee? Typ dan precies dezelfde naam,
         dan ga je verder waar je gebleven was.
       </p>
+      <p class="klein" style="margin-top:0.5rem;color:var(--tekst-zwak);">
+        Naam vergeten? Kijk op de
+        <a href="ranglijst.html" style="color:var(--accent);">ranglijst</a>
+        hoe je er precies bij staat, of stuur Jesse even een appje.
+      </p>
       <p class="klein" style="margin-top:1rem;">
         <a href="uitleg.html" style="color:var(--accent);">❓ Hoe werkt het? Lees de korte uitleg</a>
       </p>
@@ -145,8 +160,8 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { registreerSpeler, haalVoortgang, haalSpelerUitStorage, slaHuidigeSpelerOp,
-         verwerkWachtrij, controleerVerbinding, verversStatus } from './js/api.js?v=19';
-import { renderNav, renderBonusCTA, checkGesloten, SPEL_NAMEN, AANTAL_SPELLEN } from './js/app.js?v=19';
+         verwerkWachtrij, controleerVerbinding, verversStatus } from './js/api.js?v=20';
+import { renderNav, renderBonusCTA, checkGesloten, SPEL_NAMEN, AANTAL_SPELLEN } from './js/app.js?v=20';
 
 // Gesloten-check
 if (checkGesloten()) throw new Error('gesloten');

@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>JKZ — Awards</title>
+  <link rel="stylesheet" href="css/stijl.css?v=20">
+</head>
+<body>
+
+<script>
+// Vangnet: als de pagina niet goed laadt (bijv. oude bestanden in de cache
+// of een halve upload), toon dan een duidelijke melding i.p.v. stil falen.
+window.addEventListener('error', function (e) {
+  if (!e || !e.message) return;
+  if (document.getElementById('laadfout-banner')) return;
+  var d = document.createElement('div');
+  d.id = 'laadfout-banner';
+  d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;' +
+    'background:#8a2020;color:#fff;padding:12px 16px;text-align:center;' +
+    'font:14px/1.45 -apple-system,Segoe UI,sans-serif;';
+  d.textContent = 'Oeps, de pagina is niet goed geladen. Sluit de browser helemaal af en open de site opnieuw. Blijft deze melding staan? Upload dan alle bestanden opnieuw naar de server.';
+  document.body.appendChild(d);
+}, true);
+</script>
+
+<div class="pagina">
+
+  <header class="hoofd">
+    <a href="index.html" class="logo-link">
+      <div class="logo-placeholder">
+        <span class="logo-jkz">JKZ</span>
+        <span class="logo-sub">since 1957</span>
+      </div>
+    </a>
+  </header>
+
+  <div class="inhoud" style="overflow-y:auto;">
+
+    <h1 style="margin-bottom:0.5rem;">Awards 🏆</h1>
+    <p class="info-intro">
+      Junior Kamer Zaanstreek sleept al sinds de jaren '70 (inter)nationale
+      awards binnen — en deelt daarnaast elk jaar haar eigen, licht beruchte
+      kamerawards uit. Hieronder vind je ze allemaal.
+    </p>
+
+    <!-- ── (Inter)nationale awards ─────────────────────────────────────── -->
+    <div class="uitleg-blok">
+      <h2>Vergaarde (inter)nationale awards</h2>
+      <p>De door Junior Kamer Zaanstreek en haar leden vergaarde awards:</p>
+    </div>
+
+    <table class="historie-tabel">
+      <tbody>
+        <tr><td class="jaar-cel">1972 – 1973</td><td>Daan Bolding Award</td></tr>
+        <tr><td class="jaar-cel">1979 – 1980</td><td>Maurits J. Themans Troffel Award</td></tr>
+        <tr><td class="jaar-cel">1982 – 1983</td><td>Maurits J. Themans Troffel Award</td></tr>
+        <tr><td class="jaar-cel">1983 – 1984</td><td>D. Bolding Award<br>Maurits J. Themans Troffel Award</td></tr>
+        <tr><td class="jaar-cel">1984 – 1985</td><td>D. Bolding Award</td></tr>
+        <tr><td class="jaar-cel">1986 – 1987</td><td>Service Through Cooperation Award<br>Cultural Affairs Award<br><em style="color:var(--tekst-zwak);">(vergaard op het wereldcongres te Nagoya)</em></td></tr>
+        <tr><td class="jaar-cel">1987 – 1988</td><td>Conrad O’Brien Award<br>D. Bolding Award</td></tr>
+        <tr><td class="jaar-cel">1990 – 1991</td><td>Fundraising Award</td></tr>
+        <tr><td class="jaar-cel">1992 – 1993</td><td>Audiovisual Presentation Award — Certificate of Merit</td></tr>
+        <tr><td class="jaar-cel">1993 – 1994</td><td>Delta Lloyd Award<br>Junior Kamer Sport Award</td></tr>
+        <tr><td class="jaar-cel">1994 – 1995</td><td>Junior Kamer Sport Award</td></tr>
+        <tr><td class="jaar-cel">1995 – 1996</td><td>D. Bolding Award<br>Vrijblijvendheidsaward van de D.O. Noordzeekanaal<br>Junior Kamer Sportaward</td></tr>
+        <tr><td class="jaar-cel">1997 – 1998</td><td>D. Bolding Award</td></tr>
+        <tr><td class="jaar-cel">1999 – 2000</td><td>Fundraising Award</td></tr>
+        <tr><td class="jaar-cel">2001 – 2002</td><td>D. Bolding Award<br>Bezemaward</td></tr>
+        <tr><td class="jaar-cel">2009 – 2010</td><td>Fundraising Award<br>Paul Vogels Award<br>Originaliteits Award</td></tr>
+        <tr><td class="jaar-cel">2016 – 2017</td><td>Visie in Actie Award</td></tr>
+        <tr><td class="jaar-cel">2018 – 2019</td><td>Ledengroei Award</td></tr>
+      </tbody>
+    </table>
+
+    <div class="award-lijst">
+      <details>
+        <summary>🥇 Daan Bolding Award — Beste jaarverslag</summary>
+        <div class="award-tekst">Voor de Kamer met het beste JCI-jaarverslag qua
+        stijl en inhoud. Deze award wordt tijdens het CvA in mei uitgereikt.
+        <em>(En laat jij nu nét 10 jaarverslagen aan het vrijspelen zijn…)</em></div>
+      </details>
+      <details>
+        <summary>🌱 Paul Vogels Award — Natuur en milieu</summary>
+        <div class="award-tekst">Voor de Kamer die het meest milieubewust is,
+        bijvoorbeeld middels een project of milieubewuste activiteit. Wordt
+        alleen uitgereikt als er een project heeft plaatsgevonden dat hierop focust.</div>
+      </details>
+      <details>
+        <summary>💶 Fundraising Award</summary>
+        <div class="award-tekst">Voor de Kamer die de meeste fundraising heeft
+        gerealiseerd.</div>
+      </details>
+      <details>
+        <summary>👔 Visie in Actie Award — Beste Kamervoorzitter</summary>
+        <div class="award-tekst">Voor de Kamervoorzitter met de beste prestaties
+        op het gebied van leiderschap. Wordt uitgereikt bij de BidBad en is open
+        voor inschrijving.</div>
+      </details>
+      <details>
+        <summary>📈 Ledengroei Award</summary>
+        <div class="award-tekst">Voor de Kamer die de meeste nieuwe leden in een
+        jaar heeft verkregen — bekeken in zowel absolute als procentuele stijging.
+        Wordt tijdens de BidBad uitgereikt.</div>
+      </details>
+    </div>
+
+    <!-- ── Kamerawards: winnaars ───────────────────────────────────────── -->
+    <div class="uitleg-blok">
+      <h2>Kamerawards — de winnaars</h2>
+      <p>De door leden en commissies vergaarde awards van de Junior Kamer Zaanstreek:</p>
+    </div>
+
+    <table class="historie-tabel">
+      <tbody>
+        <tr class="decennium"><td colspan="2">2013 – 2014</td></tr>
+        <tr><td class="jaar-cel">J. Magielsen</td><td>Air Max Award</td></tr>
+        <tr><td class="jaar-cel">P. van Esseveld</td><td>Eikelpoets Award</td></tr>
+        <tr><td class="jaar-cel">G. Heijink</td><td>Route 66 Award</td></tr>
+        <tr><td class="jaar-cel">W.K. Veen</td><td>Zwembandje Award</td></tr>
+        <tr><td class="jaar-cel">M. van ’t Veer</td><td>Oculum per Traditionem Award</td></tr>
+        <tr class="decennium"><td colspan="2">2014 – 2015</td></tr>
+        <tr><td class="jaar-cel">F. Beentjes</td><td>Gillet Award</td></tr>
+        <tr><td class="jaar-cel">D. Vis</td><td>Daan Bolding Award</td></tr>
+        <tr><td class="jaar-cel">F. Lopes</td><td>Friendship Award</td></tr>
+        <tr class="decennium"><td colspan="2">2015 – 2016</td></tr>
+        <tr><td class="jaar-cel">P. van Esseveld</td><td>N.O.O.M.-Award</td></tr>
+        <tr><td class="jaar-cel">D. Vis</td><td>Communicatie Award</td></tr>
+        <tr class="decennium"><td colspan="2">2016 – 2017</td></tr>
+        <tr><td class="jaar-cel">E. Zijlmans</td><td>Pleegzuster Bloedwijn Award</td></tr>
+        <tr><td class="jaar-cel">J. Fechter</td><td>Air Max Award</td></tr>
+        <tr><td class="jaar-cel">J. Kroes</td><td>P.O.R.N.O. Award</td></tr>
+        <tr><td class="jaar-cel">S. Joustra</td><td>Viagra Award</td></tr>
+        <tr><td class="jaar-cel">A. Varma</td><td>A(social)Media Award</td></tr>
+        <tr class="decennium"><td colspan="2">2017 – 2018</td></tr>
+        <tr><td class="jaar-cel">B. Floris</td><td>ShoarmAward</td></tr>
+        <tr class="decennium"><td colspan="2">2018 – 2019</td></tr>
+        <tr><td class="jaar-cel">T. Aafjes</td><td>Matras Award</td></tr>
+        <tr><td class="jaar-cel">S. Joustra</td><td>(B-)rookie Award</td></tr>
+        <tr><td class="jaar-cel">F. Lopes</td><td>Grand Cru Award</td></tr>
+        <tr class="decennium"><td colspan="2">2019 – 2020</td></tr>
+        <tr><td class="jaar-cel">F. Lopes</td><td>Pleegzuster Bloedwijn Award</td></tr>
+        <tr><td class="jaar-cel">J. Wessels</td><td>De Vriendschap Award a.k.a. de Warm Bad Award</td></tr>
+        <tr class="decennium"><td colspan="2">2020 – 2021</td></tr>
+        <tr><td class="jaar-cel">T. Aafjes</td><td>Corona Award</td></tr>
+        <tr class="decennium"><td colspan="2">2021 – 2022</td></tr>
+        <tr><td class="jaar-cel">S. Joustra</td><td>Porno Award</td></tr>
+        <tr><td class="jaar-cel">J. van der Heide</td><td>Hangjas Award</td></tr>
+        <tr class="decennium"><td colspan="2">2022 – 2023</td></tr>
+        <tr><td class="jaar-cel">J. Blokpoel</td><td>Miss Moneypenny Award</td></tr>
+        <tr><td class="jaar-cel">J. Haanstra</td><td>Personality Award</td></tr>
+      </tbody>
+    </table>
+
+    <!-- ── Kamerawards: alle beschrijvingen ────────────────────────────── -->
+    <div class="uitleg-blok">
+      <h2>Alle kamerawards uitgelegd</h2>
+      <p>Tik op een award voor het (officiële) verhaal erachter:</p>
+    </div>
+
+    <div class="award-lijst">
+      <details>
+        <summary>🛏️ De Matras Award</summary>
+        <div class="award-tekst">Ingesteld in 1988 naar aanleiding van het
+        Ardennenweekend, alwaar zelfs om matrassen werd gevochten. De award wordt
+        uitgereikt aan het meest sportieve lid of de meest sportieve commissie.</div>
+      </details>
+      <details>
+        <summary>🍷 De Pleegzuster Bloedwijn Award</summary>
+        <div class="award-tekst">In 1990 door het toenmalige bestuur ingesteld.
+        De award wordt uitgereikt aan dat lid dat toe is aan een oppepper, zodat
+        hij het jaar daaropvolgend hieruit de nodige krachten kan ontlenen om
+        verder te gaan in het kamerleven.</div>
+      </details>
+      <details>
+        <summary>⭐ De Personality Award</summary>
+        <div class="award-tekst">In 1993 door het toenmalige bestuur ingesteld.
+        De award wordt uitgereikt aan díe actieve persoon of commissie die
+        duidelijk in zijn respectievelijk haar rol is gegroeid.</div>
+      </details>
+      <details>
+        <summary>🎩 De Etiquette Award</summary>
+        <div class="award-tekst">In 1996 door het toenmalige bestuur ingesteld
+        voor dát lid van de Kamer dat in het afgelopen jaar het toonbeeld van
+        fatsoen is geweest.</div>
+      </details>
+      <details>
+        <summary>🎲 De GOK-Award</summary>
+        <div class="award-tekst">Een door Ronald de Nas tijdens de kameravond
+        van 1997 in het leven geroepen award, bestemd voor dat lid — of díe
+        commissie — dat in het kamerjaar de grootste gok heeft durven nemen.
+        Het ontstaan van deze award is terug te voeren tot het memorabele
+        Old-Roosteruitje in Brummen, alwaar het zolang onrustig is gebleven.</div>
+      </details>
+      <details>
+        <summary>🛕 De Bangkok Award</summary>
+        <div class="award-tekst">In december 1998 door mr. Frank R. Duijn in het
+        leven geroepen. De officiële tekst: <em>“Dát lid of díe commissie die op
+        de meest serieuze manier de waan van alledag niet serieus heeft genomen
+        en met behulp van humor de Junior Kamergedachte gestalte heeft gegeven,
+        zonder dat daarbij de ontplooide activiteiten iets met kinderen en/of
+        padvinders te maken hebben gehad. Humor, integriteit, inzet,
+        onderscheidend vermogen en een uitzonderlijk resultaat zijn een vereiste
+        bij de uitreiking van deze award.”</em></div>
+      </details>
+      <details>
+        <summary>💊 De Viagra Award</summary>
+        <div class="award-tekst">In 1998 – 1999 ingesteld door het toenmalige
+        bestuur. Voor dát lid dat met zijn slappe (ge-)lul de kamer zeer
+        vermakelijk heeft onderhouden zonder ook maar één zinnig woord te zeggen.</div>
+      </details>
+      <details>
+        <summary>🛣️ De Route 66 Award</summary>
+        <div class="award-tekst">Onze Kamer is een reislustig volkje. Daarom
+        heeft René Blom in 2000 voor het eerst deze award uitgereikt aan de
+        voorzitter van de commissie die zich buitengewoon heeft ingezet om een
+        zo groot mogelijk aantal leden naar één of ander exotisch oord te krijgen.</div>
+      </details>
+      <details>
+        <summary>📜 De Daan Bolding Award</summary>
+        <div class="award-tekst">Sinds het CvA 2002 is er enig en echt bewijs
+        dat Junior Kamer Zaanstreek de oudste Kamer van Nederland is. Dát lid
+        dat de Junior Kamergedachte en met name de PR van JKZ het meest naar
+        buiten heeft weten te brengen, komt in aanmerking voor deze award. Het
+        betreft een ingelijst exemplaar van de oprichtingsakte.</div>
+      </details>
+      <details>
+        <summary>🏊 De Zwembandje Award</summary>
+        <div class="award-tekst">Deze award van formaat werd door het bestuur
+        2003 – 2004 opnieuw in het leven geroepen en is bestemd voor het kamerlid
+        dat in letterlijke zin een corpulente uitstraling heeft, dan wel snel
+        toenemend dan wel snel afnemend in omvang is. De award vindt zijn
+        oorsprong in zwembad Zaangolf, alwaar in 2000 een kameravond is gehouden
+        en deze award op ludieke wijze is uitgereikt.</div>
+      </details>
+      <details>
+        <summary>📣 De Communicatie Award</summary>
+        <div class="award-tekst">Een onderscheiding voor het kamerlid dat of de
+        commissie die, voor zichzelf, grensverleggend bezig is geweest op het
+        gebied van communicatie, in welke vorm dan ook, én hiermee ook anderen
+        heeft kunnen verrassen.</div>
+      </details>
+      <details>
+        <summary>🧸 De Softie Award</summary>
+        <div class="award-tekst">Deze award is voor het kamerlid dat zich
+        belangeloos heeft ontfermd over kamerleden, en dit geheel zonder
+        erotische bijbedoelingen naar het aangeschoten lid of zijn vrouw
+        erachter. Hij staat op tegen het met testosteron doordrenkte gedrag van
+        de meerderheid en toont ballen door voor het door vele (al dan niet
+        terechte) aanvallen verzwakte kamerlid te gaan staan. Dit, tot tranen
+        geroerd.</div>
+      </details>
+      <details>
+        <summary>🌈 De Chakra Award</summary>
+        <div class="award-tekst">Ingesteld in het kamerjaar 2005 – 2006 en
+        vernoemd naar de beroemde Chakra-introducties die voorzitter Etienne
+        Gooijer aan het begin van elke kameravond voordroeg. Door een aantal
+        personen zijn deze op kleuren berustende overwegingen “vaag” genoemd.
+        De award is dan ook bedoeld voor dát kleurrijke kamerlid dat zich in het
+        betreffende kamerjaar het meest zwevend, onbegrijpelijk of vaag heeft
+        uitgelaten naar het bestuur of naar de Kamer in zijn geheel, maar
+        desalniettemin een kleurrijke bijdrage aan de Kamer heeft geleverd.</div>
+      </details>
+      <details>
+        <summary>🚴 De (B-)rookie Award</summary>
+        <div class="award-tekst">Eveneens ingesteld in het kamerjaar 2005 – 2006.
+        Voor een jong kamerlid — qua leeftijd dan wel qua anciënniteit — dat
+        zich onbesuisd in het kamerleven stortte en daarmee hoge ogen gooide in
+        het desbetreffende kamerjaar. De witte kleur van deze award verwijst
+        naar het kleurrijke kamerjaar waarin de award is ingesteld, alsook naar
+        de witte trui uit de Tour de France (beste jongeling), doch refereert
+        niet verder aan het daar gebezigde dopinggebruik.</div>
+      </details>
+      <details>
+        <summary>🪞 De Eikelpoets Award</summary>
+        <div class="award-tekst">Ingesteld in het kamerjaar 2006 – 2007. Voor
+        het kamerlid dat het meest zelfingenomen is en hoog opgeeft over eigen
+        successen.</div>
+      </details>
+      <details>
+        <summary>🤝 De Maa Award</summary>
+        <div class="award-tekst">Ingesteld in het kamerjaar 2011 – 2012. Een
+        jaarlijkse award voor personen of commissies die een opmerkelijke
+        prestatie hebben geleverd op een bepaald gebied van de Maa-wereld, te
+        weten: uitbesteding, informatievoorziening, grote klappers (sponsoren)
+        binnenhalen, het grootste netwerk de Kamer binnentrekken, het meest
+        rekruteren met verschillend bloed, of zich anderszins als een echt
+        Maa-lid manifesteren.</div>
+      </details>
+      <details>
+        <summary>🔞 De Porno Award</summary>
+        <div class="award-tekst">Ingesteld in het Pornojaar 2012 – 2013 door de
+        toenmalige voorzitter Edgar Zijlmans. Bedoeld voor het kamerlid dat op
+        een kameravond, een kamerreis of een ander Junior Kamer-evenement zich
+        dusdanig heeft geprofileerd tegenover het andere geslacht dat zij
+        volledig van de kaart is van zijn optreden. De indruk die dit kamerlid
+        heeft achtergelaten kan zowel positief als negatief worden uitgelegd,
+        waarbij de uitdrukkelijke voorkeur naar het laatste uitgaat.</div>
+      </details>
+      <details>
+        <summary>👻 De Charles Schwietert Award</summary>
+        <div class="award-tekst">Bestemd voor dat kamerlid of die commissie die
+        zich het gehele kamerjaar een waar fantoom heeft getoond. Sneller dan
+        zijn schaduw en in nevelen gehuld begeeft dit kamerlid of deze commissie
+        zich door het kamerleven — met het enkele doel de Kamer op het verkeerde
+        been te zetten en ja, zelfs ronduit te belazeren. Dit alles voor eigen
+        gewin en/of eigen plezier.</div>
+      </details>
+      <details>
+        <summary>👑 De Presidential Award</summary>
+        <div class="award-tekst">De toekenning van de awards is een
+        democratische gebeurtenis tussen vijf heren. En democratische besluiten
+        kenmerken zich door pijn bij het individu. Dat kan zich voordoen bij de
+        voorzitter; hij is immers maar primus inter pares. Deze award is
+        prerogatief aan de voorzitter: alleen hij beslist — willekeurig of
+        weloverwogen — wie hem krijgt. De award is een oud JK-schild, ingesteld
+        door Peter Wieringa, voorzitter 2008 – 2009.</div>
+      </details>
+      <details>
+        <summary>🦴 De Beentjes Award</summary>
+        <div class="award-tekst">Bij aanvang van het kamerjaar 2013 – 2014
+        ingesteld door de leden; deze twijfelachtige eer is voor het eerst
+        vergeven aan Frank Beentjes. De award is voor dat bestuurslid dat de
+        meest beperkte en/of inhoudsloze bijdrage heeft geleverd aan het
+        bestuursplan, waardoor de Kamer bijna heeft besloten een motie van
+        wantrouwen in te dienen jegens het gehele bestuur.</div>
+      </details>
+      <details>
+        <summary>👟 De Air Max Award</summary>
+        <div class="award-tekst">Ingesteld door Frans Holwedel als voorzitter
+        van het kamerjaar 2013 – 2014. Toegekend aan het kamerlid dat het
+        lichtvoetigst door de Kamer manoeuvreert maar desondanks zijn eigen
+        gewicht in goud waard is: het lid dat zich maximaal inzet voor de Kamer
+        zonder zichzelf op de voorgrond te zetten.</div>
+      </details>
+      <details>
+        <summary>🫂 De Friendship Award</summary>
+        <div class="award-tekst">In het leven geroepen in het bestuursjaar
+        2014 – 2015 door toenmalig voorzitter Glenn de Vries. Bedoeld voor het
+        kamerlid dat zorgt voor vriendschap en totale verbroedering binnen de
+        Kamer: dat lid weet eerst de Kamer in het ongewisse te laten, om
+        vervolgens alle handen op elkaar te krijgen en iedereen te verrassen
+        met het onmogelijke. De winnaar ontvangt een prachtig geschenk van
+        basisschool Madrasat Al Inbiaat, met de tekst: “School opgeknapt in
+        Marrakesh, Marokko”.</div>
+      </details>
+      <details>
+        <summary>🎭 De Gillet Award</summary>
+        <div class="award-tekst">Eveneens in het leven geroepen in het
+        bestuursjaar 2014 – 2015. Wordt uitgereikt aan die persoon die tussen de
+        kameravonden door compleet van gedaante kan veranderen, om zo
+        medekamergenoten volledig in de war te brengen.</div>
+      </details>
+      <details>
+        <summary>🚪 De N.O.O.M.-Award</summary>
+        <div class="award-tekst">In 2015 – 2016 door het toenmalige bestuur
+        ingesteld voor dat lid dat de Kamer om de meest ondeugdelijke reden
+        vroegtijdig verlaat. In het bijzonder om een <strong>N</strong>ieuwe
+        baan, het <strong>O</strong>uderschap, een <strong>O</strong>pleiding
+        en/of zijn <strong>M</strong>innares.</div>
+      </details>
+      <details>
+        <summary>📵 De (A)Social Media Award</summary>
+        <div class="award-tekst">Ingesteld door het bestuur in het lustrumjaar
+        2016 – 2017. Komt toe aan dát kamerlid van wie, als gevolg van overmatig
+        gebruik van social media en/of apps met een werking van vergelijkbare
+        strekking op zijn smartphone gedurende de kameravonden — en dan met name
+        tijdens de algemene vergaderingen — de figuurlijke presentie in dat
+        kamerjaar op nihil kan worden vastgesteld.</div>
+      </details>
+      <details>
+        <summary>🥙 De ShoarmAward</summary>
+        <div class="award-tekst">In het leven geroepen in het kamerjaar
+        2017 – 2018 door voorzitter Vonk, voor dat lid dat met zijn tomeloze
+        enthousiasme diep in de nacht nog honger heeft — en die creëert bij zijn
+        medekamerleden. De ShoarmAward heeft dan ook de vorm gekregen van een
+        broodje shoarma met een bijbehorende Fristi.</div>
+      </details>
+      <details>
+        <summary>🍇 De Grand Cru Award</summary>
+        <div class="award-tekst">In 2019 door het toenmalige bestuur ingesteld
+        voor dát lid van de Kamer dat zich onderscheidt van andere kamerleden
+        door zijn complexiteit, gelaagdheid, zeldzaamheid en herkomst. Al met al
+        een kamerlid dat zich laat vergelijken met een wijn van uitzonderlijke
+        kwaliteit — een classificatie die je alleen krijgt door jarenlange
+        inzet, toewijding en loyaliteit.</div>
+      </details>
+      <details>
+        <summary>🛁 De Vriendschap Award a.k.a. de Warm Bad Award</summary>
+        <div class="award-tekst">In het kamerjaar 2019 – 2020 door toenmalig
+        voorzitter Vis in het leven geroepen, bestemd voor dát lid van de Kamer
+        dat de overige kamerleden laat ontspannen alsof zij een warm bad nemen.
+        Dit kamerlid spreidt daarbij een grote mate van barmhartigheid,
+        goedertierenheid en vriendschap tentoon, geheel zoals beloofd bij zijn
+        intrede als kamerlid. De geboden ontspanning kan middels luchtige
+        grappen en opmerkingen, grappige filmpjes in de WhatsApp-groep van de
+        Kamer, of door het faciliteren van een hottub nadat zijn kamervrienden
+        een zekere mate van lichamelijke inspanning hebben moeten leveren.</div>
+      </details>
+      <details>
+        <summary>🦠 De Corona Award</summary>
+        <div class="award-tekst">Door het bestuur in het lockdown-jaar in het
+        leven geroepen. Deze award wordt uitgereikt aan dát kamerlid dat na
+        meerdere maanden lijfelijke afwezigheid van zijn kamervrienden een zo
+        sterke drang voelt om alcohol te drinken (waaronder inbegrepen
+        zelfgebrouwen pepershotjes) dat hij hiervan een tijdje gestrekt
+        horizontaal moet gaan liggen — vergelijkbaar met een persoon die een
+        Covid-19-besmetting bestrijdt op de intensive care.</div>
+      </details>
+      <details>
+        <summary>🧥 De Hangjas Award</summary>
+        <div class="award-tekst">In het lustrumjaar 2021 – 2022 door het
+        toenmalige bestuur ingesteld, zonder te willen verwijzen naar voorzitter
+        Jordy Jas van dat kamerjaar, wiens naam — geheel bij toeval —
+        overeenkomsten vertoont met de naam van deze award. Wordt uitgereikt aan
+        dát lid dat zich een ware hangjas heeft getoond door gedurende het
+        kamerjaar niet te veel te doen, maar op het laatste moment desalniettemin
+        buitengewoon grootse inspanningen heeft geleverd en andere kamerleden
+        heeft weten te motiveren en activeren, met als doel de Junior Kamer
+        Zaanstreek in een goed daglicht te zetten en zich persoonlijk te
+        ontwikkelen.</div>
+      </details>
+      <details>
+        <summary>🕵️‍♀️ De Miss Moneypenny Award</summary>
+        <div class="award-tekst">In het leven geroepen in het kamerjaar
+        2022 – 2023 door toenmalig voorzitter Kars de Jong. Hoewel de rol van
+        Miss Moneypenny in de James Bond-films wellicht bescheiden lijkt, is
+        haar inbreng van onschatbare waarde. Zo geldt dat ook voor het kamerlid
+        aan wie deze award wordt uitgereikt: een kamerlid dat niet altijd
+        zichtbaar is, maar op de achtergrond veel werk verzet. Dat in chaos orde
+        weet te scheppen. En dat daarnaast op slinkse wijze de Kamer en haar
+        leden weet te beïnvloeden om in gezamenlijkheid tot grootse prestaties
+        te komen.</div>
+      </details>
+      <details>
+        <summary>🧂 De Peper &amp; Zout Award</summary>
+        <div class="award-tekst">In het leven geroepen om het duo te eren dat
+        samen de smaakmakers van het jaar waren. Er zijn geweldige recepten,
+        maar het toevoegen van peper en zout kan het verschil maken tussen
+        geweldig en fantastisch. Met alleen zout mist het de pit, met alleen
+        peper de finishing touch — samen is toch alles beter. Ingesteld door
+        Joost Kroes, voorzitter 2023 – 2024.</div>
+      </details>
+      <details>
+        <summary>🦪 De Gesloten Oester Award</summary>
+        <div class="award-tekst">Parels worden gevormd door oesters. Dit proces
+        begint wanneer een vreemd deeltje — een zandkorrel of een parasiet — het
+        schelpdier binnendringt en irriteert. Als reactie scheidt het schelpdier
+        lagen parelmoer af om het irriterende deeltje te bedekken. Deze award is
+        voor het lid dat na een flinke irritatie heeft kunnen groeien tot de
+        parel die hij nu is. Ingesteld door Joost Kroes, voorzitter 2023 – 2024.</div>
+      </details>
+    </div>
+
+    <a href="historie.html" class="over-jkz-kaart" style="margin-bottom:1.5rem;">
+      <span class="over-jkz-icoon">📜</span>
+      <span>Bekijk ook de historie<br><small>Alle voorzitters, senatoren en ereleden sinds 1957</small></span>
+    </a>
+
+  </div>
+</div>
+
+<script type="module">
+import { renderNav, checkGesloten } from './js/app.js?v=20';
+
+if (checkGesloten()) throw new Error('gesloten');
+renderNav('spelen');
+</script>
+</body>
+</html>
