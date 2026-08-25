@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Jouw eindkaart</title>
-  <link rel="stylesheet" href="css/stijl.css?v=14">
+  <link rel="stylesheet" href="css/stijl.css?v=15">
 </head>
 <body>
 
@@ -51,7 +51,7 @@ window.addEventListener('error', function (e) {
       <div class="eindkaart-score">
         <div>
           <div class="score-punten-groot" id="ek-totaal" style="font-size:2.8rem;">0</div>
-          <p class="klein" style="color:var(--tekst-zwak);" id="ek-totaal-sub">van 700 punten</p>
+          <p class="klein" style="color:var(--tekst-zwak);" id="ek-totaal-sub">van 1000 punten</p>
         </div>
         <div>
           <div class="score-punten-groot" id="ek-positie" style="font-size:2.8rem;">–</div>
@@ -82,8 +82,8 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalRanglijst, toonPunten } from './js/api.js?v=14';
-import { renderNav, checkGesloten, toonConfetti } from './js/app.js?v=14';
+import { haalSpelerUitStorage, haalVoortgang, haalRanglijst, toonPunten } from './js/api.js?v=15';
+import { renderNav, checkGesloten, toonConfetti, SPEL_NAMEN, AANTAL_SPELLEN } from './js/app.js?v=15';
 
 if (checkGesloten()) throw new Error('gesloten');
 renderNav('ranglijst');
@@ -95,10 +95,10 @@ document.getElementById('ek-naam').textContent = speler.naam;
 
 const voortgang = await haalVoortgang(speler.spelerId);
 const spellenDiv = document.getElementById('ek-spellen');
-const NAMEN = ['Reactie', 'Breakout', 'Simon', 'Mep', 'Snake', 'Flappy', 'Pong'];
+const NAMEN = SPEL_NAMEN;
 let totaal = 0;
 
-for (let s = 1; s <= 7; s++) {
+for (let s = 1; s <= AANTAL_SPELLEN; s++) {
   const sc = (voortgang.scores || []).find(x => x.spel === s);
   const beste = sc ? Math.max(...sc.pogingen.map(p => p.score)) : null;
   if (beste !== null) totaal += beste;

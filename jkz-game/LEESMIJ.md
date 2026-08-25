@@ -50,13 +50,12 @@ uitleg in plaats van een pagina die stilletjes niets doet.
 
 ## Wat je nog moet invullen
 
-1. **Verslagtitels** — `js/titels.js`: vervang "Verslag 1" t/m "Verslag 7"
-   door de echte namen, bijv. "Verslag voorzitter", "Verslag penningmeester",
-   "Verslag Coco 1 (Kars)". Deze titels verschijnen in het verslagenoverzicht
-   en bovenaan elk verslag.
+1. **Verslagtitels** — `js/titels.js`: de 10 titels staan er al in
+   (5 bestuur + 5 commissies uit het jaarplan). Aanpassen kan altijd; ze
+   verschijnen in het verslagenoverzicht en bovenaan elk verslag.
 
 2. **Verslagen** — de verslagen zijn gewone tekstpagina's, geen PDF's meer.
-   Open `verslag-teksten/verslag-1.html` t/m `verslag-7.html` in een
+   Open `verslag-teksten/verslag-1.html` t/m `verslag-10.html` in een
    teksteditor (Kladblok kan al) en vervang de voorbeeldtekst. Bovenin elk
    bestand staat precies uitgelegd hoe je koppen, alinea's, opsommingen en
    **foto's** toevoegt. Foto's zet je in de map `/img/` en verwijs je aan met
@@ -93,7 +92,7 @@ Eén speler wissen kan ook, in het blok erboven: kies de naam en klik
 ## Bonuspunten via Tikkie (steun de clubkas)
 
 **1 euro = 1 bonuspunt.** Ter vergelijking: elk spel is maximaal 100 punten,
-alle 7 spellen samen dus 700. Bonuspunten geven een zetje, maar spelen
+alle 10 spellen samen dus 1.000. Bonuspunten geven een zetje, maar spelen
 blijft het belangrijkste.
 
 1. Jouw Tikkie-link staat er standaard al in — je hoeft niets te doen.
@@ -134,13 +133,14 @@ jkz-game/
   index.html          Startscherm, naam typen + bevestigen
   spel.html           Spel-flow: uitleg, oefenen, spelen, score
   verslag.html        Toont één verslag als tekstpagina
-  verslagen.html      Overzicht van alle 7 verslagen (open/op slot)
+  verslagen.html      Overzicht van alle 10 verslagen (open/op slot)
   ranglijst.html      Scorebord (ververst elke 15 sec)
   eindstand.html      Beamerpagina voor op de vergadering
   uitleg.html         Korte spelregels/uitleg voor de leden ("Hoe werkt het?")
   admin.html          Beheerpagina (?key=GEHEIM)
 
-  eindkaart.html      Persoonlijke eindkaart na level 7 (screenshotbaar)
+  eindkaart.html      Persoonlijke eindkaart na level 10 (screenshotbaar)
+  fonts/              Bebas Neue (kopletter uit het jaarplan-magazine)
 
   api.php             Server-API: alle database-acties (fase 2)
   controle.php        Zelfcontrole: vertelt of de database goed staat
@@ -162,8 +162,11 @@ jkz-game/
       spel5.js        Snake
       spel6.js        One-button (Flappy style)
       spel7.js        Pong tegen de computer
+      spel8.js        Stapelen (stacker)
+      spel9.js        Lucky Shot (timing-wiel)
+      spel10.js       Hit & Run (ontwijken + munten vangen)
   verslag-teksten/
-    verslag-1.html ... verslag-7.html   (nu: voorbeeldtekst, zelf invullen)
+    verslag-1.html ... verslag-10.html   (nu: voorbeeldtekst, zelf invullen)
   img/                Hier zet je foto's voor in de verslagen
 ```
 
@@ -194,6 +197,9 @@ jkz-game/
 | 5 Snake | appels | `appels * 5` (elke 5e appel is goud en telt voor 2) |
 | 6 One-button | palen | `palen * 5` |
 | 7 Pong | terugslagen | `terugslagen * 8` |
+| 8 Stapelen | lagen | `lagen * 5` |
+| 9 Lucky Shot | raak | `raak * 7` |
+| 10 Hit & Run | seconden + munten | `seconden * 3 + munten * 2` |
 Alle scores worden begrensd op 0–100.
 
 ### Beheerpagina

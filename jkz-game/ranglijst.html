@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Ranglijst</title>
-  <link rel="stylesheet" href="css/stijl.css?v=14">
+  <link rel="stylesheet" href="css/stijl.css?v=15">
 </head>
 <body>
 
@@ -69,8 +69,8 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { haalRanglijst, haalSpelerUitStorage, haalVoortgang, verversStatus,
-         toonPunten } from './js/api.js?v=14';
-import { renderVoortgang, renderNav, renderBonusCTA, checkGesloten } from './js/app.js?v=14';
+         toonPunten } from './js/api.js?v=15';
+import { renderVoortgang, renderNav, renderBonusCTA, checkGesloten, SPEL_NAMEN } from './js/app.js?v=15';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -89,7 +89,8 @@ async function laadVoortgang() {
     renderVoortgang(document.getElementById('voortgang'), vg.level, vg.level - 1);
   }
 }
-laadVoortgang();
+// .catch: als de pagina wordt verlaten terwijl dit nog laadt, geen foutmelding
+laadVoortgang().catch(() => {});
 
 let verversInterval = null;
 let tellerInterval = null;
@@ -107,8 +108,7 @@ async function laadRanglijst() {
 
 // ── Tabbladen: Totaal + één per spel ─────────────────────────────────────────
 
-const SPEL_NAMEN = ['Reactie', 'Breakout', 'Simon', 'Mep', 'Snake', 'Flappy', 'Pong'];
-let actieveTab = 'totaal';   // 'totaal' of spelnummer 1–7
+let actieveTab = 'totaal';   // 'totaal' of spelnummer 1–10
 let laatsteData = null;
 
 function renderTabs() {

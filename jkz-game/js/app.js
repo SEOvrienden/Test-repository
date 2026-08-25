@@ -1,12 +1,18 @@
 // Gedeelde hulpfuncties voor alle pagina's
-import { haalConfig, haalTikkieLink } from './api.js?v=14';
-import { PLAAGTEKSTEN } from './teksten.js?v=14';
+import { haalConfig, haalTikkieLink } from './api.js?v=15';
+import { PLAAGTEKSTEN } from './teksten.js?v=15';
+
+// ── Spellen: het aantal en de namen, op één plek ─────────────────────────────
+
+export const AANTAL_SPELLEN = 10;
+export const SPEL_NAMEN = ['Reactie', 'Breakout', 'Simon', 'Mep', 'Snake',
+                           'Flappy', 'Pong', 'Stapelen', 'Lucky Shot', 'Hit & Run'];
 
 // ── Voortgangsbalk ────────────────────────────────────────────────────────────
 
 export function renderVoortgang(container, huidigLevel, gespeeldTm) {
   container.innerHTML = '';
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i <= AANTAL_SPELLEN; i++) {
     // Gespeelde levels en het actieve level zijn klikbaar: opnieuw spelen
     // mag altijd, want je hoogste score telt.
     const klikbaar = i <= Math.max(gespeeldTm + 1, huidigLevel);
@@ -118,7 +124,7 @@ export function toonConfetti(canvasEl) {
   const w = canvasEl.width  = window.innerWidth;
   const h = canvasEl.height = window.innerHeight;
   const ctx = canvasEl.getContext('2d');
-  const kleuren = ['#ccab37', '#e0c766', '#ffffff', '#4a8a6a', '#ccab37'];
+  const kleuren = ['#e8a33d', '#f2c069', '#f2ecd9', '#4a99a8', '#d8548f'];
   const deeltjes = Array.from({ length: 90 }, (_, i) => ({
     x: Math.random() * w,
     y: -20 - Math.random() * 80,

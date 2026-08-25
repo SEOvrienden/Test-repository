@@ -1,8 +1,8 @@
 // Spel 6 — One-button (Flappy style)
 // Tik om te fladderen, ontwijkt palen. Canvas + delta-tijd.
 // Oefenen: eindigt na 3 palen, botsen herstart meteen.
-import { speel } from '../geluid.js?v=14';
-import { clamp } from '../app.js?v=14';
+import { speel } from '../geluid.js?v=15';
+import { clamp } from '../app.js?v=15';
 
 export const info = {
   naam: 'One-button',
@@ -177,12 +177,12 @@ export function maakSpel(container, { modus, onKlaar }) {
     const h = H();
 
     // Achtergrond
-    ctx.fillStyle = '#0f241a';
+    ctx.fillStyle = '#0f333c';
     ctx.fillRect(0, 0, w, h);
 
     // Palen
     ctx.fillStyle = '#204634';
-    ctx.strokeStyle = 'rgba(204,171,55,0.3)';
+    ctx.strokeStyle = 'rgba(232,163,61,0.3)';
     ctx.lineWidth = 1.5;
     for (const p of palen) {
       // Bovenpaal
@@ -196,22 +196,22 @@ export function maakSpel(container, { modus, onKlaar }) {
 
     // Vogel (gouden bol)
     const vogelX = w * 0.25;
-    ctx.fillStyle = '#ccab37';
+    ctx.fillStyle = '#e8a33d';
     ctx.beginPath();
     ctx.arc(vogelX, vogelY, VOGEL_R, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#e0c766';
+    ctx.strokeStyle = '#f2c069';
     ctx.lineWidth = 2;
     ctx.stroke();
 
     // Oog
-    ctx.fillStyle = '#0f241a';
+    ctx.fillStyle = '#0f333c';
     ctx.beginPath();
     ctx.arc(vogelX + 5, vogelY - 4, 3, 0, Math.PI * 2);
     ctx.fill();
 
     // Score overlay
-    ctx.fillStyle = 'rgba(204,171,55,0.9)';
+    ctx.fillStyle = 'rgba(232,163,61,0.9)';
     ctx.font = `bold ${Math.round(h * 0.055)}px 'Courier New', monospace`;
     ctx.textAlign = 'center';
     ctx.fillText(palen_count, w * 0.5, h * 0.08);

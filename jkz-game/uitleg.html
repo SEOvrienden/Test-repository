@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Hoe werkt het?</title>
-  <link rel="stylesheet" href="css/stijl.css?v=14">
+  <link rel="stylesheet" href="css/stijl.css?v=15">
 </head>
 <body>
 
@@ -39,14 +39,15 @@ window.addEventListener('error', function (e) {
 
     <h1 style="margin-bottom:0.5rem;">Hoe werkt het? 🎮</h1>
     <p style="margin-bottom:1.5rem;line-height:1.6;">
-      <strong>Speel 7 mini-games en speel zo alle 7 jaarverslagen vrij.</strong>
-      Na elk uitgespeeld spel gaat het volgende verslag én het volgende spel open.
+      <strong>Speel 10 mini-games en speel zo alle 10 jaarverslagen vrij</strong> —
+      van de 5 bestuursleden en de 5 commissies. Na elk uitgespeeld spel gaat
+      het volgende verslag én het volgende spel open.
     </p>
 
     <div class="uitleg-blok">
       <h2>De punten</h2>
       <ul>
-        <li>Elk spel is maximaal <strong>100 punten</strong>, alle 7 samen dus <strong>700 punten</strong>.</li>
+        <li>Elk spel is maximaal <strong>100 punten</strong>, alle 10 samen dus <strong>1.000 punten</strong>.</li>
         <li>Je mag elk spel <strong>zo vaak spelen als je wilt</strong> — alleen je hoogste score telt.</li>
         <li>Je kunt <strong>de hele week blijven spelen</strong> om je scores te verbeteren, tot de
             jaarvergadering op <strong>3 september 2026</strong>. Daar maken we de eindstand bekend.</li>
@@ -94,8 +95,8 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { verversStatus } from './js/api.js?v=14';
-import { renderNav, renderBonusCTA, checkGesloten } from './js/app.js?v=14';
+import { verversStatus } from './js/api.js?v=15';
+import { renderNav, renderBonusCTA, checkGesloten } from './js/app.js?v=15';
 
 if (checkGesloten()) throw new Error('gesloten');
 renderNav('uitleg');

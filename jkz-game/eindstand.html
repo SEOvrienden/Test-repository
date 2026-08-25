@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>JKZ — Eindstand</title>
-  <link rel="stylesheet" href="css/stijl.css?v=14">
+  <link rel="stylesheet" href="css/stijl.css?v=15">
   <style>
     /* Beamer-specifieke overrides — desktop gericht */
     html, body {
@@ -62,7 +62,7 @@ window.addEventListener('error', function (e) {
         <tr>
           <th style="width:50px;">#</th>
           <th>Naam</th>
-          <th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th><th>S7</th>
+          <th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th><th>S7</th><th>S8</th><th>S9</th><th>S10</th>
           <th>Totaal</th>
         </tr>
       </thead>
@@ -73,7 +73,7 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalRanglijst } from './js/api.js?v=14';
+import { haalRanglijst } from './js/api.js?v=15';
 
 let volgendeVervers = 15;
 
@@ -99,7 +99,7 @@ function renderStand(data) {
   const topDiv = document.getElementById('top-per-spel');
   topDiv.innerHTML = '';
   const topPerSpel = {};
-  for (let s = 1; s <= 7; s++) {
+  for (let s = 1; s <= 10; s++) {
     let beste = null;
     data.forEach(r => {
       const sc = r.scores[s];
@@ -126,7 +126,7 @@ function renderStand(data) {
     tr.innerHTML = `
       <td style="font-family:'Courier New',monospace;">${icoon}</td>
       <td>${escapeHtml(rij.naam)}${rij.bonus > 0 ? ' 💰' : ''}</td>
-      ${[1,2,3,4,5,6,7].map(s => {
+      ${[1,2,3,4,5,6,7,8,9,10].map(s => {
         const sc = rij.scores[s];
         return `<td>${sc !== undefined && sc !== null ? sc : '–'}</td>`;
       }).join('')}

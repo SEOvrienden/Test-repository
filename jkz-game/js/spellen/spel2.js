@@ -4,8 +4,8 @@
 // - Soms valt er een ster: vang hem en je krijgt een EXTRA bal (max 3).
 // - Pas als je álle ballen mist, is het voorbij.
 // Oefenen: 30 seconden vrij spelen, gemiste bal komt gewoon terug.
-import { speel } from '../geluid.js?v=14';
-import { clamp } from '../app.js?v=14';
+import { speel } from '../geluid.js?v=15';
+import { clamp } from '../app.js?v=15';
 
 export const info = {
   naam: 'JKZ Breakout',
@@ -264,13 +264,13 @@ export function maakSpel(container, { modus, onKlaar }) {
 
   function teken() {
     const w = W(), h = H();
-    ctx.fillStyle = '#0f241a';
+    ctx.fillStyle = '#0f333c';
     ctx.fillRect(0, 0, w, h);
 
     // Stenen — harde stenen (2 hits over) zijn licht, normale goud
     for (const s of stenen) {
       if (s.weg) continue;
-      ctx.fillStyle = s.hits >= 2 ? '#e0c766' : '#ccab37';
+      ctx.fillStyle = s.hits >= 2 ? '#f2c069' : '#e8a33d';
       ctx.fillRect(s.x, s.y, s.b, s.h);
       ctx.strokeStyle = s.hits >= 2 ? 'rgba(255,255,255,0.5)' : 'rgba(15,36,26,0.6)';
       ctx.strokeRect(s.x, s.y, s.b, s.h);
@@ -283,7 +283,7 @@ export function maakSpel(container, { modus, onKlaar }) {
 
     // Plateau
     const peddelY = h - 34;
-    ctx.fillStyle = '#e0c766';
+    ctx.fillStyle = '#f2c069';
     ctx.fillRect(peddelX - PEDDEL_B / 2, peddelY, PEDDEL_B, PEDDEL_H);
 
     // Ballen
@@ -295,7 +295,7 @@ export function maakSpel(container, { modus, onKlaar }) {
     }
 
     // Teller
-    ctx.fillStyle = 'rgba(204,171,55,0.9)';
+    ctx.fillStyle = 'rgba(232,163,61,0.9)';
     ctx.font = `bold ${Math.round(h * 0.045)}px 'Courier New', monospace`;
     ctx.fillText(`${kapot}/${TOTAAL_STENEN}`, w * 0.5, h * 0.5);
     if (isOefenen) {

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Spel</title>
-  <link rel="stylesheet" href="css/stijl.css?v=14">
+  <link rel="stylesheet" href="css/stijl.css?v=15">
 </head>
 <body>
 
@@ -143,10 +143,10 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { haalSpelerUitStorage, haalVoortgang, slaScoreOp, haalRanglijst, haalConfig }
-  from './js/api.js?v=14';
+  from './js/api.js?v=15';
 import { renderVoortgang, renderNav, plaatsTekst, checkGesloten, toonConfetti, urlParam }
-  from './js/app.js?v=14';
-import { speel } from './js/geluid.js?v=14';
+  from './js/app.js?v=15';
+import { speel } from './js/geluid.js?v=15';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -154,7 +154,7 @@ if (checkGesloten()) throw new Error('gesloten');
 renderNav('spelen');
 
 const level = parseInt(urlParam('level') || '1');
-if (isNaN(level) || level < 1 || level > 7) {
+if (isNaN(level) || level < 1 || level > 10) {
   window.location.href = 'index.html'; throw new Error();
 }
 
@@ -179,7 +179,7 @@ renderVoortgang(voortgangContainer, level, gespeeldTm);
 document.getElementById('scherm-uitleg').querySelector('#uitleg-naam').textContent = 'Laadt…';
 let spelModule;
 try {
-  spelModule = await import(`./js/spellen/spel${level}.js?v=14`);
+  spelModule = await import(`./js/spellen/spel${level}.js?v=15`);
 } catch (e) {
   console.error('Module laden mislukt:', e);
   window.location.href = 'index.html'; throw e;

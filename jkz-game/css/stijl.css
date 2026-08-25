@@ -1,23 +1,39 @@
 /* ===================================================================
-   JKZ JAARVERSLAG GAME — HUISSTIJL
+   JKZ JAARVERSLAG GAME — HUISSTIJL "LEVEL UP / GAME CHANGERS"
+   Palet en fonts afgestemd op het jaarplan-magazine 2025-2026:
+   petrolblauw + crème + warm goud, koppen in Bebas Neue.
    Alle kleuren via rolvariabelen. Pas dit blok aan om de hele app
    te herkluren. Gebruik NOOIT directe hexcodes buiten dit blok.
    =================================================================== */
+
+/* Kopletter uit het magazine (lokaal meegeleverd, geen externe requests) */
+@font-face {
+  font-family: 'Bebas Neue';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/bebas-neue.woff2') format('woff2');
+}
+
 :root {
-  /* huisstijl JKZ — deze twee zijn hard */
-  --jkz-groen:  #183729;
-  --jkz-goud:   #ccab37;
-  --jkz-wit:    #ffffff;
+  /* magazine-palet */
+  --jkz-groen:  #1c525f;   /* petrol (vlakken) */
+  --jkz-goud:   #e8a33d;   /* warm goud/oranje */
+  --jkz-wit:    #f2ecd9;   /* crème, zoals het magazinepapier */
   --jkz-zwart:  #111111;
 
   /* afgeleide tinten */
-  --jkz-groen-diep:   #0f241a;
-  --jkz-groen-paneel: #204634;
-  --jkz-goud-zacht:   #e0c766;
-  --jkz-grijs:        #8fa79a;
+  --jkz-groen-diep:   #0f333c;   /* diep petrol (achtergrond) */
+  --jkz-groen-paneel: #26616f;   /* lichter petrol (panelen) */
+  --jkz-goud-zacht:   #f2c069;
+  --jkz-grijs:        #9fc0c4;   /* zacht teal-grijs */
+  --jkz-roze:         #d8548f;   /* accent van de magazine-cover */
 
-  /* Simon — vierde kleur buiten huisstijl */
+  /* Simon — vierde kleur buiten huisstijl (ook de gevaar-kleur) */
   --simon-4: #d4541a;
+
+  /* fonts */
+  --font-kop: 'Bebas Neue', 'Arial Narrow', system-ui, sans-serif;
 
   /* rolvariabelen — gebruik uitsluitend deze in de rest van de CSS */
   --achtergrond: var(--jkz-groen-diep);
@@ -30,7 +46,7 @@
   /* Simon-kleuren via rolvariabelen */
   --simon-1: var(--accent);
   --simon-2: var(--tekst);
-  --simon-3: #4a8a6a;
+  --simon-3: #4a99a8;
   /* --simon-4 hierboven */
 
   /* layout */
@@ -39,6 +55,15 @@
   --safe-b: env(safe-area-inset-bottom, 0px);
   --nav-hoogte: 56px;
 }
+
+/* === KOPPEN IN MAGAZINE-STIJL === */
+h1, h2, .logo-jkz, .welkom-groot, .score-punten-groot {
+  font-family: var(--font-kop);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+h1 { font-size: 2.1rem; text-transform: uppercase; }
+h2 { letter-spacing: 0.07em; }
 
 /* === RESET === */
 *, *::before, *::after {
@@ -147,7 +172,7 @@ body::after {
 .hoofd {
   height: var(--hoofd-hoogte);
   background: var(--vlak);
-  border-bottom: 1px solid rgba(204, 171, 55, 0.2);
+  border-bottom: 1px solid rgba(232, 163, 61, 0.2);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -169,10 +194,9 @@ body::after {
 }
 
 .logo-jkz {
-  font-family: 'Courier New', monospace;
-  font-size: 1.4rem;
-  font-weight: bold;
-  letter-spacing: 0.15em;
+  font-family: var(--font-kop);
+  font-size: 1.5rem;
+  letter-spacing: 0.18em;
   color: var(--accent);
 }
 
@@ -200,7 +224,7 @@ body::after {
   height: calc(var(--nav-hoogte) + var(--safe-b));
   padding-bottom: var(--safe-b);
   background: var(--vlak);
-  border-top: 1px solid rgba(204, 171, 55, 0.25);
+  border-top: 1px solid rgba(232, 163, 61, 0.25);
   display: flex;
   z-index: 500;
 }
@@ -232,7 +256,7 @@ body::after {
 
 .onder-nav-item:active {
   color: var(--accent);
-  background: rgba(204, 171, 55, 0.08);
+  background: rgba(232, 163, 61, 0.08);
 }
 
 /* Pagina's met nav: houd ruimte vrij onderaan zodat niets onder de balk valt */
@@ -269,12 +293,12 @@ body.nav-verborgen .pagina {
 .voortgang {
   height: var(--voortgang-hoogte);
   background: var(--jkz-groen-diep);
-  border-bottom: 1px solid rgba(204, 171, 55, 0.15);
+  border-bottom: 1px solid rgba(232, 163, 61, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 6px 1rem;
+  gap: 4px;
+  padding: 6px 0.75rem;
   flex-shrink: 0;
 }
 
@@ -284,7 +308,7 @@ body.nav-verborgen .pagina {
   height: 100%;
   border-radius: 4px;
   background: var(--jkz-groen-paneel);
-  border: 1px solid rgba(204, 171, 55, 0.2);
+  border: 1px solid rgba(232, 163, 61, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -296,7 +320,7 @@ body.nav-verborgen .pagina {
 }
 
 .voortgang-blokje.gespeeld {
-  background: rgba(204, 171, 55, 0.25);
+  background: rgba(232, 163, 61, 0.25);
   border-color: var(--accent);
   color: var(--accent);
 }
@@ -305,7 +329,7 @@ body.nav-verborgen .pagina {
   background: var(--accent);
   border-color: var(--jkz-goud-zacht);
   color: var(--achtergrond);
-  box-shadow: 0 0 8px rgba(204, 171, 55, 0.6);
+  box-shadow: 0 0 8px rgba(232, 163, 61, 0.6);
 }
 
 /* === SCHERMEN (show/hide) === */
@@ -330,17 +354,20 @@ body.nav-verborgen .pagina {
 
 /* === TYPOGRAFIE === */
 h1 {
-  font-family: 'Courier New', monospace;
-  font-size: 1.8rem;
-  letter-spacing: 0.05em;
+  font-family: var(--font-kop);
+  font-size: 2.1rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--accent);
   margin-bottom: 0.5rem;
 }
 
 h2 {
-  font-family: 'Courier New', monospace;
-  font-size: 1.3rem;
-  letter-spacing: 0.03em;
+  font-family: var(--font-kop);
+  font-size: 1.45rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
   color: var(--accent);
   margin-bottom: 0.5rem;
 }
@@ -435,7 +462,7 @@ p:last-child { margin-bottom: 0; }
 /* === PANELEN / KAARTEN === */
 .paneel {
   background: var(--jkz-groen-paneel);
-  border: 1px solid rgba(204, 171, 55, 0.2);
+  border: 1px solid rgba(232, 163, 61, 0.2);
   border-radius: 12px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -468,11 +495,11 @@ p:last-child { margin-bottom: 0; }
 
 /* === AFTELLING === */
 .aftelling-cijfer {
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-kop);
   font-size: 6rem;
   color: var(--accent);
   animation: aftelling-pulse 0.8s ease-out;
-  text-shadow: 0 0 30px rgba(204, 171, 55, 0.7);
+  text-shadow: 0 0 30px rgba(232, 163, 61, 0.7);
 }
 
 @keyframes aftelling-pulse {
@@ -491,11 +518,11 @@ p:last-child { margin-bottom: 0; }
 
 /* === SCORE SCHERM === */
 .score-punten-groot {
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-kop);
   font-size: 3.25rem;
   font-weight: bold;
   color: var(--accent);
-  text-shadow: 0 0 20px rgba(204, 171, 55, 0.5);
+  text-shadow: 0 0 20px rgba(232, 163, 61, 0.5);
   line-height: 1;
   margin: 0.25rem 0;
 }
@@ -672,7 +699,7 @@ p:last-child { margin-bottom: 0; }
 
 .memory-achter {
   background: var(--jkz-groen-paneel);
-  border: 2px solid rgba(204, 171, 55, 0.3);
+  border: 2px solid rgba(232, 163, 61, 0.3);
   font-family: 'Courier New', monospace;
   color: var(--accent);
   font-size: 1.5rem;
@@ -685,7 +712,7 @@ p:last-child { margin-bottom: 0; }
 }
 
 .memory-kaart.gevonden .memory-voor {
-  background: rgba(204, 171, 55, 0.15);
+  background: rgba(232, 163, 61, 0.15);
   border-color: var(--jkz-goud-zacht);
 }
 
@@ -780,7 +807,7 @@ p:last-child { margin-bottom: 0; }
 .mep-cel {
   border-radius: 12px;
   background: var(--jkz-groen-paneel);
-  border: 2px solid rgba(204, 171, 55, 0.15);
+  border: 2px solid rgba(232, 163, 61, 0.15);
   cursor: pointer;
   touch-action: none;
   -webkit-tap-highlight-color: transparent;
@@ -796,7 +823,7 @@ p:last-child { margin-bottom: 0; }
 .mep-cel.actief {
   background: var(--accent);
   border-color: var(--jkz-goud-zacht);
-  box-shadow: 0 0 15px rgba(204, 171, 55, 0.4);
+  box-shadow: 0 0 15px rgba(232, 163, 61, 0.4);
 }
 
 .mep-cel.geraakt {
@@ -831,9 +858,9 @@ p:last-child { margin-bottom: 0; }
 .snake-speelveld-wrap canvas {
   display: block;
   touch-action: none;
-  border: 2px solid rgba(204, 171, 55, 0.3);
+  border: 2px solid rgba(232, 163, 61, 0.3);
   border-radius: 4px;
-  box-shadow: 0 0 20px rgba(204, 171, 55, 0.15);
+  box-shadow: 0 0 20px rgba(232, 163, 61, 0.15);
 }
 
 .snake-controls {
@@ -928,7 +955,7 @@ p:last-child { margin-bottom: 0; }
   min-height: 56px;
   padding: 14px 16px;
   background: var(--jkz-groen-paneel);
-  border: 2px solid rgba(204, 171, 55, 0.25);
+  border: 2px solid rgba(232, 163, 61, 0.25);
   border-radius: 10px;
   color: var(--tekst);
   font-size: 0.95rem;
@@ -945,7 +972,7 @@ p:last-child { margin-bottom: 0; }
 }
 
 .quiz-optie:active:not(:disabled) {
-  background: rgba(204, 171, 55, 0.2);
+  background: rgba(232, 163, 61, 0.2);
 }
 
 .quiz-optie.goed {
@@ -971,7 +998,7 @@ p:last-child { margin-bottom: 0; }
   font-style: italic;
   padding: 0.75rem;
   border-left: 3px solid var(--accent);
-  background: rgba(204, 171, 55, 0.05);
+  background: rgba(232, 163, 61, 0.05);
   border-radius: 0 8px 8px 0;
 }
 
@@ -1030,7 +1057,7 @@ p:last-child { margin-bottom: 0; }
 .rang-tabs::-webkit-scrollbar { display: none; }
 .rang-tab {
   flex: 0 0 auto;
-  border: 1px solid rgba(204, 171, 55, 0.3);
+  border: 1px solid rgba(232, 163, 61, 0.3);
   border-radius: 999px;
   background: var(--jkz-groen-paneel);
   color: var(--tekst-zwak);
@@ -1054,7 +1081,7 @@ p:last-child { margin-bottom: 0; }
   color: var(--tekst-zwak);
   text-transform: uppercase;
   padding: 6px 4px;
-  border-bottom: 1px solid rgba(204, 171, 55, 0.2);
+  border-bottom: 1px solid rgba(232, 163, 61, 0.2);
   text-align: center;
 }
 
@@ -1122,7 +1149,7 @@ p:last-child { margin-bottom: 0; }
   font-family: 'Courier New', monospace;
   color: var(--accent);
   padding: 8px 12px;
-  border-bottom: 2px solid rgba(204, 171, 55, 0.3);
+  border-bottom: 2px solid rgba(232, 163, 61, 0.3);
   text-align: center;
   letter-spacing: 0.05em;
 }
@@ -1151,7 +1178,7 @@ p:last-child { margin-bottom: 0; }
 
 .eindstand-winnaar-spel {
   background: var(--jkz-groen-paneel);
-  border: 1px solid rgba(204, 171, 55, 0.25);
+  border: 1px solid rgba(232, 163, 61, 0.25);
   border-radius: 8px;
   padding: 0.75rem 1rem;
   font-size: clamp(0.8rem, 1.5vw, 1rem);
@@ -1172,7 +1199,7 @@ p:last-child { margin-bottom: 0; }
 /* === ADMIN === */
 .admin-sectie {
   background: var(--jkz-groen-paneel);
-  border: 1px solid rgba(204, 171, 55, 0.2);
+  border: 1px solid rgba(232, 163, 61, 0.2);
   border-radius: 12px;
   padding: 1.25rem;
   margin-bottom: 1rem;
@@ -1181,7 +1208,7 @@ p:last-child { margin-bottom: 0; }
 .admin-sectie h2 {
   font-size: 1rem;
   margin-bottom: 1rem;
-  border-bottom: 1px solid rgba(204, 171, 55, 0.2);
+  border-bottom: 1px solid rgba(232, 163, 61, 0.2);
   padding-bottom: 0.5rem;
 }
 
@@ -1211,7 +1238,7 @@ p:last-child { margin-bottom: 0; }
 
 .invoer {
   background: var(--vlak);
-  border: 1px solid rgba(204, 171, 55, 0.3);
+  border: 1px solid rgba(232, 163, 61, 0.3);
   border-radius: 8px;
   padding: 10px 14px;
   color: var(--tekst);
@@ -1229,7 +1256,7 @@ p:last-child { margin-bottom: 0; }
 
 .selecteer {
   background: var(--vlak);
-  border: 1px solid rgba(204, 171, 55, 0.3);
+  border: 1px solid rgba(232, 163, 61, 0.3);
   border-radius: 8px;
   padding: 10px 14px;
   color: var(--tekst);
@@ -1242,16 +1269,18 @@ p:last-child { margin-bottom: 0; }
 
 /* === WELKOM TERUG === */
 .welkom-groot {
-  font-family: 'Courier New', monospace;
-  font-size: 1.1rem;
-  letter-spacing: 0.05em;
+  font-family: var(--font-kop);
+  font-size: 1.25rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--tekst-zwak);
   margin-bottom: 0.25rem;
 }
 
 .welkom-naam {
-  font-family: 'Courier New', monospace;
-  font-size: 2rem;
+  font-family: var(--font-kop);
+  font-size: 2.4rem;
+  letter-spacing: 0.05em;
   color: var(--accent);
   margin-bottom: 0.5rem;
 }
@@ -1309,7 +1338,7 @@ p:last-child { margin-bottom: 0; }
   padding: 1rem;
   background: var(--jkz-groen-paneel);
   border-radius: 12px;
-  border: 1px solid rgba(204, 171, 55, 0.15);
+  border: 1px solid rgba(232, 163, 61, 0.15);
   min-height: 100px;
 }
 
@@ -1363,7 +1392,7 @@ p:last-child { margin-bottom: 0; }
   max-width: 100%;
   height: auto;
   border-radius: 10px;
-  border: 1px solid rgba(204, 171, 55, 0.25);
+  border: 1px solid rgba(232, 163, 61, 0.25);
   margin: 0.5rem 0 1rem;
   display: block;
 }
@@ -1381,7 +1410,7 @@ p:last-child { margin-bottom: 0; }
   align-items: center;
   gap: 0.9rem;
   background: var(--jkz-groen-paneel);
-  border: 1px solid rgba(204, 171, 55, 0.25);
+  border: 1px solid rgba(232, 163, 61, 0.25);
   border-radius: 12px;
   padding: 0.9rem 1rem;
   margin-bottom: 0.7rem;
@@ -1417,14 +1446,14 @@ p:last-child { margin-bottom: 0; }
 }
 
 .verslag-kaart.op-slot:active {
-  border-color: rgba(204, 171, 55, 0.25);
+  border-color: rgba(232, 163, 61, 0.25);
   background: var(--jkz-groen-paneel);
 }
 
 .verslag-voet {
   padding: 0.75rem 1rem;
   padding-bottom: calc(0.75rem + var(--safe-b));
-  border-top: 1px solid rgba(204, 171, 55, 0.2);
+  border-top: 1px solid rgba(232, 163, 61, 0.2);
   flex-shrink: 0;
 }
 
@@ -1485,7 +1514,7 @@ p:last-child { margin-bottom: 0; }
   font-family: 'Courier New', monospace;
   font-size: 3.5rem;
   color: var(--accent);
-  text-shadow: 0 0 25px rgba(204, 171, 55, 0.5);
+  text-shadow: 0 0 25px rgba(232, 163, 61, 0.5);
   margin: 0.25rem 0;
 }
 
@@ -1519,7 +1548,7 @@ p:last-child { margin-bottom: 0; }
 .demo-memory-kaart {
   width: 44px; height: 60px;
   border-radius: 6px;
-  border: 2px solid rgba(204,171,55,0.4);
+  border: 2px solid rgba(232,163,61,0.4);
 }
 .demo-memory-kaart.flip1 { animation: demo-kaart-flip 2s 0s ease-in-out infinite; }
 .demo-memory-kaart.flip2 { animation: demo-kaart-flip 2s 0.4s ease-in-out infinite; }
@@ -1543,12 +1572,12 @@ p:last-child { margin-bottom: 0; }
 }
 
 .demo-mep { position: relative; width: 80px; height: 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-.demo-mep div { border-radius: 6px; background: var(--jkz-groen-paneel); border: 1px solid rgba(204,171,55,0.2); }
+.demo-mep div { border-radius: 6px; background: var(--jkz-groen-paneel); border: 1px solid rgba(232,163,61,0.2); }
 .demo-mep div:nth-child(2) { animation: demo-mep-pop 1.5s 0.2s ease-in-out infinite; }
 .demo-mep div:nth-child(3) { animation: demo-mep-pop 1.5s 0.9s ease-in-out infinite; }
 @keyframes demo-mep-pop {
   0%, 40%, 100% { background: var(--jkz-groen-paneel); }
-  20% { background: var(--accent); box-shadow: 0 0 8px rgba(204,171,55,0.5); }
+  20% { background: var(--accent); box-shadow: 0 0 8px rgba(232,163,61,0.5); }
 }
 
 .demo-snake { position: relative; width: 80px; height: 80px; }
@@ -1569,7 +1598,7 @@ p:last-child { margin-bottom: 0; }
 .demo-onebutton { position: relative; width: 100px; height: 70px; overflow: hidden; }
 .demo-ob-paal {
   position: absolute; width: 12px; background: var(--jkz-groen-paneel);
-  border: 1px solid rgba(204,171,55,0.3); border-radius: 2px;
+  border: 1px solid rgba(232,163,61,0.3); border-radius: 2px;
 }
 .demo-ob-paal.boven { top: 0; height: 22px; left: 70px; animation: demo-ob-paal-move 2s linear infinite; }
 .demo-ob-paal.onder { bottom: 0; height: 22px; left: 70px; animation: demo-ob-paal-move 2s linear infinite; }
@@ -1583,10 +1612,10 @@ p:last-child { margin-bottom: 0; }
 
 .demo-quiz { display: flex; flex-direction: column; gap: 5px; width: 120px; }
 .demo-quiz-v { height: 14px; background: rgba(255,255,255,0.15); border-radius: 3px; }
-.demo-quiz-o { height: 10px; border-radius: 3px; background: var(--jkz-groen-paneel); border: 1px solid rgba(204,171,55,0.25); }
+.demo-quiz-o { height: 10px; border-radius: 3px; background: var(--jkz-groen-paneel); border: 1px solid rgba(232,163,61,0.25); }
 .demo-quiz-o:nth-child(3) { animation: demo-quiz-kies 2s 0.5s ease-in-out infinite; }
 @keyframes demo-quiz-kies {
-  0%, 60%, 100% { background: var(--jkz-groen-paneel); border-color: rgba(204,171,55,0.25); }
+  0%, 60%, 100% { background: var(--jkz-groen-paneel); border-color: rgba(232,163,61,0.25); }
   30% { background: rgba(39,174,96,0.3); border-color: #27ae60; }
 }
 
@@ -1604,7 +1633,7 @@ p:last-child { margin-bottom: 0; }
   width: 130px;
   height: 100px;
   margin: 0 auto;
-  border: 1px solid rgba(204, 171, 55, 0.25);
+  border: 1px solid rgba(232, 163, 61, 0.25);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -1641,7 +1670,7 @@ p:last-child { margin-bottom: 0; }
   width: 130px;
   height: 100px;
   margin: 0 auto;
-  border: 1px solid rgba(204, 171, 55, 0.25);
+  border: 1px solid rgba(232, 163, 61, 0.25);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -1698,13 +1727,13 @@ a.voortgang-blokje {
   justify-content: center;
   gap: 6px;
   min-height: 52px;
-  background: linear-gradient(180deg, #e0c766, var(--accent));
+  background: linear-gradient(180deg, #f2c069, var(--accent));
   color: var(--jkz-groen);
   font-weight: bold;
   font-size: 1.05rem;
   border-radius: 12px;
   text-decoration: none;
-  box-shadow: 0 2px 10px rgba(204, 171, 55, 0.35);
+  box-shadow: 0 2px 10px rgba(232, 163, 61, 0.35);
   -webkit-tap-highlight-color: transparent;
 }
 .bonus-cta:active { transform: scale(0.98); }
@@ -1733,9 +1762,135 @@ a.voortgang-blokje {
   gap: 0.4rem;
 }
 
+/* === NIEUWE SPELLEN: STAPELEN / LUCKY SHOT / HIT & RUN === */
+.stapel-container, .lucky-container, .hitrun-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.stapel-veld-wrap, .lucky-veld-wrap, .hitrun-veld-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 8px 4px;
+  min-height: 0;
+}
+
+.stapel-veld-wrap canvas, .lucky-veld-wrap canvas, .hitrun-veld-wrap canvas {
+  display: block;
+  touch-action: none;
+  border: 2px solid rgba(232, 163, 61, 0.3);
+  border-radius: 4px;
+  box-shadow: 0 0 20px rgba(232, 163, 61, 0.15);
+}
+
+.stapel-veld-wrap, .hitrun-veld-wrap { align-items: stretch; }
+.stapel-veld-wrap canvas, .hitrun-veld-wrap canvas { width: 100%; }
+
+.stapel-info, .lucky-info, .hitrun-info {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--tekst-zwak);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 12px 0;
+  flex-shrink: 0;
+}
+
+/* Demo's op de uitlegschermen */
+.demo-stapel {
+  position: relative;
+  width: 120px; height: 90px;
+  margin: 0 auto;
+}
+.demo-stapel-blok {
+  position: absolute;
+  left: 30px;
+  width: 60px; height: 20px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+.demo-stapel-blok.b1 { bottom: 0; opacity: 0.7; }
+.demo-stapel-blok.b2 { bottom: 24px; opacity: 0.85; background: var(--jkz-goud-zacht); }
+.demo-stapel-blok.b3 {
+  bottom: 48px;
+  background: var(--jkz-roze);
+  animation: demo-stapel-schuif 1.6s ease-in-out infinite alternate;
+}
+@keyframes demo-stapel-schuif {
+  from { transform: translateX(-34px); }
+  to   { transform: translateX(34px); }
+}
+
+.demo-lucky {
+  position: relative;
+  width: 90px; height: 90px;
+  margin: 0 auto;
+  border: 8px solid var(--jkz-groen-paneel);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+}
+.demo-lucky-wijzer {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 3px; height: 46px;
+  margin-left: -1.5px;
+  background: var(--tekst);
+  transform-origin: top center;
+  animation: demo-lucky-draai 1.8s linear infinite;
+}
+@keyframes demo-lucky-draai {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.demo-hitrun {
+  position: relative;
+  width: 120px; height: 90px;
+  margin: 0 auto;
+  border-bottom: 2px solid var(--jkz-groen-paneel);
+  overflow: hidden;
+}
+.demo-hitrun-speler {
+  position: absolute;
+  bottom: 0; left: 40px;
+  width: 34px; height: 16px;
+  border-radius: 3px 3px 0 0;
+  background: var(--tekst);
+  border-top: 5px solid var(--accent);
+  animation: demo-hitrun-ren 1.4s ease-in-out infinite alternate;
+}
+.demo-hitrun-blok {
+  position: absolute;
+  top: -18px; left: 20px;
+  width: 24px; height: 14px;
+  background: var(--simon-4);
+  animation: demo-hitrun-val 1.3s linear infinite;
+}
+.demo-hitrun-munt {
+  position: absolute;
+  top: -18px; right: 22px;
+  width: 15px; height: 15px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: demo-hitrun-val 1.7s 0.5s linear infinite;
+}
+@keyframes demo-hitrun-val {
+  from { transform: translateY(0); }
+  to   { transform: translateY(105px); }
+}
+@keyframes demo-hitrun-ren {
+  from { transform: translateX(-18px); }
+  to   { transform: translateX(38px); }
+}
+
 /* Mepspel: gouden ster (telt voor 3 treffers) */
 .mep-cel.ster.actief {
-  background: #e0c766;
+  background: #f2c069;
   border-color: #fff2c4;
   box-shadow: 0 0 14px rgba(224, 199, 102, 0.8);
   font-size: 1.8rem;
@@ -1758,7 +1913,7 @@ a.voortgang-blokje {
   border: 2px solid var(--accent);
   border-radius: 16px;
   padding: 1.5rem 1.25rem;
-  box-shadow: 0 0 30px rgba(204, 171, 55, 0.25);
+  box-shadow: 0 0 30px rgba(232, 163, 61, 0.25);
 }
 .eindkaart-kop {
   display: flex;
@@ -1766,7 +1921,7 @@ a.voortgang-blokje {
   align-items: center;
   gap: 2px;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(204, 171, 55, 0.25);
+  border-bottom: 1px solid rgba(232, 163, 61, 0.25);
 }
 .eindkaart-score {
   display: flex;
@@ -1803,7 +1958,7 @@ a.voortgang-blokje {
   min-height: 48px;
   padding: 8px 12px;
   background: var(--jkz-groen-paneel);
-  border: 1px solid rgba(204, 171, 55, 0.3);
+  border: 1px solid rgba(232, 163, 61, 0.3);
   border-radius: 10px;
   text-decoration: none;
   color: var(--tekst);

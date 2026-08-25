@@ -153,7 +153,7 @@ case 'slaScoreOp': {
     $ruwe     = mb_substr(trim((string) ($invoer['ruweWaarde'] ?? '')), 0, 80);
 
     if ($spelerId <= 0)                    fout('Ongeldige speler.');
-    if ($spel < 1 || $spel > 7)            fout('Ongeldig spelnummer.');
+    if ($spel < 1 || $spel > 10)           fout('Ongeldig spelnummer.');
     if ($score < 0 || $score > 100)        fout('Ongeldige score.');
     if ($poging < 1 || $poging > 999)      fout('Ongeldige poging.');
 

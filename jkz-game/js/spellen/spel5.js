@@ -1,8 +1,8 @@
 // Spel 5 — Snake
 // Twee draaiknoppen. Canvas met requestAnimationFrame + delta-tijd.
 // Oefenen: 30 sec, botsen = waarschuwing (snake wrapt door muren).
-import { speel } from '../geluid.js?v=14';
-import { clamp } from '../app.js?v=14';
+import { speel } from '../geluid.js?v=15';
+import { clamp } from '../app.js?v=15';
 
 export const info = {
   naam: 'Snake',
@@ -103,11 +103,11 @@ export function maakSpel(container, { modus, onKlaar }) {
     const h = parseInt(canvas.style.height);
 
     // Achtergrond
-    ctx.fillStyle = '#0f241a';
+    ctx.fillStyle = '#0f333c';
     ctx.fillRect(0, 0, w, h);
 
     // Grid (subtiel)
-    ctx.strokeStyle = 'rgba(32,70,52,0.5)';
+    ctx.strokeStyle = 'rgba(31,77,88,0.5)';
     ctx.lineWidth = 0.5;
     for (let i = 0; i <= RASTER; i++) {
       ctx.beginPath();
@@ -125,7 +125,7 @@ export function maakSpel(container, { modus, onKlaar }) {
     const ay = appel.y * cel + cel * 0.5;
     if (appelIsGoud) {
       const puls = 1 + Math.sin(performance.now() / 180) * 0.12;
-      ctx.fillStyle = '#e0c766';
+      ctx.fillStyle = '#f2c069';
       ctx.beginPath();
       ctx.arc(ax, ay, cel * 0.42 * puls, 0, Math.PI * 2);
       ctx.fill();
@@ -153,7 +153,7 @@ export function maakSpel(container, { modus, onKlaar }) {
       const s = cel - 2;
       const alpha = idx === 0 ? 1 : 1 - (idx / slang.length) * 0.4;
       ctx.globalAlpha = alpha;
-      ctx.fillStyle = idx === 0 ? '#ccab37' : '#a08020';
+      ctx.fillStyle = idx === 0 ? '#e8a33d' : '#b5812e';
       ctx.beginPath();
       ctx.roundRect
         ? ctx.roundRect(x, y, s, s, cel * 0.25)

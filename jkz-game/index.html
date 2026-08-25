@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ Jaarverslag Game</title>
-  <link rel="stylesheet" href="css/stijl.css?v=14">
+  <link rel="stylesheet" href="css/stijl.css?v=15">
 </head>
 <body>
 
@@ -47,7 +47,7 @@ window.addEventListener('error', function (e) {
       <div class="centervak" style="justify-content:flex-start;padding:0;">
         <p class="welkom-groot">Welkom terug!</p>
         <h1 class="welkom-naam" id="welkom-naam-tekst">Naam</h1>
-        <p class="welkom-level" id="welkom-level-tekst">Je bent op level 1 van 7</p>
+        <p class="welkom-level" id="welkom-level-tekst">Je bent op level 1 van 10</p>
         <div class="knoppen">
           <a href="#" class="knop primair" id="knop-doorgaan" style="font-size:1.1rem;min-height:60px;">
             Doorgaan →
@@ -145,8 +145,8 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { registreerSpeler, haalVoortgang, haalSpelerUitStorage, slaHuidigeSpelerOp,
-         verwerkWachtrij, controleerVerbinding, verversStatus } from './js/api.js?v=14';
-import { renderNav, renderBonusCTA, checkGesloten } from './js/app.js?v=14';
+         verwerkWachtrij, controleerVerbinding, verversStatus } from './js/api.js?v=15';
+import { renderNav, renderBonusCTA, checkGesloten, SPEL_NAMEN, AANTAL_SPELLEN } from './js/app.js?v=15';
 
 // Gesloten-check
 if (checkGesloten()) throw new Error('gesloten');
@@ -179,8 +179,8 @@ const huidig = haalSpelerUitStorage();
 if (huidig) {
   // Haal voortgang op
   haalVoortgang(huidig.spelerId).then(voortgang => {
-    const level = Math.min(voortgang.level, 8);
-    const klaar = level > 7;
+    const level = Math.min(voortgang.level, AANTAL_SPELLEN + 1);
+    const klaar = level > AANTAL_SPELLEN;
 
     document.getElementById('naam-keuze').classList.add('verborgen');
     const welkomDiv = document.getElementById('welkom-terug');
@@ -190,24 +190,23 @@ if (huidig) {
 
     if (klaar) {
       document.getElementById('welkom-level-tekst').textContent =
-        'Alle 7 levels gespeeld! Je kunt tot de jaarvergadering blijven spelen — je hoogste score telt.';
+        'Alle 10 levels gespeeld! Je kunt tot de jaarvergadering blijven spelen — je hoogste score telt.';
       document.getElementById('knop-doorgaan').href = 'eindkaart.html';
       document.getElementById('knop-doorgaan').textContent = 'Bekijk je eindkaart 🏆';
 
       // Spelkiezer: verbeter je score per spel (beste score per spel erbij)
-      const NAMEN = ['Reactie', 'Breakout', 'Simon', 'Mep', 'Snake', 'Flappy', 'Pong'];
       const kiezer = document.createElement('div');
       kiezer.innerHTML = '<p class="klein" style="margin:1.25rem 0 0.5rem;color:var(--tekst-zwak);">' +
         'Verbeter je scores — kies een spel:</p>';
       const grid = document.createElement('div');
       grid.className = 'spel-kiezer';
-      for (let s = 1; s <= 7; s++) {
+      for (let s = 1; s <= AANTAL_SPELLEN; s++) {
         const sc = (voortgang.scores || []).find(x => x.spel === s);
         const beste = sc ? Math.max(...sc.pogingen.map(p => p.score)) : null;
         const a = document.createElement('a');
         a.className = 'spel-kiezer-knop';
         a.href = `spel.html?level=${s}`;
-        a.innerHTML = `<span>${NAMEN[s - 1]}</span>` +
+        a.innerHTML = `<span>${SPEL_NAMEN[s - 1]}</span>` +
           `<span class="spel-kiezer-score">${beste ?? '–'}</span>`;
         grid.appendChild(a);
       }
@@ -216,7 +215,7 @@ if (huidig) {
       document.querySelector('#welkom-terug .knoppen').before(kiezer);
     } else {
       document.getElementById('welkom-level-tekst').textContent =
-        `Je bent op level ${level} van 7`;
+        `Je bent op level ${level} van 10`;
       document.getElementById('knop-doorgaan').href = `spel.html?level=${level}`;
       document.getElementById('knop-doorgaan').textContent =
         `Level ${level} spelen →`;
@@ -317,7 +316,7 @@ async function kiesNaam(naam) {
     const { spelerId } = await registreerSpeler(naam);
     slaHuidigeSpelerOp(spelerId);
     const voortgang = await haalVoortgang(spelerId);
-    const level = Math.min(voortgang.level, 7);
+    const level = Math.min(voortgang.level, AANTAL_SPELLEN);
     window.location.href = `spel.html?level=${level}`;
   } catch (err) {
     console.error(err);

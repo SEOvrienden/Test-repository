@@ -8,6 +8,7 @@ export const PLAAGTEKSTEN = [
     'Wat een score! Oneted plakt ’m op een billboard zodat iedereen het ziet.',
     'Honderd punten. Duisdecker zet er z’n handtekening onder en noemt het zijn ontwerp.',
     'Vlekkeloos. Zelfs Van der Laan legt z’n vloeren niet zó strak.',
+    'LEVEL UP! Dit is precies wat Van der Heide bedoelde met Game Changers.',
   ]},
   { vanaf: 80, teksten: [
     'Wauw, wat een score — jij staat vol in de spotlights van Nils!',
@@ -18,6 +19,8 @@ export const PLAAGTEKSTEN = [
     'Verkocht boven de vraagprijs — en Binnerts hoefde er niet eens bij te overdrijven.',
     'Zo strak als een spuitlaag van Kalfsvel Coating. Geen krasje op te bekennen.',
     'Dik rendement. Hugo probeert je morgen een beleggingsrekening aan te smeren.',
+    'Van side quest naar main quest — deze score mag zo het jaarplan in.',
+    '“Wow, dit was echt vet geregeld”, zegt penningmeester Stam. Missie geslaagd.',
   ]},
   { vanaf: 60, teksten: [
     'Prima fundering, zegt Van der Heide. Oplevering wel pas Q3 2027.',
@@ -27,6 +30,8 @@ export const PLAAGTEKSTEN = [
     'Draait als een machine van Camiel. Alleen de bougies nog even afstellen.',
     'Kars heeft de kleine lettertjes gecheckt: rechtsgeldig. Maar meer zat er echt niet in.',
     'De ketel brandt, zou Wessels zeggen. Kan alleen nog een graadje warmer.',
+    'Prima checkpoint. Even bijladen en door naar het volgende level.',
+    'Sven noteert je netjes in de notulen. Wees blij — hij vergeet weleens iemand “per ongeluk”.',
   ]},
   { vanaf: 40, teksten: [
     'Matig, matig… bel Jesse eens voor wat tips.',
@@ -38,6 +43,9 @@ export const PLAAGTEKSTEN = [
     'Van Velze geeft deze score hooguit een flexplek. Geen vast contract.',
     'De bouwtekening was prima, zegt Duisdecker. De uitvoering… tja.',
     'Veel rook, geen vuurwerk. En geloof me: Nils kent het verschil.',
+    'Zaanse zuinigheid met punten strooien — Stam knikt goedkeurend, maar meer ook niet.',
+    'Volgens Kars is dit “ruim voldoende”. Maar Kars heeft ook de statuten als nachtlectuur.',
+    'Banana Chaos, maar dan zonder de fun. Reflexen trainen en opnieuw!',
   ]},
   { vanaf: 20, teksten: [
     'Tsjonge jonge, wat een drama — zo laag als de rente bij de ING.',
@@ -50,6 +58,9 @@ export const PLAAGTEKSTEN = [
     'Zelfs Thijs krijgt dit niet verkocht. En die verkoopt álles.',
     'Je staat rood. Hugo blokkeert je pas uit voorzorg.',
     'Veel beloofd, niks binnengekomen — Fidel noemt dat een linkse begroting.',
+    'Sven overweegt z’n lidmaatschap alwéér op te zeggen na het zien van deze score.',
+    'Dit haalt de doelstelling niet. En die lag al op “minstens zes nieuwe leden”.',
+    'Game over op een side quest. En de main quest moet nog beginnen…',
   ]},
   { vanaf: 0, teksten: [
     'Wat een drama. Lijkt Patrick Stam in de sportschool wel.',
@@ -62,5 +73,8 @@ export const PLAAGTEKSTEN = [
     'Troostprijs: een stuk baklava van Ozgur. Die is tenminste wél zoet.',
     'Duisdecker heeft hier een vakterm voor: bouwval.',
     'Zó plat krijgt zelfs Tuf Tuf een ballon niet.',
+    'Press Start, zei Van der Heide. Niet Press Stop.',
+    'Sven schrijft je uit de ledenlijst. Je merkt het waarschijnlijk niet eens.',
+    'Deze score valt onder “falen” uit het jaarplan. Gelukkig stond erbij: samen winnen komt later.',
   ]},
 ];

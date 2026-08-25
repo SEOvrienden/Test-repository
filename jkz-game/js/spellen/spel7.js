@@ -2,8 +2,8 @@
 // Jij onderin, de computer bovenin. De bal wordt steeds sneller.
 // Hoe vaker jij hem terugslaat, hoe hoger je score. Mis = einde.
 // Oefenen: 20 seconden vrij spelen, gemiste bal komt gewoon terug.
-import { speel } from '../geluid.js?v=14';
-import { clamp } from '../app.js?v=14';
+import { speel } from '../geluid.js?v=15';
+import { clamp } from '../app.js?v=15';
 
 export const info = {
   naam: 'Pong',
@@ -159,11 +159,11 @@ export function maakSpel(container, { modus, onKlaar }) {
 
   function teken() {
     const w = W(), h = H();
-    ctx.fillStyle = '#0f241a';
+    ctx.fillStyle = '#0f333c';
     ctx.fillRect(0, 0, w, h);
 
     // Middenlijn
-    ctx.strokeStyle = 'rgba(204,171,55,0.25)';
+    ctx.strokeStyle = 'rgba(232,163,61,0.25)';
     ctx.lineWidth = 2;
     ctx.setLineDash([8, 10]);
     ctx.beginPath();
@@ -177,7 +177,7 @@ export function maakSpel(container, { modus, onKlaar }) {
     ctx.fillRect(cpuX - PEDDEL_B / 2, 22, PEDDEL_B, PEDDEL_H);
 
     // Spelerpeddel
-    ctx.fillStyle = '#e0c766';
+    ctx.fillStyle = '#f2c069';
     ctx.fillRect(spelerX - spelerB / 2, h - 34, spelerB, PEDDEL_H);
 
     // Bal
@@ -187,7 +187,7 @@ export function maakSpel(container, { modus, onKlaar }) {
     ctx.fill();
 
     // Teller
-    ctx.fillStyle = 'rgba(204,171,55,0.9)';
+    ctx.fillStyle = 'rgba(232,163,61,0.9)';
     ctx.font = `bold ${Math.round(h * 0.05)}px 'Courier New', monospace`;
     ctx.textAlign = 'center';
     ctx.fillText(terugslagen, w * 0.5, h * 0.60);
