@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Spel</title>
-  <link rel="stylesheet" href="css/stijl.css?v=22">
+  <link rel="stylesheet" href="css/stijl.css?v=23">
 </head>
 <body>
 
@@ -128,8 +128,9 @@ window.addEventListener('error', function (e) {
     </div>
 
     <!-- Ranglijst zit al in de navigatiebalk onderaan, dus hier alleen
-         de twee acties die bij dit moment horen -->
+         de twee acties die bij dit moment horen — plus de bonusknop -->
     <div class="uitleg-knoppen">
+      <div id="bonus-cta-vak" style="margin-bottom:0.25rem;"></div>
       <button class="knop" id="knop-nog-poging" style="display:none;">
         Nog een poging
       </button>
@@ -143,12 +144,16 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { haalSpelerUitStorage, haalVoortgang, slaScoreOp, haalRanglijst, haalConfig }
-  from './js/api.js?v=22';
-import { renderVoortgang, renderNav, plaatsTekst, checkGesloten, toonConfetti, urlParam }
-  from './js/app.js?v=22';
-import { speel } from './js/geluid.js?v=22';
+  from './js/api.js?v=23';
+import { renderVoortgang, renderNav, renderBonusCTA, plaatsTekst, checkGesloten,
+         toonConfetti, urlParam }
+  from './js/app.js?v=23';
+import { speel } from './js/geluid.js?v=23';
 
 if (checkGesloten()) throw new Error('gesloten');
+
+// Bonusknop op het scorescherm (verdwijnt vanzelf als er geen Tikkie-link is)
+renderBonusCTA(document.getElementById('bonus-cta-vak'));
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 renderNav('spelen');
@@ -179,7 +184,7 @@ renderVoortgang(voortgangContainer, level, gespeeldTm);
 document.getElementById('scherm-uitleg').querySelector('#uitleg-naam').textContent = 'Laadt…';
 let spelModule;
 try {
-  spelModule = await import(`./js/spellen/spel${level}.js?v=22`);
+  spelModule = await import(`./js/spellen/spel${level}.js?v=23`);
 } catch (e) {
   console.error('Module laden mislukt:', e);
   window.location.href = 'index.html'; throw e;
