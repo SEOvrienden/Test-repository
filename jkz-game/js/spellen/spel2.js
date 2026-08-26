@@ -7,8 +7,8 @@
 //   je plateau, dan ben je al je extra ballen in één klap kwijt.
 // - Pas als je álle (grote) ballen mist, is het voorbij.
 // Oefenen: 30 seconden vrij spelen, gemiste bal komt gewoon terug.
-import { speel } from '../geluid.js?v=25';
-import { clamp } from '../app.js?v=25';
+import { speel } from '../geluid.js?v=26';
+import { clamp } from '../app.js?v=26';
 
 export const info = {
   naam: 'JKZ Breakout',

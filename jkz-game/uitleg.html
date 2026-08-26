@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Hoe werkt het?</title>
-  <link rel="stylesheet" href="css/stijl.css?v=25">
+  <link rel="stylesheet" href="css/stijl.css?v=26">
 </head>
 <body>
 
@@ -57,7 +57,8 @@ window.addEventListener('error', function (e) {
     <div class="uitleg-blok">
       <h2>Bonuspunten kopen 💰</h2>
       <p style="margin-bottom:0.5rem;">
-        Wil je hogerop in de ranglijst? Koop extra bonuspunten via de gouden Tikkie-knop.
+        Wil je hogerop in de ranglijst? Koop extra bonuspunten via de roze knop
+        “Koop bonuspunten”.
       </p>
       <ul>
         <li><strong>1 euro = 1 punt.</strong> Zo simpel is het.</li>
@@ -110,14 +111,14 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { verversStatus } from './js/api.js?v=25';
-import { renderNav, renderBonusCTA, checkGesloten, initScrollHint } from './js/app.js?v=25';
+import { verversStatus } from './js/api.js?v=26';
+import { renderNav, renderBonusCTA, checkGesloten, initScrollHint } from './js/app.js?v=26';
 
 if (checkGesloten()) throw new Error('gesloten');
 renderNav('uitleg');
 initScrollHint();
 
-// Gouden bonusknop midden in de uitleg (verdwijnt als er geen link is)
+// Roze bonusknop midden in de uitleg (verdwijnt als er geen link is)
 const ctaVak = document.getElementById('bonus-cta-vak');
 renderBonusCTA(ctaVak);
 verversStatus().then(() => renderBonusCTA(ctaVak));

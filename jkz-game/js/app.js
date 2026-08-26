@@ -1,6 +1,6 @@
 // Gedeelde hulpfuncties voor alle pagina's
-import { haalConfig, haalTikkieLink } from './api.js?v=25';
-import { PLAAGTEKSTEN } from './teksten.js?v=25';
+import { haalConfig, haalTikkieLink } from './api.js?v=26';
+import { PLAAGTEKSTEN } from './teksten.js?v=26';
 
 // ── Spellen: het aantal en de namen, op één plek ─────────────────────────────
 
@@ -112,7 +112,7 @@ export function initScrollHint(wachtMs = 700) {
 }
 
 // ── Bonuspunten-knop (Tikkie) ────────────────────────────────────────────────
-// Eén duidelijke gouden knop, op ranglijst, startscherm en uitlegpagina.
+// Eén duidelijke roze knop, op start, ranglijst, uitleg en het scorescherm.
 // Verdwijnt vanzelf als er in het beheer geen Tikkie-link (meer) staat.
 
 export function renderBonusCTA(container) {

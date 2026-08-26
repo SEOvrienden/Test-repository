@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Beheer</title>
-  <link rel="stylesheet" href="css/stijl.css?v=25">
+  <link rel="stylesheet" href="css/stijl.css?v=26">
 </head>
 <body>
 
@@ -44,7 +44,7 @@ window.addEventListener('error', function (e) {
 <script type="module">
 import { haalSpelersOverzicht, haalSpelStatus, zetSpelStatus, zetTestmodus,
          zetTikkieLink, zetBonus, resetAlles, resetSpeler, resetScores,
-         resetBonus, toonPunten } from './js/api.js?v=25';
+         resetBonus, toonPunten } from './js/api.js?v=26';
 
 // Sleutel uit URL halen; de server controleert of hij klopt
 const params = new URLSearchParams(window.location.search);
@@ -94,7 +94,7 @@ function renderBeheer(status) {
       <h2>Bonuspunten (Tikkie)</h2>
       <p class="klein" style="margin-bottom:0.75rem;">
         Spelers zien op het startscherm, de ranglijst en de uitlegpagina de
-        gouden knop "Koop bonuspunten" met deze Tikkie-link.
+        roze knop "Koop bonuspunten" met deze Tikkie-link.
         <strong>1 euro = 1 punt.</strong> Zie je in je Tikkie-app dat iemand
         betaald heeft? Vul hieronder het betaalde bedrag in als punten
         (0 = weer weghalen). Betaalt iemand nóg een keer? Tel het dan zelf
@@ -126,7 +126,7 @@ function renderBeheer(status) {
         : spelers.map(s => `<div class="admin-speler-rij">
             <span>${escapeHtml(s.naam)}</span>
             <span class="klein" style="color:var(--accent);text-align:right;">
-              Level ${Math.min(s.level, 7)} | ${s.gespeeld}/7 spellen | ${toonPunten(s.totaal)} pt${s.bonus > 0 ? ' (waarvan ' + toonPunten(s.bonus) + ' 💰)' : ''}<br>
+              Level ${Math.min(s.level, 10)} | ${s.gespeeld}/10 spellen | ${toonPunten(s.totaal)} pt${s.bonus > 0 ? ' (waarvan ' + toonPunten(s.bonus) + ' 💰)' : ''}<br>
               <span style="color:var(--tekst-zwak)">laatst actief: ${escapeHtml(s.laatste_actie || '–')}</span>
             </span>
           </div>`).join('')}</div>
