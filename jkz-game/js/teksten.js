@@ -97,5 +97,6 @@ export const PLAAGTEKSTEN = [
     'Deze score is een echte N.O.O.M.: om een ondeugdelijke reden veel te vroeg opgehouden.',
     'Even gestrekt gaan liggen na deze score? Thijs kan het je uitleggen — die won er de Corona Award mee.',
     'Deze score is net als het JKZ-archief: ergens heel veilig opgeborgen. Zó veilig dat niemand hem kan vinden.',
+    'Je kunt een hoop met AI, zegt de CoCo. Maar deze score rechtpraten lukt zelfs de computer niet.',
   ]},
 ];
