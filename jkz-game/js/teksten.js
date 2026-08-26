@@ -57,6 +57,7 @@ export const PLAAGTEKSTEN = [
     'Deze score heeft nieuwjaarsborrel-op-oudjaarsdag-logica: het klopt nét niet, maar gezellig was het wel.',
     'Een gok wagen mag van de GOK-Award. Maar deze score bewijst: gokken is geen strategie.',
     'Deze score heeft Hangjas Award-potentie: voorlopig even niks, maar op het laatste moment kan het zomaar groots worden.',
+    'Deze score is een onafgerond dossier. En zonder onafgeronde dossiers ben je geen echte commissie — dus nog een potje.',
   ]},
   { vanaf: 20, teksten: [
     'Tsjonge jonge, wat een drama — deze score is zo laag als de rente bij de ING.',
@@ -95,5 +96,6 @@ export const PLAAGTEKSTEN = [
     'Game over? Zeker niet, zou de voorzitter zeggen. Continue!',
     'Deze score is een echte N.O.O.M.: om een ondeugdelijke reden veel te vroeg opgehouden.',
     'Even gestrekt gaan liggen na deze score? Thijs kan het je uitleggen — die won er de Corona Award mee.',
+    'Deze score is net als het JKZ-archief: ergens heel veilig opgeborgen. Zó veilig dat niemand hem kan vinden.',
   ]},
 ];

@@ -2,8 +2,8 @@
 // Sleep je speler onderin heen en weer: ontwijk de vallende blokken en
 // vang de gouden munten (Credits & Coins!). Het tempo loopt steeds op.
 // Eén blok tegen je hoofd = klaar. Oefenen: 20 sec, botsen mag.
-import { speel } from '../geluid.js?v=23';
-import { clamp } from '../app.js?v=23';
+import { speel } from '../geluid.js?v=24';
+import { clamp } from '../app.js?v=24';
 
 export const info = {
   naam: 'Hit & Run',
