@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Ranglijst</title>
-  <link rel="stylesheet" href="css/stijl.css?v=26">
+  <link rel="stylesheet" href="css/stijl.css?v=27">
 </head>
 <body>
 
@@ -69,8 +69,8 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { haalRanglijst, haalSpelerUitStorage, haalVoortgang, verversStatus,
-         toonPunten } from './js/api.js?v=26';
-import { renderVoortgang, renderNav, renderBonusCTA, checkGesloten, SPEL_NAMEN } from './js/app.js?v=26';
+         toonPunten } from './js/api.js?v=27';
+import { renderVoortgang, renderNav, renderBonusCTA, checkGesloten, SPEL_NAMEN } from './js/app.js?v=27';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -81,7 +81,7 @@ const speler = haalSpelerUitStorage();
 // Gouden bonuspunten-knop bovenaan (verdwijnt als er geen Tikkie-link is)
 const clubkasVak = document.getElementById('clubkas-vak');
 renderBonusCTA(clubkasVak);
-verversStatus().then(() => renderBonusCTA(clubkasVak));
+verversStatus().then(() => renderBonusCTA(clubkasVak)).catch(() => {});
 
 async function laadVoortgang() {
   if (speler) {

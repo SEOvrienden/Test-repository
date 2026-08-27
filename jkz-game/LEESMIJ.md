@@ -166,7 +166,7 @@ jkz-game/
       spel9.js        Lucky Shot (timing-wiel)
       spel10.js       Hit & Run (ontwijken + munten vangen)
   verslag-teksten/
-    verslag-1.html ... verslag-10.html   (9 van de 10 definitief; verslag 6 volgt nog)
+    verslag-1.html ... verslag-10.html   (alle 10 definitief)
   img/                Hier zet je foto's voor in de verslagen
   historie.html       Voorzitters sinds 1957, senatoren en ereleden
   awards.html         Alle (inter)nationale awards en kamerawards

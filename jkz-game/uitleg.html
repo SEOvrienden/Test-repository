@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Hoe werkt het?</title>
-  <link rel="stylesheet" href="css/stijl.css?v=26">
+  <link rel="stylesheet" href="css/stijl.css?v=27">
 </head>
 <body>
 
@@ -111,8 +111,8 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { verversStatus } from './js/api.js?v=26';
-import { renderNav, renderBonusCTA, checkGesloten, initScrollHint } from './js/app.js?v=26';
+import { verversStatus } from './js/api.js?v=27';
+import { renderNav, renderBonusCTA, checkGesloten, initScrollHint } from './js/app.js?v=27';
 
 if (checkGesloten()) throw new Error('gesloten');
 renderNav('uitleg');
@@ -121,7 +121,7 @@ initScrollHint();
 // Roze bonusknop midden in de uitleg (verdwijnt als er geen link is)
 const ctaVak = document.getElementById('bonus-cta-vak');
 renderBonusCTA(ctaVak);
-verversStatus().then(() => renderBonusCTA(ctaVak));
+verversStatus().then(() => renderBonusCTA(ctaVak)).catch(() => {});
 </script>
 </body>
 </html>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Verslag</title>
-  <link rel="stylesheet" href="css/stijl.css?v=26">
+  <link rel="stylesheet" href="css/stijl.css?v=27">
 </head>
 <body>
 
@@ -53,9 +53,9 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=26';
-import { renderVoortgang, renderNav, urlParam, checkGesloten } from './js/app.js?v=26';
-import { VERSLAG_TITELS } from './js/titels.js?v=26';
+import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=27';
+import { renderVoortgang, renderNav, urlParam, checkGesloten } from './js/app.js?v=27';
+import { VERSLAG_TITELS } from './js/titels.js?v=27';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -71,7 +71,8 @@ if (!speler) { window.location.href = 'index.html'; throw new Error(); }
 
 // Alleen vrijgespeelde verslagen zijn leesbaar (testmodus opent alles)
 const config = haalConfig();
-const voortgang = await haalVoortgang(speler.spelerId);
+const voortgang = await haalVoortgang(speler.spelerId)
+  .catch(() => { throw new Error('gesloten'); }); // stil bij wegklikken tijdens laden
 const vrijgespeeld = level < voortgang.level || config.testmodus;
 if (!vrijgespeeld) {
   window.location.href = 'verslagen.html'; throw new Error();
@@ -86,7 +87,7 @@ renderVoortgang(document.getElementById('voortgang'), level, voortgang.level - 1
 // Verslagtekst laden (los HTML-bestand, makkelijk zelf aan te passen)
 const artikel = document.getElementById('verslag-artikel');
 try {
-  const res = await fetch(`verslag-teksten/verslag-${level}.html?v=26`);
+  const res = await fetch(`verslag-teksten/verslag-${level}.html?v=27`);
   if (!res.ok) throw new Error(res.status);
   artikel.innerHTML = await res.text();
   artikel.scrollTop = 0;

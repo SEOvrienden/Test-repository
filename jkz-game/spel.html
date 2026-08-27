@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Spel</title>
-  <link rel="stylesheet" href="css/stijl.css?v=26">
+  <link rel="stylesheet" href="css/stijl.css?v=27">
 </head>
 <body>
 
@@ -144,11 +144,11 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { haalSpelerUitStorage, haalVoortgang, slaScoreOp, haalRanglijst, haalConfig }
-  from './js/api.js?v=26';
+  from './js/api.js?v=27';
 import { renderVoortgang, renderNav, renderBonusCTA, plaatsTekst, checkGesloten,
          toonConfetti, urlParam }
-  from './js/app.js?v=26';
-import { speel } from './js/geluid.js?v=26';
+  from './js/app.js?v=27';
+import { speel } from './js/geluid.js?v=27';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -169,7 +169,8 @@ if (!speler) { window.location.href = 'index.html'; throw new Error(); }
 const config = haalConfig();
 
 // Level-check
-const voortgang = await haalVoortgang(speler.spelerId);
+const voortgang = await haalVoortgang(speler.spelerId)
+  .catch(() => { throw new Error('gesloten'); }); // stil bij wegklikken tijdens laden
 const spelersLevel = voortgang.level;
 if (level > spelersLevel && !config.testmodus) {
   window.location.href = 'index.html'; throw new Error();
@@ -184,7 +185,7 @@ renderVoortgang(voortgangContainer, level, gespeeldTm);
 document.getElementById('scherm-uitleg').querySelector('#uitleg-naam').textContent = 'Laadt…';
 let spelModule;
 try {
-  spelModule = await import(`./js/spellen/spel${level}.js?v=26`);
+  spelModule = await import(`./js/spellen/spel${level}.js?v=27`);
 } catch (e) {
   console.error('Module laden mislukt:', e);
   window.location.href = 'index.html'; throw e;

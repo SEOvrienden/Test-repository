@@ -1,6 +1,6 @@
 // Gedeelde hulpfuncties voor alle pagina's
-import { haalConfig, haalTikkieLink } from './api.js?v=26';
-import { PLAAGTEKSTEN } from './teksten.js?v=26';
+import { haalConfig, haalTikkieLink } from './api.js?v=27';
+import { PLAAGTEKSTEN } from './teksten.js?v=27';
 
 // ── Spellen: het aantal en de namen, op één plek ─────────────────────────────
 

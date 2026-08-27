@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ Jaarverslag Game</title>
-  <link rel="stylesheet" href="css/stijl.css?v=26">
+  <link rel="stylesheet" href="css/stijl.css?v=27">
 </head>
 <body>
 
@@ -150,9 +150,9 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { registreerSpeler, haalVoortgang, haalSpelerUitStorage, slaHuidigeSpelerOp,
-         verwerkWachtrij, controleerVerbinding, verversStatus } from './js/api.js?v=26';
+         verwerkWachtrij, controleerVerbinding, verversStatus } from './js/api.js?v=27';
 import { renderNav, renderBonusCTA, checkGesloten, initScrollHint,
-         SPEL_NAMEN, AANTAL_SPELLEN } from './js/app.js?v=26';
+         SPEL_NAMEN, AANTAL_SPELLEN } from './js/app.js?v=27';
 
 // Gesloten-check
 if (checkGesloten()) throw new Error('gesloten');
@@ -174,7 +174,7 @@ controleerVerbinding().then(res => {
     escapeHtml(res.fout) + '<br>' +
     '<a href="controle.php" style="color:var(--accent);">→ Open de zelfcontrole (controle.php)</a>';
   document.getElementById('hoofd-inhoud').prepend(balk);
-});
+}).catch(() => {});
 
 function escapeHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -250,7 +250,7 @@ document.getElementById('knop-iemand-anders')?.addEventListener('click', (e) => 
 if (huidig) {
   const ctaVak = document.getElementById('bonus-cta-vak');
   renderBonusCTA(ctaVak);
-  verversStatus().then(() => renderBonusCTA(ctaVak));
+  verversStatus().then(() => renderBonusCTA(ctaVak)).catch(() => {});
 }
 
 document.getElementById('knop-wissel-nee').addEventListener('click', () => {

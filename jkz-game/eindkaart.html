@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Jouw eindkaart</title>
-  <link rel="stylesheet" href="css/stijl.css?v=26">
+  <link rel="stylesheet" href="css/stijl.css?v=27">
 </head>
 <body>
 
@@ -82,8 +82,8 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalRanglijst, toonPunten } from './js/api.js?v=26';
-import { renderNav, checkGesloten, toonConfetti, SPEL_NAMEN, AANTAL_SPELLEN } from './js/app.js?v=26';
+import { haalSpelerUitStorage, haalVoortgang, haalRanglijst, toonPunten } from './js/api.js?v=27';
+import { renderNav, checkGesloten, toonConfetti, SPEL_NAMEN, AANTAL_SPELLEN } from './js/app.js?v=27';
 
 if (checkGesloten()) throw new Error('gesloten');
 renderNav('ranglijst');
@@ -93,7 +93,8 @@ if (!speler) { window.location.href = 'index.html'; throw new Error(); }
 
 document.getElementById('ek-naam').textContent = speler.naam;
 
-const voortgang = await haalVoortgang(speler.spelerId);
+const voortgang = await haalVoortgang(speler.spelerId)
+  .catch(() => { throw new Error('gesloten'); }); // stil bij wegklikken tijdens laden
 const spellenDiv = document.getElementById('ek-spellen');
 const NAMEN = SPEL_NAMEN;
 let totaal = 0;

@@ -56,6 +56,7 @@ export const PLAAGTEKSTEN = [
     'De Big Five gespot? Deze score haalt niet eens de fotorol van de Keniareis.',
     'Deze score heeft nieuwjaarsborrel-op-oudjaarsdag-logica: het klopt nét niet, maar gezellig was het wel.',
     'Een gok wagen mag van de GOK-Award. Maar deze score bewijst: gokken is geen strategie.',
+    'Deze score is als de ETA van de reiscommissie: “bijna rond”. Al drie weken.',
     'Deze score heeft Hangjas Award-potentie: voorlopig even niks, maar op het laatste moment kan het zomaar groots worden.',
     'Deze score is een onafgerond dossier. En zonder onafgeronde dossiers ben je geen echte commissie — dus nog een potje.',
   ]},

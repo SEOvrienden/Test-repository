@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Verslagen</title>
-  <link rel="stylesheet" href="css/stijl.css?v=26">
+  <link rel="stylesheet" href="css/stijl.css?v=27">
 </head>
 <body>
 
@@ -63,9 +63,9 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=26';
-import { renderVoortgang, renderNav, checkGesloten, initScrollHint } from './js/app.js?v=26';
-import { VERSLAG_TITELS } from './js/titels.js?v=26';
+import { haalSpelerUitStorage, haalVoortgang, haalConfig } from './js/api.js?v=27';
+import { renderVoortgang, renderNav, checkGesloten, initScrollHint } from './js/app.js?v=27';
+import { VERSLAG_TITELS } from './js/titels.js?v=27';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -75,7 +75,8 @@ const speler = haalSpelerUitStorage();
 if (!speler) { window.location.href = 'index.html'; throw new Error(); }
 
 const config = haalConfig();
-const voortgang = await haalVoortgang(speler.spelerId);
+const voortgang = await haalVoortgang(speler.spelerId)
+  .catch(() => { throw new Error('gesloten'); }); // stil bij wegklikken tijdens laden
 
 renderVoortgang(document.getElementById('voortgang'),
   Math.min(voortgang.level, 10), voortgang.level - 1);
