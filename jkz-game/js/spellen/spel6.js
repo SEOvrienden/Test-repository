@@ -1,8 +1,8 @@
 // Spel 6 — One-button (Flappy style)
 // Tik om te fladderen, ontwijkt palen. Canvas + delta-tijd.
 // Oefenen: eindigt na 3 palen, botsen herstart meteen.
-import { speel } from '../geluid.js?v=27';
-import { clamp } from '../app.js?v=27';
+import { speel } from '../geluid.js?v=28';
+import { clamp } from '../app.js?v=28';
 
 export const info = {
   naam: 'One-button',

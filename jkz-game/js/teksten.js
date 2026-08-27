@@ -11,6 +11,7 @@ export const PLAAGTEKSTEN = [
     'De volle honderd! Dit is precies wat Van der Heide bedoelde met Game Changers.',
     'Drie sterren van de voorzitter. Level uitgespeeld!',
     'Honderd punten. Als er een Daan Bolding Award voor scores bestond, hing jouw naam nu ingelijst aan de muur.',
+    'Honderd punten. Hier kan zelfs de reiscommissie geen naheffing meer op sturen.',
   ]},
   { vanaf: 80, teksten: [
     'Wauw, wat een score — jij staat vol in de spotlights van Nils!',
@@ -27,6 +28,7 @@ export const PLAAGTEKSTEN = [
     'Een score om nooit te vergeten — net als Kenia. Alleen word jij morgen niet wakker met zebra’s voor het raam.',
     'Deze score gaat viral. Straks schrijft de burgemeester er nog een column over.',
     'Deze score is Grand Cru: complex, gelaagd en van uitzonderlijke kwaliteit. Proost.',
+    'Business class-score. De rest van de Kamer zit met hun punten gewoon in de economy.',
   ]},
   { vanaf: 60, teksten: [
     'Deze score is een prima fundering, zegt Van der Heide. Oplevering van de top 3 wel pas Q3 2027.',
@@ -39,6 +41,7 @@ export const PLAAGTEKSTEN = [
     'Prima checkpoint, deze score. Even bijladen en door naar het volgende level.',
     'Sven noteert deze score netjes in de notulen. Wees blij — hij vergeet weleens iemand “per ongeluk”.',
     'Deze score is de chocoladeletter, de negen ton komt nog. Blijven spelen dus!',
+    'Deze score is als Taxi Binnerts: je komt een heel eind, maar nét niet tot Schiphol.',
   ]},
   { vanaf: 40, teksten: [
     'Matig, matig… deze score kan wel wat optimalisatie gebruiken. Bel Jesse maar eens voor tips.',
@@ -78,6 +81,7 @@ export const PLAAGTEKSTEN = [
     'De nieuwe eindbaas Joustra heeft deze score gezien, hè.',
     'Zelfs Danny Vera kan deze score niet meer redden.',
     'Deze score verdient de Pleegzuster Bloedwijn Award: duidelijk toe aan een oppepper.',
+    '“De portemonnee kan thuisblijven”, zei de reiscommissie. Voor deze score kun je hem beter juist pakken: 1 euro = 1 punt.',
   ]},
   { vanaf: 0, teksten: [
     'Deze score is een drama. Lijkt Patrick Stam in de sportschool wel.',
@@ -86,6 +90,8 @@ export const PLAAGTEKSTEN = [
     'Zelfs Peppi en Kokki hadden hier meer punten gehaald. En die moeten álles met z’n tweeën.',
     'Kars heeft naar je score gekeken: kansloos. Zelfs in hoger beroep.',
     'Erdi maakt prullenbakken voor precies dit soort scores.',
+    'Deze score heeft tien minuten met de zwaartekracht staan discussiëren — en dik verloren.',
+    'Zelfs het stamhoofd keek pas na drie kwartier op z’n smartwatch. Bij deze score al na tien seconden.',
     'Hallatu schenkt er eentje in. Niet om te vieren — om deze score te vergeten.',
     'Voor deze score is er een troostprijs: baklava van Ozgur. Die is tenminste wél zoet.',
     'Duisdecker heeft een vakterm voor deze score: bouwval.',

@@ -1,7 +1,7 @@
 // Spel 4 — Mepspel
 // Tik het opduikende vakje in 30 seconden. Oefenen: 10 seconden.
-import { speel } from '../geluid.js?v=27';
-import { clamp } from '../app.js?v=27';
+import { speel } from '../geluid.js?v=28';
+import { clamp } from '../app.js?v=28';
 
 export const info = {
   naam: 'Mepspel',
