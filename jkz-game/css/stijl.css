@@ -2196,3 +2196,102 @@ a.eindkaart-spel:active {
 .home-knop:active { color: var(--accent); }
 /* Tijdens het spelen geen extra knop in beeld (misklikken voorkomen) */
 body.nav-verborgen .home-knop { display: none; }
+
+/* === DE EINDBAAS (bonusspel, spel 11) === */
+.eb-kop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 0.25rem 0 0.75rem;
+  flex-wrap: wrap;
+}
+.eb-stip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: var(--jkz-groen-paneel);
+  border: 1px solid rgba(232, 163, 61, 0.3);
+  font-size: 1rem;
+}
+.eb-stip.actief { border-color: var(--roze, #d8548f); box-shadow: 0 0 10px rgba(216, 84, 143, 0.5); }
+.eb-stip.verslagen { opacity: 0.55; color: var(--accent); }
+
+.baas-kaart {
+  background: var(--jkz-groen-paneel);
+  border: 1px solid rgba(216, 84, 143, 0.45);
+  border-radius: 16px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+.baas-emoji { font-size: 4rem; line-height: 1.1; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
+
+.eb-rondes {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--tekst-zwak);
+}
+.eb-dobbelveld { min-height: 120px; margin-top: 0.5rem; }
+.eb-worpen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+}
+.eb-worp { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.eb-stenen { font-size: 3.2rem; line-height: 1.1; letter-spacing: 4px; color: var(--creme, #f2ecd9); }
+.eb-vs {
+  font-family: var(--font-kop, 'Bebas Neue'), 'Arial Narrow', sans-serif;
+  font-size: 1.4rem;
+  color: var(--roze, #d8548f);
+  letter-spacing: 0.1em;
+}
+.knop.eb-vecht {
+  background: linear-gradient(180deg, #e0699e, #c94480);
+  color: #fff;
+  border: none;
+  font-weight: bold;
+  box-shadow: 0 2px 12px rgba(216, 84, 143, 0.45);
+}
+.knop.eb-cash {
+  background: linear-gradient(180deg, #f2c069, var(--accent));
+  color: var(--jkz-groen);
+  border: none;
+  font-weight: bold;
+}
+.eb-status {
+  text-align: center;
+  color: var(--tekst-zwak);
+  margin-top: 0.5rem;
+}
+
+/* Aankondigingskaart op het startscherm */
+.eindbaas-cta {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  text-align: center;
+  text-decoration: none;
+  color: #fff;
+  background: linear-gradient(135deg, #c94480, #7a2350);
+  border: 1px solid rgba(242, 192, 105, 0.6);
+  box-shadow: 0 0 18px rgba(216, 84, 143, 0.45);
+  animation: eb-gloed 1.8s ease-in-out infinite alternate;
+}
+.eindbaas-cta .eb-titel {
+  font-family: var(--font-kop, 'Bebas Neue'), 'Arial Narrow', sans-serif;
+  font-size: 1.35rem;
+  letter-spacing: 0.08em;
+}
+.eindbaas-cta .klein { color: rgba(255, 255, 255, 0.85); margin-top: 2px; }
+@keyframes eb-gloed {
+  from { box-shadow: 0 0 10px rgba(216, 84, 143, 0.35); }
+  to   { box-shadow: 0 0 26px rgba(216, 84, 143, 0.7); }
+}

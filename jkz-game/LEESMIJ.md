@@ -110,6 +110,32 @@ blijft het belangrijkste.
 5. Per ongeluk toegekend? Ken 0 punten toe en de bonus is weer weg.
 6. Link weghalen = veld leegmaken en opnieuw opslaan; de knop verdwijnt dan.
 
+## De Eindbaas 👑 (bonusspel, lanceren met één vinkje)
+
+**Wat is het?** Een 11e spel op een eigen pagina (`eindbaas.html`): een
+dobbelduel tegen 5 figuren uit de jaarverslagen. Geen behendigheid maar lef —
+na elke gewonnen ronde kies je: punten pakken of doorgaan voor meer. Maximaal
+**100 extra punten**, en iedereen mag maar **2 pogingen** (dat bewaakt de
+server, ook als iemand zijn browser leegt of een ander apparaat pakt).
+De beste poging telt mee in het totaal op de ranglijst.
+
+**Lanceren (bijvoorbeeld zondag):**
+1. Upload de bestanden gerust al eerder — zolang het vinkje uit staat,
+   ziet niemand iets van het bonusspel.
+2. Ga op het gewenste moment naar de beheerpagina en zet bij **Status** het
+   vinkje **"👑 De Eindbaas open"** aan. Klik op Opslaan.
+3. Klaar! Vanaf dat moment zien alle spelers op het startscherm een grote
+   gloeiende knop "DE EINDBAAS IS WAKKER", verschijnt het spel in de uitleg
+   en krijgt de ranglijst een 👑-tabje.
+
+**Zelf vooraf testen:** zet Testmodus aan en open
+`jaarverslag.jkz.nl/eindbaas.html` direct (het vinkje kan uit blijven).
+Let op: ook jouw eigen pogingen tellen als 2 pogingen — test dus met een
+testnaam, niet met je echte spelersnaam, en wis die testspeler daarna.
+
+**Weer dicht?** Vinkje uit en Opslaan. Al behaalde Eindbaas-scores blijven
+gewoon meetellen.
+
 ## Wissen & resetten (drie aparte knoppen)
 
 Op de beheerpagina staan drie resets, elk met een eigen bevestigingswoord:
@@ -140,6 +166,7 @@ jkz-game/
   admin.html          Beheerpagina (?key=GEHEIM)
 
   eindkaart.html      Persoonlijke eindkaart na level 10 (screenshotbaar)
+  eindbaas.html       Bonusspel "De Eindbaas" (aan/uit via de beheerpagina)
   fonts/              Bebas Neue (kopletter uit het jaarplan-magazine)
 
   api.php             Server-API: alle database-acties (fase 2)
@@ -208,6 +235,7 @@ Alle scores worden begrensd op 0–100.
 `admin.html?key=GEHEIM`
 - Spel openen/sluiten
 - Testmodus (alle levels direct open)
+- De Eindbaas openzetten (bonusspel)
 - Speler of alles wissen
 
 ### Beamerpagina

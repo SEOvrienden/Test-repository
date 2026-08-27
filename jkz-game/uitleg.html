@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Hoe werkt het?</title>
-  <link rel="stylesheet" href="css/stijl.css?v=28">
+  <link rel="stylesheet" href="css/stijl.css?v=29">
 </head>
 <body>
 
@@ -71,6 +71,24 @@ window.addEventListener('error', function (e) {
       <div id="bonus-cta-vak" style="margin-top:1rem;"></div>
     </div>
 
+    <!-- Dit blok is verborgen tot De Eindbaas in het beheer is opengezet -->
+    <div class="uitleg-blok" id="uitleg-eindbaas" style="display:none;">
+      <h2>De Eindbaas 👑</h2>
+      <p style="margin-bottom:0.5rem;">
+        Er is een bonusspel wakker geworden: <strong>De Eindbaas</strong>.
+        Versla 5 figuren uit de jaarverslagen in een dobbelduel en verdien
+        tot <strong>100 extra punten</strong>.
+      </p>
+      <ul>
+        <li>Geen behendigheid, wél lef: na elke gewonnen ronde kies je —
+            <strong>stoppen en je punten pakken, of doorgaan</strong> voor meer.</li>
+        <li>Verlies je een duel, dan raak je de helft van je verzamelde punten kwijt.</li>
+        <li>Je mag De Eindbaas maar <strong>2 keer</strong> uitdagen. Je beste
+            poging telt mee in je totaal.</li>
+        <li>Je vindt hem op het startscherm, onder de grote gloeiende knop.</li>
+      </ul>
+    </div>
+
     <div class="uitleg-blok">
       <h2>De ranglijst 🏆</h2>
       <p>
@@ -111,8 +129,8 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { verversStatus } from './js/api.js?v=28';
-import { renderNav, renderBonusCTA, checkGesloten, initScrollHint } from './js/app.js?v=28';
+import { verversStatus, haalEindbaasOpen } from './js/api.js?v=29';
+import { renderNav, renderBonusCTA, checkGesloten, initScrollHint } from './js/app.js?v=29';
 
 if (checkGesloten()) throw new Error('gesloten');
 renderNav('uitleg');
@@ -121,7 +139,13 @@ initScrollHint();
 // Roze bonusknop midden in de uitleg (verdwijnt als er geen link is)
 const ctaVak = document.getElementById('bonus-cta-vak');
 renderBonusCTA(ctaVak);
-verversStatus().then(() => renderBonusCTA(ctaVak)).catch(() => {});
+
+// Het Eindbaas-blok verschijnt pas als het bonusspel in het beheer open staat
+function toonEindbaasBlok() {
+  document.getElementById('uitleg-eindbaas').style.display = haalEindbaasOpen() ? '' : 'none';
+}
+toonEindbaasBlok();
+verversStatus().then(() => { renderBonusCTA(ctaVak); toonEindbaasBlok(); }).catch(() => {});
 </script>
 </body>
 </html>

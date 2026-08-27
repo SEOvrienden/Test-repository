@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <title>JKZ — De Eindbaas</title>
+  <link rel="stylesheet" href="css/stijl.css?v=29">
+</head>
+<body>
+
+<script>
+// Vangnet: als de pagina niet goed laadt (bijv. oude bestanden in de cache
+// of een halve upload), toon dan een duidelijke melding i.p.v. stil falen.
+window.addEventListener('error', function (e) {
+  if (!e || !e.message) return;
+  if (document.getElementById('laadfout-banner')) return;
+  var d = document.createElement('div');
+  d.id = 'laadfout-banner';
+  d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;' +
+    'background:#8a2020;color:#fff;padding:12px 16px;text-align:center;' +
+    'font:14px/1.45 -apple-system,Segoe UI,sans-serif;';
+  d.textContent = 'Oeps, de pagina is niet goed geladen. Sluit de browser helemaal af en open de site opnieuw. Blijft deze melding staan? Upload dan alle bestanden opnieuw naar de server.';
+  document.body.appendChild(d);
+}, true);
+</script>
+
+<canvas id="confetti-canvas"></canvas>
+
+<div class="pagina">
+
+  <header class="hoofd">
+    <a href="index.html" class="logo-link">
+      <div class="logo-placeholder">
+        <span class="logo-jkz">JKZ</span>
+        <span class="logo-sub">since 1957</span>
+      </div>
+    </a>
+  </header>
+
+  <div class="inhoud" id="eb-inhoud" style="overflow-y:auto;">
+    <div class="laadbericht">Laden…</div>
+  </div>
+
+</div>
+
+<script type="module">
+import { haalSpelerUitStorage, haalVoortgang, slaScoreOp, verversStatus,
+         haalEindbaasOpen, haalConfig } from './js/api.js?v=29';
+import { renderNav, checkGesloten, toonConfetti, plaatsTekst } from './js/app.js?v=29';
+import { speel } from './js/geluid.js?v=29';
+
+if (checkGesloten()) throw new Error('gesloten');
+renderNav('spelen');
+
+const speler = haalSpelerUitStorage();
+if (!speler) { window.location.href = 'index.html'; throw new Error('gesloten'); }
+
+const inhoud = document.getElementById('eb-inhoud');
+
+// ── De vijf bazen (uit de jaarverslagen) ─────────────────────────────────────
+// bonus = hoeveel de baas vals speelt bij zijn dobbelworp
+const BAZEN = [
+  { emoji: '🚕', naam: 'Taxi Binnerts', bonus: 0, punten: 15,
+    intro: 'Brengt je een heel eind. Maar nooit helemaal tot Schiphol.' },
+  { emoji: '🛍️', naam: 'De souvenirverkoopster', bonus: 0, punten: 20,
+    intro: '“Nee” is voor haar het begin van een onderhandeling.' },
+  { emoji: '🦛', naam: 'Het nijlpaard', bonus: 1, punten: 20,
+    intro: 'Het gevaarlijkste dier van de hele reis. Massa wint van snelheid.' },
+  { emoji: '🧮', naam: 'Penningmeester Stam', bonus: 1, punten: 20,
+    intro: 'Controleert élk punt in je kasboek. Vet geregeld? Dat bepaalt hij.' },
+  { emoji: '👑', naam: 'Eindbaas Joustra', bonus: 2, punten: 25,
+    intro: 'De nieuwe eindbaas. Letterlijk. Hij speelt het valst van allemaal.' },
+];
+const MAX_POGINGEN = 2;
+
+// ── Toegang en pogingen bepalen ──────────────────────────────────────────────
+await verversStatus().catch(() => {});
+const config = haalConfig();
+const open = haalEindbaasOpen() || config.testmodus;
+
+const voortgang = await haalVoortgang(speler.spelerId)
+  .catch(() => { throw new Error('gesloten'); }); // stil bij wegklikken tijdens laden
+const eb = (voortgang.scores || []).find(s => s.spel === 11);
+const gebruikt = eb ? eb.pogingen.length : 0;
+const beste = eb ? Math.max(...eb.pogingen.map(p => p.score)) : null;
+const pogingNr = eb ? Math.max(...eb.pogingen.map(p => p.poging)) + 1 : 1;
+
+if (!open) {
+  inhoud.innerHTML = `
+    <div class="centervak" style="text-align:center;padding-top:3rem;">
+      <div style="font-size:4rem;">🔒</div>
+      <h1 style="margin:0.5rem 0;">De Eindbaas slaapt nog</h1>
+      <p class="klein" style="max-width:320px;">Kom later terug… je hoort het
+      vanzelf als hij wakker is.</p>
+      <a href="index.html" class="knop secundair" style="width:auto;margin-top:1.5rem;">← Terug</a>
+    </div>`;
+  throw new Error('gesloten');
+}
+
+// ── Spelstatus van deze run ──────────────────────────────────────────────────
+let baasIndex = 0;       // welke baas nu
+let verzameld = 0;       // punten die je in deze run bij elkaar hebt gevochten
+let herkansing = true;   // 1x per run mag je je eigen worp overgooien
+let mijnWins = 0, baasWins = 0;
+let laatsteWorp = null;  // {mijn: [a,b], baas: n} — voor de herkansing
+let bezig = false;       // dobbel-animatie loopt
+
+function html(str) { inhoud.innerHTML = str; window.scrollTo(0, 0); }
+
+// ── Schermen ─────────────────────────────────────────────────────────────────
+
+function toonIntro() {
+  const klaar = gebruikt >= MAX_POGINGEN;
+  html(`
+    <div style="text-align:center;padding-top:0.5rem;">
+      <div style="font-size:4rem;">👑</div>
+      <h1 style="margin:0.25rem 0;">De Eindbaas</h1>
+      <p class="klein" style="color:var(--roze,#d8548f);letter-spacing:0.1em;font-weight:bold;">
+        BONUSSPEL · TOT 100 EXTRA PUNTEN</p>
+    </div>
+    <div class="uitleg-blok" style="margin-top:1rem;">
+      <p style="line-height:1.6;">Vijf figuren uit de jaarverslagen versperren je de weg.
+      <strong>Versla ze in een dobbelduel</strong>: jij gooit twee dobbelstenen (je hoogste
+      telt), de baas gooit er één — maar hoe verder je komt, hoe valser ze spelen.
+      Wie het eerst twee rondes wint, wint het duel.</p>
+      <ul style="padding-left:1.2rem;margin-top:0.75rem;display:flex;flex-direction:column;gap:0.4rem;">
+        <li>Elke verslagen baas levert punten op: <strong>15 – 20 – 20 – 20 – 25</strong>.</li>
+        <li>Na elke overwinning kies je: <strong>💰 cashen</strong> of <strong>⚔️ doorgaan</strong>.</li>
+        <li>Verlies je een duel? Dan strompel je weg met <strong>de helft</strong> van je punten.</li>
+        <li>Je hebt <strong>1 herkansing</strong> per run om een eigen worp over te gooien.</li>
+        <li>Je mag De Eindbaas maar <strong>${MAX_POGINGEN} keer</strong> uitdagen. Je beste run telt.</li>
+      </ul>
+    </div>
+    <div class="eb-status klein">
+      ${beste !== null ? `Je beste run tot nu toe: <strong>${beste} punten</strong> · ` : ''}
+      Poging ${Math.min(gebruikt + 1, MAX_POGINGEN)} van ${MAX_POGINGEN}
+    </div>
+    <div class="knoppen" style="margin-top:1rem;">
+      ${klaar
+        ? `<p class="ta-c" style="color:var(--tekst-zwak);">Je hebt je ${MAX_POGINGEN} pogingen gebruikt.
+             Eindresultaat: <strong style="color:var(--accent);">${beste ?? 0} punten</strong> — die tellen mee in je totaal.</p>
+           <a href="ranglijst.html" class="knop primair">Bekijk de ranglijst</a>
+           <a href="index.html" class="knop secundair">← Terug naar home</a>`
+        : `<button class="knop eb-vecht" id="knop-start">⚔️ Daag de bazen uit</button>
+           <a href="index.html" class="knop secundair">Toch maar niet…</a>`}
+    </div>`);
+  document.getElementById('knop-start')?.addEventListener('click', startRun);
+}
+
+function startRun() {
+  baasIndex = 0; verzameld = 0; herkansing = true;
+  toonBaas();
+}
+
+function toonBaas() {
+  const b = BAZEN[baasIndex];
+  mijnWins = 0; baasWins = 0; laatsteWorp = null;
+  html(`
+    ${kopBalk()}
+    <div class="baas-kaart">
+      <div class="baas-emoji">${b.emoji}</div>
+      <h2 style="margin:0.25rem 0;">${b.naam}</h2>
+      <p class="klein" style="color:var(--tekst-zwak);">${b.intro}</p>
+      <p class="klein" style="margin-top:0.5rem;">Te winnen: <strong style="color:var(--accent);">+${b.punten} punten</strong>
+        ${b.bonus > 0 ? ` · speelt vals: <strong style="color:var(--roze,#d8548f);">+${b.bonus} op zijn worp</strong>` : ''}</p>
+      <div class="eb-rondes" id="eb-rondes">${rondeStand()}</div>
+      <div class="eb-dobbelveld" id="eb-dobbelveld"></div>
+      <div class="knoppen" style="margin-top:0.75rem;">
+        <button class="knop eb-vecht" id="knop-gooi">🎲 Gooi de dobbelstenen</button>
+      </div>
+    </div>`);
+  document.getElementById('knop-gooi').addEventListener('click', () => gooiRonde(false));
+}
+
+function kopBalk() {
+  const stippen = BAZEN.map((b, i) =>
+    `<span class="eb-stip${i < baasIndex ? ' verslagen' : ''}${i === baasIndex ? ' actief' : ''}">${i < baasIndex ? '✔' : b.emoji}</span>`).join('');
+  return `<div class="eb-kop">
+    <div>${stippen}</div>
+    <div class="klein">Buit: <strong style="color:var(--accent);">${verzameld}</strong>
+      · Herkansing: ${herkansing ? '🎲' : '—'}</div>
+  </div>`;
+}
+
+function rondeStand() {
+  return `Rondestand — Jij: ${'⭐'.repeat(mijnWins) || '·'} &nbsp;|&nbsp; Baas: ${'💀'.repeat(baasWins) || '·'} &nbsp;(eerste bij 2 wint)`;
+}
+
+const d6 = () => 1 + Math.floor(Math.random() * 6);
+const OGEN = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+
+function gooiRonde(isHerkansing) {
+  if (bezig) return;
+  bezig = true;
+  const b = BAZEN[baasIndex];
+  const mijn = [d6(), d6()];
+  const baas = isHerkansing ? laatsteWorp.baas : d6();
+  laatsteWorp = { mijn, baas };
+
+  const veld = document.getElementById('eb-dobbelveld');
+  document.getElementById('knop-gooi')?.setAttribute('disabled', 'disabled');
+
+  // Dobbel-animatie: even ratelen, dan de echte uitslag
+  let ticks = 0;
+  speel('tik');
+  const anim = setInterval(() => {
+    veld.innerHTML = dobbelHTML([d6(), d6()], d6(), b, false);
+    if (++ticks >= 8) { clearInterval(anim); toonUitslag(mijn, baas, b, isHerkansing); }
+  }, 90);
+}
+
+function dobbelHTML(mijn, baas, b, definitief) {
+  const hoogste = Math.max(...mijn);
+  return `
+    <div class="eb-worpen">
+      <div class="eb-worp">
+        <span class="klein">Jij</span>
+        <div class="eb-stenen">${OGEN[mijn[0]]}${OGEN[mijn[1]]}</div>
+        ${definitief ? `<span class="klein">hoogste: <strong>${hoogste}</strong></span>` : ''}
+      </div>
+      <div class="eb-vs">VS</div>
+      <div class="eb-worp">
+        <span class="klein">${b.naam.split(' ')[0]}</span>
+        <div class="eb-stenen">${OGEN[baas]}</div>
+        ${definitief ? `<span class="klein">${baas}${b.bonus ? ' + ' + b.bonus + ' vals = <strong>' + (baas + b.bonus) + '</strong>' : ''}</span>` : ''}
+      </div>
+    </div>`;
+}
+
+function toonUitslag(mijn, baas, b, wasHerkansing) {
+  const veld = document.getElementById('eb-dobbelveld');
+  veld.innerHTML = dobbelHTML(mijn, baas, b, true);
+  const mijnTotaal = Math.max(...mijn);
+  const baasTotaal = baas + b.bonus;
+
+  const knoppen = document.createElement('div');
+  knoppen.className = 'knoppen';
+  knoppen.style.marginTop = '0.75rem';
+
+  if (mijnTotaal > baasTotaal) {
+    speel('treffer');
+    mijnWins++;
+    knoppen.innerHTML = `<p class="ta-c klein" style="color:var(--accent);">Ronde voor jou! 💪</p>`;
+  } else if (mijnTotaal < baasTotaal) {
+    // Verloren ronde: eerst de kans om je herkansing in te zetten
+    if (herkansing && !wasHerkansing) {
+      speel('fout');
+      knoppen.innerHTML = `
+        <p class="ta-c klein" style="color:var(--simon-4,#d4541a);">Die gaat naar de baas…</p>
+        <button class="knop eb-vecht" id="knop-herkans">🎲 Herkansing! Gooi opnieuw (1x per run)</button>
+        <button class="knop secundair" id="knop-accepteer">Laat maar staan</button>`;
+      veld.after(knoppen);
+      document.getElementById('knop-herkans').addEventListener('click', () => {
+        herkansing = false; bezig = false;
+        knoppen.remove();
+        gooiRonde(true);
+      });
+      document.getElementById('knop-accepteer').addEventListener('click', () => {
+        baasWins++;
+        knoppen.remove();
+        naRonde(b);
+      });
+      return;
+    }
+    speel('fout');
+    baasWins++;
+    knoppen.innerHTML = `<p class="ta-c klein" style="color:var(--simon-4,#d4541a);">Ronde voor ${b.naam}…</p>`;
+  } else {
+    knoppen.innerHTML = `<p class="ta-c klein" style="color:var(--tekst-zwak);">Gelijkspel — gooi opnieuw!</p>`;
+  }
+  veld.after(knoppen);
+  setTimeout(() => { knoppen.remove(); naRonde(b); }, 900);
+}
+
+function naRonde(b) {
+  bezig = false;
+  if (mijnWins >= 2)  return baasVerslagen(b);
+  if (baasWins >= 2)  return runVerloren(b);
+  document.getElementById('eb-rondes').innerHTML = rondeStand();
+  const knop = document.getElementById('knop-gooi');
+  knop.removeAttribute('disabled');
+  knop.textContent = '🎲 Volgende worp';
+}
+
+function baasVerslagen(b) {
+  speel('nieuwRecord');
+  verzameld += b.punten;
+  baasIndex++;
+
+  if (baasIndex >= BAZEN.length) return eindeRun(verzameld, 'alle 5 bazen verslagen! 👑');
+
+  const volgende = BAZEN[baasIndex];
+  html(`
+    ${kopBalk()}
+    <div class="baas-kaart">
+      <div class="baas-emoji">😵</div>
+      <h2 style="margin:0.25rem 0;">${b.naam} verslagen!</h2>
+      <p style="margin:0.5rem 0;">+${b.punten} punten — je buit is nu
+        <strong style="color:var(--accent);font-size:1.3rem;">${verzameld}</strong></p>
+      <p class="klein" style="color:var(--tekst-zwak);margin-bottom:1rem;">
+        Volgende: ${volgende.emoji} ${volgende.naam}${volgende.bonus ? ` (speelt vals: +${volgende.bonus})` : ''}.
+        Verlies je daar, dan hou je maar <strong>${Math.floor(verzameld / 2)}</strong> over.</p>
+      <div class="knoppen">
+        <button class="knop eb-vecht" id="knop-door">⚔️ Doorgaan — versla ${volgende.naam}</button>
+        <button class="knop eb-cash" id="knop-cash">💰 Cashen — zeker zijn van ${verzameld} punten</button>
+      </div>
+    </div>`);
+  document.getElementById('knop-door').addEventListener('click', toonBaas);
+  document.getElementById('knop-cash').addEventListener('click', () =>
+    eindeRun(verzameld, `gecasht na ${baasIndex} ${baasIndex === 1 ? 'baas' : 'bazen'}`));
+}
+
+function runVerloren(b) {
+  speel('gameOver');
+  if (navigator.vibrate) navigator.vibrate([100, 50, 150]);
+  const score = Math.floor(verzameld / 2);
+  eindeRun(score, `verslagen door ${b.naam.toLowerCase()}`, b);
+}
+
+async function eindeRun(score, ruweTekst, verslagenDoor = null) {
+  const ruwe = `${ruweTekst}`;
+  let opgeslagen = true;
+  try {
+    await slaScoreOp(speler.spelerId, 11, score, ruwe, pogingNr);
+  } catch (e) { opgeslagen = false; }
+
+  const nieuwBeste = beste === null || score > beste;
+  const eindScore = Math.max(score, beste ?? 0);
+  const laatstePoging = gebruikt + 1 >= MAX_POGINGEN;
+
+  if (score >= 100) toonConfetti(document.getElementById('confetti-canvas'));
+
+  html(`
+    <div style="text-align:center;padding-top:1rem;">
+      <div style="font-size:4rem;">${verslagenDoor ? verslagenDoor.emoji : score >= 100 ? '👑' : '💰'}</div>
+      <h1 style="margin:0.25rem 0;">${verslagenDoor ? 'Verslagen…' : score >= 100 ? 'DE KAMER IS VERSLAGEN!' : 'Gecasht!'}</h1>
+      <p class="klein" style="color:var(--tekst-zwak);">${ruweTekst}</p>
+      <div class="score-punten-groot" style="margin:0.75rem 0;">${score}</div>
+      ${nieuwBeste && gebruikt > 0 ? '<p class="klein" style="color:var(--accent);">Nieuw persoonlijk record!</p>' : ''}
+      ${!opgeslagen ? '<p class="klein" style="color:var(--simon-4,#d4541a);">⚠️ Score nog niet verstuurd — we proberen het automatisch opnieuw.</p>' : ''}
+      <p class="score-tekst" style="margin:0.75rem 0;">${plaatsTekst(score)}</p>
+      <p class="klein" style="color:var(--tekst-zwak);">
+        ${laatstePoging
+          ? `Dat was je laatste poging. Eindresultaat Eindbaas: <strong>${eindScore} punten</strong> bij je totaal.`
+          : `Je hebt nog 1 poging over — je beste run telt.`}
+      </p>
+      <div class="knoppen" style="margin-top:1rem;">
+        ${laatstePoging
+          ? `<a href="ranglijst.html" class="knop primair">Bekijk de ranglijst</a>`
+          : `<button class="knop eb-vecht" id="knop-nogmaals">⚔️ Laatste poging (${MAX_POGINGEN} van ${MAX_POGINGEN})</button>`}
+        <a href="index.html" class="knop secundair">← Terug naar home</a>
+      </div>
+    </div>`);
+  document.getElementById('knop-nogmaals')?.addEventListener('click', () => {
+    window.location.reload();
+  });
+}
+
+toonIntro();
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Ranglijst</title>
-  <link rel="stylesheet" href="css/stijl.css?v=28">
+  <link rel="stylesheet" href="css/stijl.css?v=29">
 </head>
 <body>
 
@@ -69,8 +69,8 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { haalRanglijst, haalSpelerUitStorage, haalVoortgang, verversStatus,
-         toonPunten } from './js/api.js?v=28';
-import { renderVoortgang, renderNav, renderBonusCTA, checkGesloten, SPEL_NAMEN } from './js/app.js?v=28';
+         toonPunten, haalEindbaasOpen } from './js/api.js?v=29';
+import { renderVoortgang, renderNav, renderBonusCTA, checkGesloten, SPEL_NAMEN } from './js/app.js?v=29';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -111,10 +111,20 @@ async function laadRanglijst() {
 let actieveTab = 'totaal';   // 'totaal' of spelnummer 1–10
 let laatsteData = null;
 
+// Naam van een spel, inclusief het bonusspel (11)
+function spelNaam(s) { return s === 11 ? '👑 Eindbaas' : SPEL_NAMEN[s - 1]; }
+
+// De Eindbaas-tab verschijnt zodra het bonusspel open is of iemand hem speelde
+function eindbaasZichtbaar() {
+  return haalEindbaasOpen() ||
+    (laatsteData || []).some(r => r.scores && r.scores[11] !== undefined);
+}
+
 function renderTabs() {
   const tabsDiv = document.getElementById('rang-tabs');
   tabsDiv.innerHTML = '';
   const tabs = [['totaal', '🏆 Totaal'], ...SPEL_NAMEN.map((n, i) => [i + 1, n])];
+  if (eindbaasZichtbaar()) tabs.push([11, '👑 Eindbaas']);
   tabs.forEach(([key, label]) => {
     const knop = document.createElement('button');
     knop.className = 'rang-tab' + (String(key) === String(actieveTab) ? ' actief' : '');
@@ -163,10 +173,10 @@ function renderRanglijst(data) {
       .sort((a, b) => b.sorteer - a.sorteer);
     if (rijen.length === 0) {
       tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--tekst-zwak);padding:2rem;">
-        Nog niemand heeft ${SPEL_NAMEN[s - 1]} gespeeld.</td></tr>`;
+        Nog niemand heeft ${spelNaam(s)} gespeeld.</td></tr>`;
       return;
     }
-    voetnoot.textContent = `Spel ${s} — ${SPEL_NAMEN[s - 1]} · ${rijen.length} van ${data.length} spelers gespeeld · max 100 punten`;
+    voetnoot.textContent = `${s === 11 ? 'Bonusspel' : 'Spel ' + s} — ${spelNaam(s)} · ${rijen.length} van ${data.length} spelers gespeeld · max 100 punten`;
   }
 
   rijen.forEach((rij, idx) => {

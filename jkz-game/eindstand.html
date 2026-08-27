@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>JKZ — Eindstand</title>
-  <link rel="stylesheet" href="css/stijl.css?v=28">
+  <link rel="stylesheet" href="css/stijl.css?v=29">
   <style>
     /* Beamer-specifieke overrides — desktop gericht */
     html, body {
@@ -63,6 +63,7 @@ window.addEventListener('error', function (e) {
           <th style="width:50px;">#</th>
           <th>Naam</th>
           <th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th><th>S7</th><th>S8</th><th>S9</th><th>S10</th>
+          <th id="kolom-eindbaas" style="display:none;">👑</th>
           <th>Totaal</th>
         </tr>
       </thead>
@@ -73,7 +74,7 @@ window.addEventListener('error', function (e) {
 </div>
 
 <script type="module">
-import { haalRanglijst } from './js/api.js?v=28';
+import { haalRanglijst } from './js/api.js?v=29';
 
 let volgendeVervers = 15;
 
@@ -94,6 +95,10 @@ function escapeHtml(s) {
 function renderStand(data) {
   const tbody = document.getElementById('eindstand-body');
   tbody.innerHTML = '';
+
+  // De Eindbaas-kolom (👑) verschijnt pas als iemand het bonusspel speelde
+  const metEindbaas = data.some(r => r.scores && r.scores[11] !== undefined && r.scores[11] !== null);
+  document.getElementById('kolom-eindbaas').style.display = metEindbaas ? '' : 'none';
 
   // Topscore per spel
   const topDiv = document.getElementById('top-per-spel');
@@ -130,13 +135,14 @@ function renderStand(data) {
         const sc = rij.scores[s];
         return `<td>${sc !== undefined && sc !== null ? sc : '–'}</td>`;
       }).join('')}
+      ${metEindbaas ? `<td>${rij.scores[11] !== undefined && rij.scores[11] !== null ? rij.scores[11] : '–'}</td>` : ''}
       <td class="totaal-cel">${String(rij.totaal).replace('.', ',')}</td>`;
     tbody.appendChild(tr);
   });
 
   if (data.length === 0) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td colspan="10" style="text-align:center;color:var(--tekst-zwak);padding:3rem;font-size:1.2rem;">
+    tr.innerHTML = `<td colspan="13" style="text-align:center;color:var(--tekst-zwak);padding:3rem;font-size:1.2rem;">
       Het spel is nog niet begonnen.</td>`;
     tbody.appendChild(tr);
   }

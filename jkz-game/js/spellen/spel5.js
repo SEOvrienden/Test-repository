@@ -4,8 +4,8 @@
 // dus je hoeft nooit "op precies het juiste moment" te klikken.
 // Sturen kan met de knoppen én door links/rechts op het veld te tikken.
 // Oefenen: 30 sec, botsen = waarschuwing (snake wrapt door muren).
-import { speel } from '../geluid.js?v=28';
-import { clamp } from '../app.js?v=28';
+import { speel } from '../geluid.js?v=29';
+import { clamp } from '../app.js?v=29';
 
 export const info = {
   naam: 'Snake',

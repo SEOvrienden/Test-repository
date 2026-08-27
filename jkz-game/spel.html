@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Spel</title>
-  <link rel="stylesheet" href="css/stijl.css?v=28">
+  <link rel="stylesheet" href="css/stijl.css?v=29">
 </head>
 <body>
 
@@ -144,11 +144,11 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { haalSpelerUitStorage, haalVoortgang, slaScoreOp, haalRanglijst, haalConfig }
-  from './js/api.js?v=28';
+  from './js/api.js?v=29';
 import { renderVoortgang, renderNav, renderBonusCTA, plaatsTekst, checkGesloten,
          toonConfetti, urlParam }
-  from './js/app.js?v=28';
-import { speel } from './js/geluid.js?v=28';
+  from './js/app.js?v=29';
+import { speel } from './js/geluid.js?v=29';
 
 if (checkGesloten()) throw new Error('gesloten');
 
@@ -185,7 +185,7 @@ renderVoortgang(voortgangContainer, level, gespeeldTm);
 document.getElementById('scherm-uitleg').querySelector('#uitleg-naam').textContent = 'Laadt…';
 let spelModule;
 try {
-  spelModule = await import(`./js/spellen/spel${level}.js?v=28`);
+  spelModule = await import(`./js/spellen/spel${level}.js?v=29`);
 } catch (e) {
   console.error('Module laden mislukt:', e);
   window.location.href = 'index.html'; throw e;

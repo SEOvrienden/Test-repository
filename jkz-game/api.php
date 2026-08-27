@@ -121,7 +121,11 @@ case 'haalVoortgang': {
     foreach ($q->fetchAll() as $r) {
         $perSpel[(int) $r['spel']][] = $r;
     }
-    $hoogsteGespeeld = $perSpel ? max(array_keys($perSpel)) : 0;
+    // Level-voortgang gaat alleen over de 10 gewone spellen; het bonusspel
+    // (De Eindbaas, spel 11) telt hier niet mee, anders zou één potje
+    // Eindbaas alle levels en verslagen openzetten.
+    $gewoneSpellen = array_filter(array_keys($perSpel), fn($s) => $s <= 10);
+    $hoogsteGespeeld = $gewoneSpellen ? max($gewoneSpellen) : 0;
 
     $scores = [];
     foreach ($perSpel as $spel => $pogingen) {
@@ -153,7 +157,7 @@ case 'slaScoreOp': {
     $ruwe     = mb_substr(trim((string) ($invoer['ruweWaarde'] ?? '')), 0, 80);
 
     if ($spelerId <= 0)                    fout('Ongeldige speler.');
-    if ($spel < 1 || $spel > 10)           fout('Ongeldig spelnummer.');
+    if ($spel < 1 || $spel > 11)           fout('Ongeldig spelnummer.');
     if ($score < 0 || $score > 100)        fout('Ongeldige score.');
     if ($poging < 1 || $poging > 999)      fout('Ongeldige poging.');
 
@@ -161,6 +165,15 @@ case 'slaScoreOp': {
     $q = $db->prepare('SELECT id FROM spelers WHERE id = ?');
     $q->execute([$spelerId]);
     if (!$q->fetch()) fout('Speler onbekend. Kies opnieuw je naam op het startscherm.');
+
+    // Spel 11 = De Eindbaas: maximaal 2 pogingen, hard op de server afgedwongen
+    if ($spel === 11) {
+        if ($poging > 2) fout('De Eindbaas mag maar 2 keer worden uitgedaagd.');
+        $q = $db->prepare('SELECT COUNT(DISTINCT poging) AS n FROM scores
+                           WHERE speler_id = ? AND spel = 11 AND poging <> ?');
+        $q->execute([$spelerId, $poging]);
+        if ((int) $q->fetch()['n'] >= 2) fout('De Eindbaas mag maar 2 keer worden uitgedaagd.');
+    }
 
     // Zelfde (speler, spel, poging) → bijwerken, anders toevoegen
     $q = $db->prepare('UPDATE scores SET score = ?, ruwe_waarde = ?, gespeeld_op = ?
@@ -214,12 +227,20 @@ case 'haalSpelStatus': {
     $inst = [];
     foreach ($q->fetchAll() as $r) $inst[$r['sleutel']] = $r['waarde'];
     antwoord([
-        'ok'          => true,
-        'open'        => ($inst['spel_open'] ?? '1') === '1',
-        'testmodus'   => ($inst['testmodus'] ?? '0') === '1',
-        'tikkie_link' => array_key_exists('tikkie_link', $inst)
+        'ok'            => true,
+        'open'          => ($inst['spel_open'] ?? '1') === '1',
+        'testmodus'     => ($inst['testmodus'] ?? '0') === '1',
+        'eindbaas_open' => ($inst['eindbaas_open'] ?? '0') === '1',
+        'tikkie_link'   => array_key_exists('tikkie_link', $inst)
                              ? $inst['tikkie_link'] : STANDAARD_TIKKIE,
     ]);
+}
+
+// ── Beheer: De Eindbaas open/dicht ────────────────────────────────────
+case 'zetEindbaas': {
+    eis_admin($invoer);
+    zet_instelling($db, 'eindbaas_open', !empty($invoer['open']) ? '1' : '0');
+    antwoord(['ok' => true]);
 }
 
 // ── Beheer: spel open/dicht ───────────────────────────────────────────

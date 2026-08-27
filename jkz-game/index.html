@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ Jaarverslag Game</title>
-  <link rel="stylesheet" href="css/stijl.css?v=28">
+  <link rel="stylesheet" href="css/stijl.css?v=29">
 </head>
 <body>
 
@@ -55,6 +55,7 @@ window.addEventListener('error', function (e) {
           <a href="verslagen.html" class="knop secundair">Lees de verslagen</a>
           <a href="ranglijst.html" class="knop secundair">Bekijk ranglijst</a>
         </div>
+        <div id="eindbaas-vak" style="width:100%;"></div>
         <div id="bonus-cta-vak" style="margin-top:1rem;width:100%;"></div>
         <p class="klein ta-c" style="margin-top:1rem;">
           <a href="uitleg.html" style="color:var(--accent);">❓ Hoe werkt het? Lees de korte uitleg</a>
@@ -150,9 +151,10 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { registreerSpeler, haalVoortgang, haalSpelerUitStorage, slaHuidigeSpelerOp,
-         verwerkWachtrij, controleerVerbinding, verversStatus } from './js/api.js?v=28';
+         verwerkWachtrij, controleerVerbinding, verversStatus,
+         haalEindbaasOpen } from './js/api.js?v=29';
 import { renderNav, renderBonusCTA, checkGesloten, initScrollHint,
-         SPEL_NAMEN, AANTAL_SPELLEN } from './js/app.js?v=28';
+         SPEL_NAMEN, AANTAL_SPELLEN } from './js/app.js?v=29';
 
 // Gesloten-check
 if (checkGesloten()) throw new Error('gesloten');
@@ -246,11 +248,22 @@ document.getElementById('knop-iemand-anders')?.addEventListener('click', (e) => 
   toonAlleen('wissel-bevestig');
 });
 
-// Gouden bonuspunten-knop op het startscherm (alleen zichtbaar met speler)
+// Bonuspunten-knop + Eindbaas-aankondiging op het startscherm
+function renderEindbaasCTA() {
+  const vak = document.getElementById('eindbaas-vak');
+  if (!vak) return;
+  vak.innerHTML = haalEindbaasOpen()
+    ? `<a href="eindbaas.html" class="eindbaas-cta">
+         <div class="eb-titel">👑 DE EINDBAAS IS WAKKER</div>
+         <div class="klein">Nieuw bonusspel — tot 100 extra punten. Maar pas op: je mag maar 2x.</div>
+       </a>`
+    : '';
+}
 if (huidig) {
   const ctaVak = document.getElementById('bonus-cta-vak');
   renderBonusCTA(ctaVak);
-  verversStatus().then(() => renderBonusCTA(ctaVak)).catch(() => {});
+  renderEindbaasCTA();
+  verversStatus().then(() => { renderBonusCTA(ctaVak); renderEindbaasCTA(); }).catch(() => {});
 }
 
 document.getElementById('knop-wissel-nee').addEventListener('click', () => {

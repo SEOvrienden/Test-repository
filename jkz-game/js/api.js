@@ -107,9 +107,21 @@ export function haalConfig() {
 export async function verversStatus() {
   try {
     const r = await roep('haalSpelStatus');
-    sla(SLEUTEL_STATUS, { open: r.open, testmodus: r.testmodus, tikkieLink: r.tikkie_link || '' });
+    sla(SLEUTEL_STATUS, { open: r.open, testmodus: r.testmodus,
+                          eindbaasOpen: !!r.eindbaas_open, tikkieLink: r.tikkie_link || '' });
     return r;
   } catch { return null; }
+}
+
+// Is De Eindbaas (het bonusspel) opengezet in het beheer?
+export function haalEindbaasOpen() {
+  const s = laad(SLEUTEL_STATUS, null);
+  return s ? !!s.eindbaasOpen : false;
+}
+
+export async function zetEindbaas(sleutel, open) {
+  await roep('zetEindbaas', { sleutel, open });
+  await verversStatus();
 }
 
 // De ingestelde Tikkie-link (leeg = geen steunknop tonen)

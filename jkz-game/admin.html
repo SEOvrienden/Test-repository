@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <title>JKZ — Beheer</title>
-  <link rel="stylesheet" href="css/stijl.css?v=28">
+  <link rel="stylesheet" href="css/stijl.css?v=29">
 </head>
 <body>
 
@@ -43,8 +43,8 @@ window.addEventListener('error', function (e) {
 
 <script type="module">
 import { haalSpelersOverzicht, haalSpelStatus, zetSpelStatus, zetTestmodus,
-         zetTikkieLink, zetBonus, resetAlles, resetSpeler, resetScores,
-         resetBonus, toonPunten } from './js/api.js?v=28';
+         zetEindbaas, zetTikkieLink, zetBonus, resetAlles, resetSpeler,
+         resetScores, resetBonus, toonPunten } from './js/api.js?v=29';
 
 // Sleutel uit URL halen; de server controleert of hij klopt
 const params = new URLSearchParams(window.location.search);
@@ -86,6 +86,14 @@ function renderBeheer(status) {
         <input type="checkbox" id="cb-testmodus" ${status.testmodus ? 'checked' : ''}>
         <label for="cb-testmodus">Testmodus (alle levels en verslagen direct open)</label>
       </div>
+      <div class="schakelaar">
+        <input type="checkbox" id="cb-eindbaas" ${status.eindbaas_open ? 'checked' : ''}>
+        <label for="cb-eindbaas">👑 De Eindbaas open (bonusspel verschijnt op het startscherm)</label>
+      </div>
+      <p class="klein" style="margin:0 0 0.75rem;color:var(--tekst-zwak);">
+        Tip: zolang dit vinkje uit staat, ziet niemand het bonusspel. Zelf vooraf
+        testen? Zet dan tijdelijk Testmodus aan en open eindbaas.html direct.
+      </p>
       <button class="knop primair" id="knop-config-opslaan">Opslaan</button>
     </div>
 
@@ -202,6 +210,7 @@ function renderBeheer(status) {
     try {
       await zetSpelStatus(sleutel, !document.getElementById('cb-gesloten').checked);
       await zetTestmodus(sleutel, document.getElementById('cb-testmodus').checked);
+      await zetEindbaas(sleutel, document.getElementById('cb-eindbaas').checked);
       toonMelding('Opgeslagen! Dit geldt nu voor iedereen.', 'ok');
     } catch (e) { toonMelding('Fout: ' + e.message, 'fout'); }
   });
