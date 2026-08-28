@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reiskalender — voorbeeldweergave</title>
+<link rel="stylesheet" href="assets/reiskalender.css">
+<style>
+	body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; margin: 0; padding: 2.5rem 1.25rem; background: #f7f8fa; color: #16202b; }
+	.wrap { max-width: 900px; margin: 0 auto; }
+	.uitleg { margin: 0 0 2rem; padding: 1rem 1.25rem; border-left: 4px solid #0f6b5c; background: #fff; border-radius: 0 10px 10px 0; }
+	.uitleg strong { color: #0f6b5c; }
+</style>
+</head>
+<body>
+<div class="wrap">
+	<h1>Reiskalender</h1>
+	<p class="uitleg">
+		Statische voorbeeldweergave van de output. Let op <strong>Rondreis IJsland</strong>: dat is
+		<strong>één pagina met drie vertrekdata</strong> en die staat hieronder in januari 2026,
+		maart 2026 én oktober 2027. Niets gedupliceerd.
+	</p>
+
+	<div class="reiskalender reiskalender--lijst">
+		<section class="reiskalender__maand">
+			<h2 class="reiskalender__maand-titel">Januari 2026 <span class="reiskalender__maand-aantal">4 vertrekken</span></h2>
+			<ul class="reiskalender__lijst">
+				<li class="reiskalender__item reiskalender__item--beschikbaar">
+					<div class="reiskalender__datum"><span class="reiskalender__dag">5</span><span class="reiskalender__maand-kort">jan</span><span class="reiskalender__jaar">2026</span></div>
+					<div class="reiskalender__body">
+						<h3 class="reiskalender__titel"><a href="#">Marokko woestijn</a></h3>
+						<p class="reiskalender__periode">5 t/m 15 januari 2026</p>
+					</div>
+					<div class="reiskalender__meta">
+						<span class="reiskalender__prijs">vanaf € 1.295</span>
+						<span class="reiskalender__status reiskalender__status--beschikbaar">Beschikbaar</span>
+						<a class="reiskalender__knop" href="#">Bekijk reis</a>
+					</div>
+				</li>
+				<li class="reiskalender__item reiskalender__item--beschikbaar">
+					<div class="reiskalender__datum"><span class="reiskalender__dag">10</span><span class="reiskalender__maand-kort">jan</span><span class="reiskalender__jaar">2026</span></div>
+					<div class="reiskalender__body">
+						<h3 class="reiskalender__titel"><a href="#">Toscane culinair</a></h3>
+						<p class="reiskalender__periode">10 t/m 17 januari 2026</p>
+					</div>
+					<div class="reiskalender__meta">
+						<span class="reiskalender__prijs">vanaf € 1.150</span>
+						<span class="reiskalender__status reiskalender__status--beschikbaar">Beschikbaar</span>
+						<a class="reiskalender__knop" href="#">Bekijk reis</a>
+					</div>
+				</li>
+				<li class="reiskalender__item reiskalender__item--beschikbaar">
+					<div class="reiskalender__datum"><span class="reiskalender__dag">12</span><span class="reiskalender__maand-kort">jan</span><span class="reiskalender__jaar">2026</span></div>
+					<div class="reiskalender__body">
+						<h3 class="reiskalender__titel"><a href="#">Rondreis IJsland</a></h3>
+						<p class="reiskalender__periode">12 t/m 26 januari 2026</p>
+					</div>
+					<div class="reiskalender__meta">
+						<span class="reiskalender__prijs">vanaf € 2.450</span>
+						<span class="reiskalender__status reiskalender__status--beschikbaar">Beschikbaar</span>
+						<a class="reiskalender__knop" href="#">Bekijk reis</a>
+					</div>
+				</li>
+				<li class="reiskalender__item reiskalender__item--beschikbaar">
+					<div class="reiskalender__datum"><span class="reiskalender__dag">18</span><span class="reiskalender__maand-kort">jan</span><span class="reiskalender__jaar">2026</span></div>
+					<div class="reiskalender__body">
+						<h3 class="reiskalender__titel"><a href="#">Wandelen in Noorwegen</a></h3>
+						<p class="reiskalender__periode">18 t/m 25 januari 2026</p>
+					</div>
+					<div class="reiskalender__meta">
+						<span class="reiskalender__prijs">vanaf € 1.795</span>
+						<span class="reiskalender__status reiskalender__status--beschikbaar">Beschikbaar</span>
+						<a class="reiskalender__knop" href="#">Bekijk reis</a>
+					</div>
+				</li>
+			</ul>
+		</section>
+
+		<section class="reiskalender__maand">
+			<h2 class="reiskalender__maand-titel">Maart 2026 <span class="reiskalender__maand-aantal">3 vertrekken</span></h2>
+			<ul class="reiskalender__lijst">
+				<li class="reiskalender__item reiskalender__item--bijna_vol">
+					<div class="reiskalender__datum"><span class="reiskalender__dag">9</span><span class="reiskalender__maand-kort">mrt</span><span class="reiskalender__jaar">2026</span></div>
+					<div class="reiskalender__body">
+						<h3 class="reiskalender__titel"><a href="#">Rondreis IJsland</a></h3>
+						<p class="reiskalender__periode">9 t/m 23 maart 2026</p>
+					</div>
+					<div class="reiskalender__meta">
+						<span class="reiskalender__prijs">vanaf € 2.295</span>
+						<span class="reiskalender__status reiskalender__status--bijna_vol">Bijna vol (3 plaatsen)</span>
+						<a class="reiskalender__knop" href="#">Bekijk reis</a>
+					</div>
+				</li>
+				<li class="reiskalender__item reiskalender__item--beschikbaar">
+					<div class="reiskalender__datum"><span class="reiskalender__dag">21</span><span class="reiskalender__maand-kort">mrt</span><span class="reiskalender__jaar">2026</span></div>
+					<div class="reiskalender__body">
+						<h3 class="reiskalender__titel"><a href="#">Marokko woestijn</a></h3>
+						<p class="reiskalender__periode">21 t/m 31 maart 2026</p>
+					</div>
+					<div class="reiskalender__meta">
+						<span class="reiskalender__prijs">vanaf € 1.345</span>
+						<span class="reiskalender__status reiskalender__status--beschikbaar">Beschikbaar</span>
+						<a class="reiskalender__knop" href="#">Bekijk reis</a>
+					</div>
+				</li>
+				<li class="reiskalender__item reiskalender__item--vol">
+					<div class="reiskalender__datum"><span class="reiskalender__dag">28</span><span class="reiskalender__maand-kort">mrt</span><span class="reiskalender__jaar">2026</span></div>
+					<div class="reiskalender__body">
+						<h3 class="reiskalender__titel"><a href="#">Japan in bloei</a></h3>
+						<p class="reiskalender__periode">28 maart t/m 11 april 2026</p>
+					</div>
+					<div class="reiskalender__meta">
+						<span class="reiskalender__prijs">vanaf € 3.150</span>
+						<span class="reiskalender__status reiskalender__status--vol">Volgeboekt</span>
+					</div>
+				</li>
+			</ul>
+		</section>
+
+		<section class="reiskalender__maand">
+			<h2 class="reiskalender__maand-titel">Oktober 2027 <span class="reiskalender__maand-aantal">3 vertrekken</span></h2>
+			<ul class="reiskalender__lijst">
+				<li class="reiskalender__item reiskalender__item--beschikbaar">
+					<div class="reiskalender__datum"><span class="reiskalender__dag">4</span><span class="reiskalender__maand-kort">okt</span><span class="reiskalender__jaar">2027</span></div>
+					<div class="reiskalender__body">
+						<h3 class="reiskalender__titel"><a href="#">Rondreis IJsland</a></h3>
+						<p class="reiskalender__periode">4 t/m 18 oktober 2027</p>
+					</div>
+					<div class="reiskalender__meta">
+						<span class="reiskalender__prijs">vanaf € 2.550</span>
+						<span class="reiskalender__status reiskalender__status--beschikbaar">Beschikbaar</span>
+						<a class="reiskalender__knop" href="#">Bekijk reis</a>
+					</div>
+				</li>
+				<li class="reiskalender__item reiskalender__item--beschikbaar">
+					<div class="reiskalender__datum"><span class="reiskalender__dag">11</span><span class="reiskalender__maand-kort">okt</span><span class="reiskalender__jaar">2027</span></div>
+					<div class="reiskalender__body">
+						<h3 class="reiskalender__titel"><a href="#">Marokko woestijn</a></h3>
+						<p class="reiskalender__periode">11 t/m 21 oktober 2027</p>
+					</div>
+					<div class="reiskalender__meta">
+						<span class="reiskalender__prijs">vanaf € 1.395</span>
+						<span class="reiskalender__status reiskalender__status--beschikbaar">Beschikbaar</span>
+						<a class="reiskalender__knop" href="#">Bekijk reis</a>
+					</div>
+				</li>
+				<li class="reiskalender__item reiskalender__item--beschikbaar">
+					<div class="reiskalender__datum"><span class="reiskalender__dag">20</span><span class="reiskalender__maand-kort">okt</span><span class="reiskalender__jaar">2027</span></div>
+					<div class="reiskalender__body">
+						<h3 class="reiskalender__titel"><a href="#">Japan in bloei</a></h3>
+						<p class="reiskalender__periode">20 oktober t/m 3 november 2027</p>
+					</div>
+					<div class="reiskalender__meta">
+						<span class="reiskalender__prijs">vanaf € 3.250</span>
+						<span class="reiskalender__status reiskalender__status--beschikbaar">Beschikbaar</span>
+						<a class="reiskalender__knop" href="#">Bekijk reis</a>
+					</div>
+				</li>
+			</ul>
+		</section>
+	</div>
+</div>
+</body>
+</html>
