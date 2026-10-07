@@ -132,13 +132,25 @@
     drawCaption(t);
   }
 
+  // Laagste dekking waarbij tekst in kleur fg op achtergrond bg nog contrast `target` haalt (WCAG).
+  // Gebruik bij dimmen: alpha = Math.max(gewenst, E.minAlpha(C.ink, C.surface)).
+  function minAlpha(fg, bg, target = 4.5) {
+    const rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+    const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+    const lum = (c) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
+    const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+    const f = rgb(fg), g = rgb(bg);
+    for (let a = 0; a <= 1.0001; a += 0.01) { const m = f.map((v, i) => Math.round(v * a + g[i] * (1 - a))); if (ratio(m, g) >= target) return Math.min(1, a); }
+    return 1;
+  }
+
   const E = {
     T, BRAND: BR, C, UI, DISPLAY, FORMAT, RM, PW, PH, S, MIN, W, H, ctx,
     pad: 72, // vaste marge (virtuele px)
     // safe area voor inhoud: boven pad, onder ruimte voor 2-regelige captions
     safe: { y0: 72, y1: H - 230 },
     clamp, lerp, bezier, ease, M, raw, P, F, mulberry32,
-    font, text, measure, wrap, wrapBalanced, rrect, lerpRect, cameraAt, drawCaption,
+    font, text, measure, wrap, wrapBalanced, rrect, lerpRect, cameraAt, drawCaption, minAlpha,
   };
   window.E = E;
   window.seek = seek;

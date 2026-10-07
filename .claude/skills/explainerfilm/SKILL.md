@@ -7,7 +7,7 @@ description: Maakt een complete explainerfilm (30 tot 90 s) voor SEO vrienden of
 
 Je bent de hele studio: creative director, schrijver, motion designer, sound designer en render engineer. Het doel is één nieuw inzicht bij één doelgroep, in een gerenderde film die je zelf hebt gecontroleerd. Een plan, moodboard of still is niet het eindproduct.
 
-De studio staat in `explainer/`. Lees eerst `explainer/README.md` en `explainer/engine/README.md` (API van de engine en de onderdelen). Kijk naar `explainer/films/2026-10-seo-vs-sea/` als uitgewerkt voorbeeld van het niveau dat verwacht wordt: `STORYBOARD.md`, `DECISIONS.md`, `scenes.js`, `review/`, `VERIFY.md`.
+De studio staat in `explainer/`. Lees eerst `explainer/README.md` en `explainer/engine/README.md` (API van de engine en de onderdelen). Uitgewerkte voorbeelden van het verwachte niveau: `explainer/films/2026-10-seo-vs-sea/` (grafiek, 60 s) en `explainer/films/2026-10-test-interne-links/` (sitekaart met links, 30 s). Kijk naar `BRIEF.md`, `STORYBOARD.md`, `DECISIONS.md`, `scenes.js`, `review/` en `VERIFY.md`.
 
 ## Taal en huisregels
 
@@ -51,7 +51,11 @@ Volg de stappen in volgorde. Stop alleen voor ontbrekende rechten, onveilige inh
 - Captions zijn de vertelling, max 2 regels, liefst ≤ 15 tekens per seconde. Woorden in beeld zijn ankers, nooit de hele caption.
 
 ### 7. Review vóór de export
-Laat twee aparte agents parallel de stills beoordelen, met de prompts uit `references/review-prompts.md`: een design review (vragen van Meaghan Choi) en een toegankelijkheidscheck. Verwerk de bevindingen. Elke fix krijgt een voor/na-paar via `engine/pair.py` in `review/`. Draai `python3 engine/verify.py <slug> --quick`.
+- Draai eerst `python3 engine/verify.py <slug> --quick`: dat maakt de stills per beat en de contact sheets in `build/` die de reviewers nodig hebben.
+- Start twee aparte agents parallel (Agent-tool, in de achtergrond) met de prompts uit `references/review-prompts.md`: een design review (vragen van Meaghan Choi) en een toegankelijkheidscheck. Onafhankelijke ogen vinden wat jij als maker mist.
+- Kun je geen agents starten (bijvoorbeeld omdat je zelf als agent draait)? Doe dan beide reviews zelf als twee aparte passes met dezelfde prompts, en zet in de README dat de review niet onafhankelijk was.
+- Verwerk de bevindingen. Elke fix krijgt een voor/na-paar via `engine/pair.py` in `review/`. Draai daarna `verify.py --quick` opnieuw.
+- Dim je tekst? Reken het contrast na met `E.minAlpha`; `verify.py` controleert alleen de vaste merkkleurparen.
 
 ### 8. Export en verificatie
 - `./engine/build.sh <slug>` (draai niets anders zwaars tegelijk, dat vertraagt de render), daarna `python3 engine/verify.py <slug>`. Alles moet "ok" zijn; "nalopen" betekent: zelf bekijken.

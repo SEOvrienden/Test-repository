@@ -201,5 +201,153 @@
     if (mark) text(mark, x + 22, yEnd - 14, { size: 26, weight: 600, color: C.ink, alpha: (t >= t1 ? 1 : 0) * (1 - after) });
   }
 
-  window.K = { cardMetrics, favicon, resultCard, morphShell, panel, searchBar, chipRect, chipContent, separate, anchor, segmentBar, toggle, laneTitle, tag, axes, click };
+
+  // ======== sitestructuur: pagina's, links, bezoeken (o.a. film interne links) ========
+
+  // Punt op de rand van rechthoek r, op de lijn van het midden naar punt p
+  function rectEdge(r, p) {
+    const cx = r.x + r.w / 2, cy = r.y + r.h / 2, dx = p.x - cx, dy = p.y - cy;
+    if (!dx && !dy) return { x: cx, y: cy };
+    const s = Math.min(dx ? (r.w / 2) / Math.abs(dx) : Infinity, dy ? (r.h / 2) / Math.abs(dy) : Infinity);
+    return { x: cx + dx * s, y: cy + dy * s };
+  }
+  // Begin- en eindpunt van een link tussen twee rechthoeken (rand tot rand, met marge)
+  function linkPoints(ra, rb, gap = 6) {
+    const ca = { x: ra.x + ra.w / 2, y: ra.y + ra.h / 2 }, cb = { x: rb.x + rb.w / 2, y: rb.y + rb.h / 2 };
+    const a = rectEdge(ra, cb), b = rectEdge(rb, ca);
+    const len = Math.hypot(b.x - a.x, b.y - a.y) || 1, ux = (b.x - a.x) / len, uy = (b.y - a.y) / len;
+    return { a: { x: a.x + ux * gap, y: a.y + uy * gap }, b: { x: b.x - ux * gap, y: b.y - uy * gap } };
+  }
+
+  // Vinkje in een cirkel (bezocht, gevonden). Vorm draagt de betekenis, niet alleen de kleur.
+  function checkBadge(x, y, r, a, color) {
+    if (a <= 0) return;
+    ctx.save(); ctx.globalAlpha *= a;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = color || C.accent; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = C.surface; ctx.stroke();
+    ctx.lineWidth = Math.max(2.5, r * 0.22); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = C.surface;
+    ctx.beginPath(); ctx.moveTo(x - r * 0.42, y + r * 0.02); ctx.lineTo(x - r * 0.1, y + r * 0.34); ctx.lineTo(x + r * 0.45, y - r * 0.3); ctx.stroke();
+    ctx.restore();
+  }
+
+  // Pagina in een sitekaart. o: { a, ta (tekstdekking), state: 'plain'|'visited'|'missing', sub, subColor, title, size, check 0..1 }
+  // plain = dunne doorgetrokken rand (ink2) · visited = dikke accentrand + vinkje · missing = gestreepte rand (ink2)
+  function pageNode(r, o) {
+    const a = o.a == null ? 1 : o.a;
+    if (a <= 0) return;
+    const st = o.state || 'plain';
+    ctx.save(); ctx.globalAlpha *= a;
+    rrect(r.x, r.y, r.w, r.h, 14); ctx.fillStyle = C.surface; ctx.fill();
+    ctx.lineWidth = st === 'visited' ? 4 : 2; ctx.strokeStyle = st === 'visited' ? C.accent : C.ink2;
+    if (st === 'missing') ctx.setLineDash([10, 7]);
+    ctx.stroke(); ctx.setLineDash([]);
+    const ta = a * (o.ta == null ? 1 : o.ta);
+    ctx.globalAlpha = ta;
+    // documentje links
+    const ix = r.x + 22, iy = r.y + r.h / 2 - 17, iw = 26, ih = 34;
+    ctx.lineWidth = 2; ctx.strokeStyle = C.ink2;
+    ctx.beginPath(); ctx.moveTo(ix, iy); ctx.lineTo(ix + iw - 8, iy); ctx.lineTo(ix + iw, iy + 8); ctx.lineTo(ix + iw, iy + ih); ctx.lineTo(ix, iy + ih); ctx.closePath(); ctx.stroke();
+    ctx.restore();
+    const size = o.size || 26, tx = r.x + 62;
+    if (o.sub) {
+      text(o.title, tx, r.y + r.h / 2 - 4, { size, weight: 600, color: C.ink, alpha: ta });
+      text(o.sub, tx, r.y + r.h / 2 + 26, { size: 22, color: o.subColor || C.ink2, alpha: ta, weight: o.subColor ? 600 : 400 });
+    } else text(o.title, tx, r.y + r.h / 2 + 9, { size, weight: 600, color: C.ink, alpha: ta });
+    if (o.check > 0) checkBadge(r.x + r.w - 6, r.y + 6, 17, a * o.check);
+  }
+
+  // Punt op een (optioneel gebogen) link. bend: uitbuiging als fractie van de lengte, naar links van de looprichting
+  function linkAt(pa, pb, p, bend = 0) {
+    if (!bend) return { x: lerp(pa.x, pb.x, p), y: lerp(pa.y, pb.y, p) };
+    const mx = (pa.x + pb.x) / 2, my = (pa.y + pb.y) / 2, dx = pb.x - pa.x, dy = pb.y - pa.y;
+    const cx = mx + dy * bend, cy = my - dx * bend, q = 1 - p;
+    return { x: q * q * pa.x + 2 * q * p * cx + p * p * pb.x, y: q * q * pa.y + 2 * q * p * cy + p * p * pb.y };
+  }
+
+  // Link als pijl van a naar b, getekend tot voortgang p. o: { a, color, lw, dash, head, bend }
+  function linkArrow(pa, pb, p, o = {}) {
+    const al = o.a == null ? 1 : o.a;
+    if (al <= 0 || p <= 0) return;
+    const bend = o.bend || 0, hl = o.head || 16;
+    const tip = linkAt(pa, pb, p, bend), pre = linkAt(pa, pb, Math.max(0, p - 0.02), bend);
+    const ang = Math.atan2(tip.y - pre.y, tip.x - pre.x);
+    ctx.save(); ctx.globalAlpha *= al;
+    ctx.strokeStyle = o.color || C.ink2; ctx.fillStyle = o.color || C.ink2; ctx.lineWidth = o.lw || 3; ctx.lineCap = 'round';
+    if (o.dash) ctx.setLineDash(o.dash);
+    ctx.beginPath(); ctx.moveTo(pa.x, pa.y);
+    const n = bend ? 40 : 1;
+    for (let i = 1; i <= n; i++) { const q = linkAt(pa, pb, p * i / n, bend); if (i === n) { ctx.lineTo(q.x - Math.cos(ang) * hl * 0.6, q.y - Math.sin(ang) * hl * 0.6); } else ctx.lineTo(q.x, q.y); }
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(tip.x, tip.y);
+    ctx.lineTo(tip.x - Math.cos(ang - 0.45) * hl, tip.y - Math.sin(ang - 0.45) * hl);
+    ctx.lineTo(tip.x - Math.cos(ang + 0.45) * hl, tip.y - Math.sin(ang + 0.45) * hl); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  // Stip die een link volgt (bezoek). p 0..1 langs de lijn; in reduced motion niet tekenen (de film markeert dan de link)
+  function travelDot(pa, pb, p, a, color, bend = 0) {
+    if (E.RM || a <= 0 || p <= 0 || p >= 1) return;
+    const q = linkAt(pa, pb, p, bend);
+    ctx.save(); ctx.globalAlpha *= a;
+    ctx.beginPath(); ctx.arc(q.x, q.y, 11, 0, Math.PI * 2);
+    ctx.fillStyle = color || C.ink; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = C.surface; ctx.stroke();
+    ctx.restore();
+  }
+
+  // Label als pil. style: 'dark' (ink, lichte tekst), 'organic' (accentSoft, accentrand), 'muted' (gestreept ink2), 'plain'
+  // align: 'left' | 'center' | 'right' t.o.v. x; y = bovenkant. check: vinkje voor de tekst. Geeft de rechthoek terug.
+  function pillRect(label, x, y, o = {}) {
+    const size = o.size || 26, h = Math.round(size * 1.75), cw = o.check ? size * 0.95 : 0;
+    const w = measure(label, size, 600) + 36 + cw;
+    const al = o.align || 'left';
+    return { x: al === 'left' ? x : al === 'center' ? x - w / 2 : x - w, y, w, h, size, cw };
+  }
+  function labelPill(label, x, y, a, o = {}) {
+    const r = pillRect(label, x, y, o);
+    if (a <= 0) return r;
+    const st = o.style || 'plain';
+    ctx.save(); ctx.globalAlpha *= a;
+    rrect(r.x, r.y, r.w, r.h, r.h / 2);
+    ctx.fillStyle = st === 'dark' ? C.ink : st === 'organic' ? C.accentSoft : C.surface; ctx.fill();
+    if (st !== 'dark') { ctx.lineWidth = 2; ctx.strokeStyle = st === 'organic' ? C.accent : C.ink2; if (st === 'muted') ctx.setLineDash([8, 6]); ctx.stroke(); }
+    ctx.restore();
+    const col = st === 'dark' ? C.surface : st === 'organic' ? C.accent : C.ink;
+    if (o.check) checkBadge(r.x + 18 + r.size * 0.38, r.y + r.h / 2, r.size * 0.42, a);
+    text(label, r.x + 18 + r.cw, r.y + r.h / 2 + r.size * 0.36, { size: r.size, weight: 600, color: col, alpha: a });
+    return r;
+  }
+
+  // Webpagina (echte UI als anker): adresbalk, titel, tekstregels. Geeft { foot: {x, y} } terug voor knoppen/labels.
+  // c: { url, title }; o: { a, textAlpha, compact }
+  function pageCard(r, c, o = {}) {
+    const a = o.a == null ? 1 : o.a;
+    if (a <= 0) return { foot: { x: r.x + 28, y: r.y + r.h - 74 } };
+    ctx.save(); ctx.globalAlpha *= a;
+    rrect(r.x, r.y, r.w, r.h, 18); ctx.fillStyle = C.surface; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = C.ink2; ctx.stroke();
+    // adresbalk
+    ctx.save(); ctx.beginPath(); rrect(r.x, r.y, r.w, r.h, 18); ctx.clip();
+    ctx.fillStyle = C.ground; ctx.fillRect(r.x, r.y, r.w, 56);
+    ctx.strokeStyle = C.rule; ctx.beginPath(); ctx.moveTo(r.x, r.y + 56); ctx.lineTo(r.x + r.w, r.y + 56); ctx.stroke();
+    ctx.restore();
+    for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.arc(r.x + 26 + i * 20, r.y + 28, 6, 0, Math.PI * 2); ctx.fillStyle = C.rule; ctx.fill(); }
+    ctx.restore();
+    const ta = (o.textAlpha == null ? 1 : o.textAlpha) * a;
+    if (ta > 0) {
+      ctx.save(); ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
+      text(c.url, r.x + 98, r.y + 36, { size: 22, color: C.ink2, alpha: ta });
+      const tl = wrap(c.title, r.w - 56, 34, 600);
+      let y = r.y + 56 + 54;
+      for (const ln of tl) { text(ln, r.x + 28, y, { size: 34, weight: 600, color: C.ink, alpha: ta }); y += 44; }
+      // tekstregels (decoratief, geen inhoud)
+      const room = r.y + r.h - 96 - y; const n = Math.max(0, Math.min(o.compact ? 2 : 3, Math.floor(room / 30)));
+      ctx.globalAlpha = ta;
+      for (let i = 0; i < n; i++) { rrect(r.x + 28, y + 4 + i * 30, (r.w - 56) * (i === n - 1 ? 0.6 : 1), 12, 6); ctx.fillStyle = C.rule; ctx.fill(); }
+      ctx.restore();
+    }
+    return { foot: { x: r.x + 28, y: r.y + r.h - 74 } };
+  }
+
+  window.K = { cardMetrics, favicon, resultCard, morphShell, panel, searchBar, chipRect, chipContent, separate, anchor, segmentBar, toggle, laneTitle, tag, axes, click,
+    rectEdge, linkPoints, linkAt, checkBadge, pageNode, linkArrow, travelDot, pillRect, labelPill, pageCard };
 })();

@@ -13,6 +13,7 @@ Elke regel hier kostte bij een eerdere film een fix. Lees ze voor je bouwt; voeg
 | Camerazoom duwt randtekst uit beeld | Reken bij zoom om een punt na of een anker aan de rand nog past |
 | Aslabels botsen in smalle grafieken | Laat "start" weg in 9:16 en 1:1; houd labels ≥ 1 labelbreedte uit elkaar |
 | Labels op lijnen lopen in elkaar en over de as | `K.separate`, daarna begrenzen boven de as, daarna nogmaals `separate` |
+| Rechte verbindingslijnen in een raster lopen over buurobjecten | Controleer elke lijn tegen vinkjes en hoeken van andere kaarten; gebruik `bend` in `K.linkArrow` of kies begin- en eindpunt zelf |
 | Een gestippelde rand in een lichte kleur is onzichtbaar | Randen die betekenis dragen in ink2 (≥ 3:1), niet in rule |
 
 ## Verhaal en hiërarchie
@@ -20,13 +21,15 @@ Elke regel hier kostte bij een eerdere film een fix. Lees ze voor je bouwt; voeg
 | Les | Waarom / wat te doen |
 |-----|----------------------|
 | Oorzaak naast gevolg | De schakelaar "budget uit" stond eerst ver van de lijn die viel; de kijker zag niet waarom. Zet de oorzaak in hetzelfde blikveld, desnoods met een verbindingslijn |
-| Eén focale actie per moment | Geen anker laten uitfaden terwijl de turn gebeurt; dim het object dat nog niet aan de beurt is (bijv. 30% dekking) |
+| Eén focale actie per moment | Geen anker laten uitfaden terwijl de turn gebeurt; dim het object dat nog niet aan de beurt is, maar houd tekst leesbaar (zie de regel over dimmen hieronder) |
 | Geen dubbele tekst | Een anker dat de caption eronder herhaalt verdunt de grote momenten. Grote tekst alleen in Vraag, Turn en Payoff |
 | Eén woordenschat | Elk ding had 4 tot 5 namen. Kies er één per ding, introduceer de koppeling ("Organisch · SEO") één keer, gebruik in de payoff dezelfde woorden |
 | Volgorde in beeld = volgorde in de caption | Blokken stonden van boven gelezen in omgekeerde volgorde |
 | De data mag niets beweren wat de film niet zegt | Een lijn die een andere kruist suggereert "dit levert meer op". Als dat niet bewezen is: laat ze niet kruisen |
 | Overgangen in volgorde: eerst weg, dan erin | Twee beelden tegelijk half doorzichtig leest als een fout. Laat het oude beeld in de eerste ~40% verdwijnen en het nieuwe daarna komen |
 | De opening moet meteen het beeld zijn | Niet 2 s een lege pagina: het misverstand staat er binnen ~1,5 s |
+| Dimmen naar 30% maakt tekst onleesbaar | 30% dekking gaf 1,9:1 op paginanamen. Gebruik `E.minAlpha(kleur, achtergrond)` als ondergrens voor gedimde tekst, of dim alleen randen en vlakken. `verify.py` ziet gedimde tekst niet: reken het zelf na |
+| Caption en beeld moeten hetzelfde zeggen op hetzelfde moment | "Google kent je pagina's" terwijl alleen Home een vinkje had. Schrijf de caption bij wat er op dat moment in beeld staat |
 | Paradox-zinnen in de payoff werken niet | "Bovenaan is niet bovenaan" moest de kijker ontcijferen. Beantwoord letterlijk de openingsvraag |
 
 ## Captions

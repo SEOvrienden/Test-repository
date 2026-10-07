@@ -9,7 +9,9 @@ f = ImageFont.truetype(os.path.join(here, '..', 'brand', 'fonts', 'Inter-SemiBol
 A = Image.open(a).convert('RGB'); B = Image.open(b).convert('RGB')
 h = 720 if A.width >= A.height else 960
 A = A.resize((int(A.width * h / A.height), h)); B = B.resize((int(B.width * h / B.height), h))
-s = Image.new('RGB', (A.width + B.width + 30, h + 70), (244, 239, 230)); d = ImageDraw.Draw(s)
-d.text((10, 18), 'VOOR  ·  ' + why, fill=(30, 28, 25), font=f); d.text((A.width + 40, 18), 'NA', fill=(24, 94, 68), font=f)
-s.paste(A, (10, 60)); s.paste(B, (A.width + 20, 60)); s.save(out)
+# de toelichting op een eigen regel, zodat hij in staande formaten niet over 'NA' loopt
+s = Image.new('RGB', (A.width + B.width + 30, h + 110), (244, 239, 230)); d = ImageDraw.Draw(s)
+d.text((10, 14), 'VOOR', fill=(30, 28, 25), font=f); d.text((A.width + 30, 14), 'NA', fill=(24, 94, 68), font=f)
+d.text((10, 54), why, fill=(30, 28, 25), font=f)
+s.paste(A, (10, 100)); s.paste(B, (A.width + 20, 100)); s.save(out)
 print(out)

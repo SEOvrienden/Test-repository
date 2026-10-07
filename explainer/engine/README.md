@@ -43,6 +43,7 @@ python3 engine/pair.py voor.png na.png films/<slug>/review/01_wat.png "wat er mi
 | `text(str, x, y, {size, weight, fam, color, align, alpha})` | Tekst; maat wordt nooit kleiner dan de minimale maat van het formaat |
 | `measure`, `wrap`, `wrapBalanced`, `rrect` | Tekstmaat, regels, afgeronde rechthoek |
 | `mulberry32(seed)` | De enige toegestane willekeur |
+| `minAlpha(fg, bg, 4.5)` | Laagste dekking waarbij gedimde tekst nog 4,5:1 haalt. Gebruik bij elk dimmen van tekst |
 | `ctx` | Canvas 2D-context voor eigen tekenwerk |
 
 Schaal en minimale tekstmaat per formaat: standaard `{wide: 1.1, tall: 1.35, square: 1.2}` en `{wide: 22, tall: 26, square: 26}`; overschrijfbaar via `TIMELINE.format`.
@@ -65,6 +66,13 @@ Stijlen: `'paid'` = gestreepte rand in ink2, `'organic'` = doorgetrokken in acce
 | `tag(slot, label, a, style)` | Label rechtsboven op een kaart |
 | `axes(plot, yLabel, [[x, label, align]], a)` | Grafiekassen met ticks |
 | `click(x, yStart, yEnd, t, t0, t1, teken)` | Klik: stip valt, ring, teken (bijv. €) |
+| `pageCard(rect, {url, title}, {a, textAlpha, compact})` | Webpagina met adresbalk, titel en tekstregels; geeft `{foot}` terug voor knoppen/labels |
+| `pageNode(rect, {a, ta, title, sub, subColor, state, check})` | Pagina in een sitekaart. `state`: `'plain'` (dunne rand), `'visited'` (accentrand + vinkje), `'missing'` (gestreept) |
+| `linkPoints(ra, rb)` / `rectEdge(r, p)` / `linkAt(a, b, p, bend)` | Rand-tot-rand-punten en punt op een (gebogen) link |
+| `linkArrow(a, b, p, {a, color, lw, head, bend, dash})` | Link als pijl, getekend tot voortgang p |
+| `travelDot(a, b, p, a, kleur, bend)` | Stip die een link volgt (bijv. Google); niet in reduced motion |
+| `pillRect(label, x, y, o)` / `labelPill(label, x, y, a, {style, check, align, size})` | Label als pil: `'dark'`, `'organic'`, `'muted'` (gestreept), `'plain'` |
+| `checkBadge(x, y, r, a)` | Vinkje in een cirkel |
 
 Nieuw onderdeel nodig dat ook in een volgende film past? Zet het hier, niet in de film.
 
