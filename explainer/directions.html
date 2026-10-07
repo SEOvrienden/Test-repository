@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Richtingen SEO vs SEA</title>
+<style>
+  @font-face { font-family: Caladea; src: url(src/fonts/Caladea-Bold.ttf); font-weight: 700; }
+  @font-face { font-family: Inter; src: url(src/fonts/Inter-Regular.otf); font-weight: 400; }
+  @font-face { font-family: Inter; src: url(src/fonts/Inter-SemiBold.otf); font-weight: 600; }
+  :root { --ground:#F4EFE6; --surface:#FFFCF7; --ink:#1E1C19; --ink2:#5A554D; --rule:#D8D0C2; --accent:#1C6A4D; --soft:#DCEBE2; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ground:#1B1A18; --surface:#25231F; --ink:#F1ECE3; --ink2:#B9B2A6; --rule:#3B3833; --accent:#6CC39C; --soft:#21362C; } }
+  :root[data-theme="dark"] { --ground:#1B1A18; --surface:#25231F; --ink:#F1ECE3; --ink2:#B9B2A6; --rule:#3B3833; --accent:#6CC39C; --soft:#21362C; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font:400 16px/1.5 Inter, system-ui, sans-serif; }
+  main { max-width:1180px; margin:0 auto; padding:40px 16px 80px; }
+  h1 { font:700 40px/1.1 Caladea, serif; margin:0 0 8px; }
+  h2 { font:700 26px/1.2 Caladea, serif; margin:0; }
+  .lede { color:var(--ink2); max-width:720px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:20px; margin-top:28px; }
+  .card { background:var(--surface); border:1px solid var(--rule); border-radius:14px; padding:18px; display:flex; flex-direction:column; gap:12px; }
+  .card.win { border:2px solid var(--accent); }
+  .badge { align-self:flex-start; font-weight:600; font-size:13px; padding:3px 10px; border-radius:99px; background:var(--soft); color:var(--accent); }
+  .badge.no { background:transparent; border:1px solid var(--rule); color:var(--ink2); }
+  svg { width:100%; height:auto; background:var(--ground); border-radius:8px; }
+  dl { margin:0; display:grid; grid-template-columns:auto 1fr; gap:4px 12px; font-size:14px; }
+  dt { color:var(--ink2); }
+  dd { margin:0; }
+  table { width:100%; border-collapse:collapse; margin-top:32px; font-size:14px; }
+  th, td { text-align:left; padding:8px; border-bottom:1px solid var(--rule); vertical-align:top; }
+  th { color:var(--ink2); font-weight:600; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Vier richtingen, één winnaar</h1>
+  <p class="lede">Vraag van de kijker: <em>"Als ik met Google Ads al bovenaan sta, waarom dan nog SEO?"</em> Idee: een advertentie huur je per klik, een organische positie bouw je op en die blijft staan als het budget stopt.</p>
+
+  <div class="grid">
+    <section class="card win">
+      <span class="badge">Winnaar</span>
+      <h2>A. Twee lanen</h2>
+      <svg viewBox="0 0 320 180" role="img" aria-label="Schets: zoekresultaat splitst in twee lanen, daarna een tijdgrafiek">
+        <rect x="16" y="20" width="136" height="26" rx="5" fill="var(--surface)" stroke="var(--rule)"/>
+        <text x="22" y="37" font-size="9" fill="var(--ink2)">Gesponsord · jouwbedrijf.nl</text>
+        <rect x="168" y="96" width="136" height="26" rx="5" fill="var(--surface)" stroke="var(--rule)"/>
+        <text x="174" y="113" font-size="9" fill="var(--ink2)">jouwbedrijf.nl</text>
+        <rect x="16" y="56" width="136" height="10" rx="3" fill="var(--ink2)" opacity=".5"/>
+        <text x="16" y="82" font-size="9" fill="var(--ink2)">budget, per klik</text>
+        <rect x="168" y="128" width="136" height="12" rx="3" fill="var(--soft)"/>
+        <rect x="168" y="144" width="136" height="12" rx="3" fill="var(--soft)"/>
+        <rect x="168" y="160" width="136" height="12" rx="3" fill="var(--soft)"/>
+        <text x="16" y="14" font-size="10" font-weight="600" fill="var(--ink)">Advertentie</text>
+        <text x="168" y="88" font-size="10" font-weight="600" fill="var(--accent)">Organisch</text>
+      </svg>
+      <dl><dt>Hook</dt><dd>Echt zoekresultaat: hetzelfde bedrijf twee keer bovenaan.</dd>
+      <dt>Model</dt><dd>De twee resultaten worden twee lanen: klikken halen budget leeg, blokken tillen de organische positie op.</dd>
+      <dt>Turn</dt><dd>Budget uit: advertentie valt weg, organische lijn loopt door.</dd></dl>
+      <p><strong>Waarom:</strong> de kijker herkent het zoekresultaat, objecten blijven bestaan (kaart wordt label, blokken worden de tijdas), geen metafoor nodig.</p>
+    </section>
+
+    <section class="card">
+      <span class="badge no">Afgevallen</span>
+      <h2>B. Kraan en tuin</h2>
+      <svg viewBox="0 0 320 180" role="img" aria-label="Schets: kraan links, plant rechts">
+        <path d="M40 40h60v16H76v20H64V56H40z" fill="var(--ink2)"/>
+        <path d="M70 80v60" stroke="var(--ink2)" stroke-dasharray="3 5" stroke-width="3"/>
+        <path d="M230 150v-60" stroke="var(--accent)" stroke-width="4"/>
+        <ellipse cx="216" cy="96" rx="16" ry="8" fill="var(--accent)"/>
+        <ellipse cx="244" cy="86" rx="16" ry="8" fill="var(--accent)"/>
+        <rect x="180" y="150" width="100" height="8" fill="var(--rule)"/>
+      </svg>
+      <p><strong>Waarom niet:</strong> een tuin groeit vanzelf, SEO niet. De metafoor maakt het idee minder kloppend en vraagt illustratie in plaats van echte UI.</p>
+    </section>
+
+    <section class="card">
+      <span class="badge no">Afgevallen</span>
+      <h2>C. Alleen de grafiek</h2>
+      <svg viewBox="0 0 320 180" role="img" aria-label="Schets: twee lijnen over tijd">
+        <path d="M30 150H300M30 150V20" stroke="var(--ink2)"/>
+        <path d="M30 150v-60h200v60" stroke="var(--ink2)" stroke-dasharray="6 5" fill="none" stroke-width="3"/>
+        <path d="M30 145C110 140 150 80 300 80" stroke="var(--accent)" fill="none" stroke-width="3"/>
+      </svg>
+      <p><strong>Waarom niet:</strong> klopt, maar abstract vanaf seconde één. De kijker mist het zoekresultaat waar het misverstand ontstaat. De grafiek blijft wel bestaan als het bewijsdeel van A.</p>
+    </section>
+
+    <section class="card">
+      <span class="badge no">Afgevallen</span>
+      <h2>D. Huren of kopen</h2>
+      <svg viewBox="0 0 320 180" role="img" aria-label="Schets: huurhuis en koophuis">
+        <path d="M50 150V90l45-35 45 35v60z" fill="none" stroke="var(--ink2)" stroke-width="3"/>
+        <path d="M180 150V90l45-35 45 35v60z" fill="var(--soft)" stroke="var(--accent)" stroke-width="3"/>
+        <text x="62" y="170" font-size="11" fill="var(--ink2)">huur</text>
+        <text x="200" y="170" font-size="11" fill="var(--accent)">koop</text>
+      </svg>
+      <p><strong>Waarom niet:</strong> "kopen" belooft eigendom. Een organische positie kan zakken zonder onderhoud. Te stellig, dus onjuist. "Huur je per klik" houden we wel als ankerzin.</p>
+    </section>
+  </div>
+
+  <table>
+    <thead><tr><th>Vraag (Meaghan Choi)</th><th>Antwoord</th></tr></thead>
+    <tbody>
+      <tr><td>Voor wie is dit?</td><td>MKB-ondernemer die Google Ads draait of overweegt en denkt dat "bovenaan" overal hetzelfde betekent.</td></tr>
+      <tr><td>Wat communiceren we?</td><td>Advertentie stopt als het budget stopt; een organische positie bouw je op en blijft staan.</td></tr>
+      <tr><td>Heeft het een naam nodig?</td><td>Nee. Twee namen, steeds dezelfde: "Advertentie" (Google Ads) en "Organisch" (SEO). Het merk alleen als afzender in de laatste seconden.</td></tr>
+    </tbody>
+  </table>
+</main>
+</body>
+</html>
