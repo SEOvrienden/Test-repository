@@ -1,4 +1,4 @@
-"""Mastert de ruwe Web Audio-render naar ca. -16 LUFS, true peak max -1.5 dBTP (twee passes loudnorm).
+"""Mastert de ruwe Web Audio-render naar ca. -16 LUFS, true peak max -1.5 dBTP na AAC (twee passes loudnorm + limiter).
 Gebruik: python3 render/master_audio.py build/bed_raw.wav build/audio_master.wav
 """
 import json, re, subprocess, sys
@@ -11,5 +11,7 @@ p = subprocess.run(['ffmpeg', '-hide_banner', '-nostats', '-i', src, '-af', f'lo
 m = json.loads(re.search(r'\{[^{}]*"input_i"[^{}]*\}', p.stderr).group(0))
 af = (f"loudnorm={TARGET}:measured_I={m['input_i']}:measured_TP={m['input_tp']}:measured_LRA={m['input_lra']}"
       f":measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true,aresample=48000")
+# Klik-transiënten schieten na AAC-codering ~2 dB over: oversampled limiter erachter (getest: -2,9 dBTP na AAC 192k)
+af += ',aresample=192000,alimiter=limit=0.6:attack=0.5:release=40:level=false,aresample=48000'
 subprocess.run(['ffmpeg', '-y', '-hide_banner', '-loglevel', 'error', '-i', src, '-af', af, '-c:a', 'pcm_s24le', out], check=True)
 print('pass1', {k: m[k] for k in ('input_i', 'input_tp', 'input_lra')})

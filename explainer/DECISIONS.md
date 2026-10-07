@@ -17,8 +17,12 @@ Eén regel per beslissing. Aanname = gemarkeerd.
 | D11 | Namen: "Advertentie" (= Google Ads) en "Organisch" (= SEO), elk één keer gekoppeld in de laankop, daarna consequent | Eén naam per ding; "SEA" komt niet in beeld omdat de doelgroep "Google Ads" zegt |
 | D12 | 96 BPM, alle kernacties op het beatraster | Bed en beeld lopen synchroon zonder handwerk |
 | D13 | Motief (A4-D5-F#5) bij "organisch opgebouwd", "positie blijft" en de payoff | Het motief hoort bij het kernidee, niet bij de advertentie |
-| D14 | Formaten met eigen compositie en schaal (16:9 ×1,1, 9:16 ×1,35, 1:1 ×1,1), geen bijsnijden | Leesbaarheid op telefoon |
+| D14 | Formaten met eigen compositie en schaal (16:9 ×1,1, 9:16 ×1,35, 1:1 ×1,2), geen bijsnijden | Leesbaarheid op telefoon |
 | D15 | Reduced-motion: posities springen (geen beweging), alleen korte fades; afspeelkop in stappen; camera vast | Zelfde volgorde van ideeën, geen beweging |
 | D16 | Captions branden in en gaan mee als .srt uit dezelfde bron (TIMELINE.captions) | Eén bron, geen afwijkingen |
 | D17 | Loudness via twee-pass loudnorm naar -16 LUFS, doel TP -2,0 (marge voor AAC) | Eis: TP max -1,5 dBTP na codering |
 | D18 | Primaire Google-bronnen niet live geopend (proxy), wel via zoekresultaten gecontroleerd | Gemarkeerd in SOURCES.md als nalopen |
+| D19 | Design review verwerkt: schakelaar boven het omslagpunt, één woordenschat (huur je per klik / bouw je op, "positie"), organische lijn onder advertentie, dubbele ankers in S3 weg, kaart B gedimd in S2, blokvolgorde gelijk aan caption | Zie review/pairs/11 t/m 15 |
+| D20 | Accessibility verwerkt: minimale tekstmaat per formaat, 1:1 op schaal 1,2 met compacte kaarten, gestreepte rand in ink2, accent #185E44, gebalanceerde captions, caption 13 trager | Zie review/pairs/16 en 17 |
+| D21 | Oversampled limiter (0,6) na loudnorm | Na AAC was true peak +0,2 dBTP; nu -3,3 dBTP bij -16,2 LUFS |
+| D22 | 16:9 is niet bedoeld voor 390 px; 9:16 is de telefoonversie | Kleinste tekst 16:9 op 390 px is 4,9 px |
