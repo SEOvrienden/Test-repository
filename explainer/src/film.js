@@ -8,12 +8,15 @@
   const SIZES = { wide: [1920, 1080], tall: [1080, 1920], square: [1080, 1080] };
   const [PW, PH] = SIZES[FORMAT];
   // Schaal per formaat: layout op een virtueel canvas, daarna opgeschaald. Groter type op telefoon.
-  const S = { wide: 1.1, tall: 1.35, square: 1.1 }[FORMAT];
+  const S = { wide: 1.1, tall: 1.35, square: 1.2 }[FORMAT];
+  // Kleinste tekstmaat per formaat (virtueel). Tall en square: ≥ 11 px op een telefoon van 390 px breed.
+  const MIN = { wide: 22, tall: 26, square: 26 }[FORMAT];
+  const COMPACT = FORMAT === 'square'; // 1:1 laat de omschrijving op de kaart weg
   const W = PW / S, H = PH / S;
 
   const C = {
     ground: '#F4EFE6', surface: '#FFFCF7', ink: '#1E1C19', ink2: '#5A554D',
-    rule: '#D8D0C2', accent: '#1C6A4D', accentSoft: '#DCEBE2',
+    rule: '#D8D0C2', accent: '#185E44', accentSoft: '#DCEBE2',
     captionBg: '#1E1C19', captionInk: '#FFFCF7',
   };
 
@@ -53,7 +56,7 @@
   const CLICK_JIT = Array.from({ length: 6 }, () => rnd());
 
   // ---------- tekst ----------
-  const font = (size, weight = 400, fam = 'Inter') => `${weight} ${size}px ${fam}`;
+  const font = (size, weight = 400, fam = 'Inter') => `${weight} ${Math.max(size, MIN)}px ${fam}`;
   function text(str, x, y, o = {}) {
     ctx.save();
     ctx.font = font(o.size || 24, o.weight || 400, o.fam || 'Inter');
@@ -69,6 +72,14 @@
     const words = str.split(' '); const lines = []; let cur = '';
     for (const w of words) { const tryS = cur ? cur + ' ' + w : w; if (measure(tryS, size, weight, fam) > maxW && cur) { lines.push(cur); cur = w; } else cur = tryS; }
     if (cur) lines.push(cur); return lines;
+  }
+  // gebalanceerd: zelfde aantal regels, zo gelijk mogelijk verdeeld (geen weesjes)
+  function wrapBalanced(str, maxW, size, weight = 400, fam = 'Inter') {
+    const base = wrap(str, maxW, size, weight, fam);
+    if (base.length < 2) return base;
+    let lo = 0, hi = maxW;
+    for (let i = 0; i < 20; i++) { const mid = (lo + hi) / 2; if (wrap(str, mid, size, weight, fam).length > base.length) lo = mid; else hi = mid; }
+    return wrap(str, hi + 1, size, weight, fam);
   }
   function rrect(x, y, w, h, r) { r = Math.min(r, h / 2, w / 2); ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
   const lerpRect = (a, b, p) => ({ x: lerp(a.x, b.x, p), y: lerp(a.y, b.y, p), w: lerp(a.w, b.w, p), h: lerp(a.h, b.h, p) });
@@ -91,8 +102,8 @@
   function cardMetrics(key, w) {
     const c = CARD[key]; const cp = 28; const iw = w - cp * 2;
     const tl = wrap(c.title, iw, 32, 600);
-    const dl = wrap(c.desc, iw, 24, 400);
-    const h = cp + (c.sponsored ? 34 : 0) + 34 + 14 + tl.length * 40 + 6 + dl.length * 33 + cp - 6;
+    const dl = COMPACT ? [] : wrap(c.desc, iw, 24, 400);
+    const h = cp + (c.sponsored ? 34 : 0) + 34 + 14 + tl.length * 40 + (dl.length ? 6 + dl.length * 33 : 0) + cp - 6;
     return { tl, dl, h, cp };
   }
 
@@ -133,9 +144,11 @@
     const rightRoom = kind === 'wide' ? 240 : 210;
     if (kind === 'wide') { o.plot = { x0: pad + 70, x1: W - pad - rightRoom, y0: cy0 + 170, y1: cy1 - 110 }; }
     else if (kind === 'tall') { o.plot = { x0: pad + 40, x1: W - pad - rightRoom, y0: cy0 + 400, y1: cy1 - 120 }; }
-    else { o.plot = { x0: pad + 40, x1: W - pad - rightRoom, y0: cy0 + 190, y1: cy1 - 110 }; }
+    else { o.plot = { x0: pad + 40, x1: W - pad - rightRoom, y0: cy0 + 230, y1: cy1 - 100 }; }
     o.chartTitle = { x: kind === 'wide' ? pad : pad, y: cy0 + 36 };
-    o.pill = kind === 'tall' ? { x: pad, y: cy0 + 190, w: 270, h: 60 } : { x: W - pad - 270, y: cy0 + 4, w: 270, h: 60 };
+    // schakelaar boven het omslagpunt: oorzaak en gevolg in één blikveld
+    { const pw = 300, ph = 70; const sx = lerp(o.plot.x0, o.plot.x1, T.chart.switchMonth / T.chart.months);
+      o.pill = { x: clamp(sx - pw / 2, pad, W - pad - pw), y: o.plot.y0 - ph - 30, w: pw, h: ph, sx }; }
     o.plotAnchor = { x: o.plot.x0 + 32, y: o.plot.y0 + 58 };
     return o;
   })();
@@ -175,7 +188,7 @@
     const a = K[i], b = K[Math.min(i + 1, K.length - 1)];
     const p = (b.t > a.t && !RM) ? ease(clamp((t - a.t) / (b.t - a.t))) : (t >= b.t ? 1 : 0);
     const fp = (f) => f === 'serp' ? { x: L.serp.x + L.serp.w / 2, y: L.serp.y + L.serp.h / 2 }
-      : f === 'switchPoint' ? { x: xOf(CH.switchMonth), y: (L.plot.y0 + L.plot.y1) / 2 } : { x: W / 2, y: H / 2 };
+      : f === 'switchPoint' ? { x: xOf(CH.switchMonth), y: (L.pill.y + yOf(0)) / 2 } : { x: W / 2, y: H / 2 };
     const fa = fp(a.focus), fb = fp(b.focus);
     let z = lerp(a.zoom, b.zoom, p);
     if (RM) z = 1;
@@ -201,7 +214,7 @@
       rrect(r.x, r.y, r.w, r.h, 16);
       ctx.fillStyle = C.surface; ctx.fill();
       ctx.globalAlpha = a * o.box; ctx.lineWidth = 2;
-      ctx.strokeStyle = key === 'B' ? C.accent : C.rule;
+      ctx.strokeStyle = key === 'B' ? C.accent : C.ink2;
       if (key === 'A') ctx.setLineDash([10, 7]);
       ctx.stroke(); ctx.setLineDash([]);
       ctx.globalAlpha = a;
@@ -211,7 +224,7 @@
       const m = cardMetrics(key, o.lw);
       const x = r.x + m.cp; let y = r.y + m.cp;
       ctx.save(); ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
-      if (c.sponsored) { text('Gesponsord', x, y + 20, { size: 22, weight: 600, color: C.ink, alpha: ta }); y += 34; }
+      if (c.sponsored) { text('Gesponsord', x, y + 22, { size: 26, weight: 600, color: C.ink, alpha: ta }); y += 34; }
       favicon(x + 15, y + 15, 15, ta);
       text(SITE, x + 42, y + 23, { size: 23, color: C.ink2, alpha: ta });
       y += 34 + 14;
@@ -300,13 +313,14 @@
     ctx.save(); ctx.globalAlpha *= a;
     rrect(r.x, r.y, r.w, r.h, r.h / 2); ctx.fillStyle = C.surface; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = C.rule; ctx.stroke();
     // schakelaar
-    const tw = 64, th = 34, tx = r.x + r.w - tw - 16, ty = r.y + (r.h - th) / 2;
+    const tw = 76, th = 40, tx = r.x + r.w - tw - 18, ty = r.y + (r.h - th) / 2;
     rrect(tx, ty, tw, th, th / 2); ctx.fillStyle = offP > 0.5 ? C.rule : C.ink; ctx.fill();
+    if (offP > 0.5) { ctx.lineWidth = 2; ctx.strokeStyle = C.ink2; ctx.stroke(); }
     const kx = lerp(tx + tw - th / 2, tx + th / 2, offP);
     ctx.beginPath(); ctx.arc(kx, ty + th / 2, th / 2 - 4, 0, Math.PI * 2); ctx.fillStyle = C.surface; ctx.fill();
     ctx.restore();
-    text('Budget', r.x + 24, r.y + r.h / 2 + 8, { size: 24, weight: 600, color: C.ink, alpha: a });
-    text(offP > 0.5 ? 'uit' : 'aan', r.x + 24 + measure('Budget ', 24, 600), r.y + r.h / 2 + 8, { size: 24, weight: 400, color: C.ink2, alpha: a });
+    text('Budget', r.x + 26, r.y + r.h / 2 + 10, { size: 30, weight: 600, color: C.ink, alpha: a });
+    text(offP > 0.5 ? 'uit' : 'aan', r.x + 26 + measure('Budget ', 30, 600), r.y + r.h / 2 + 10, { size: 30, weight: 400, color: C.ink2, alpha: a });
   }
 
   function drawLaneTitle(lane, title, sub, a, color) {
@@ -317,7 +331,9 @@
 
   function blockRect(i, t) {
     const p = P('block.' + (i + 1), t);
-    const r = { x: L.laneB.x, y: L.laneB.y1 - (i + 1) * L.blockH - i * L.blockGap, w: L.laneB.w, h: L.blockH };
+    // een nieuw blok schuift onderin en tilt alles erboven op: van boven gelezen content, techniek, links
+    let above = 0; for (let j = i + 1; j < 3; j++) above += P('block.' + (j + 1), t) * (L.blockH + L.blockGap);
+    const r = { x: L.laneB.x, y: L.laneB.y1 - L.blockH - above, w: L.laneB.w, h: L.blockH };
     return { r: { ...r, x: r.x - (1 - p) * 60 }, p, a: F('block.' + (i + 1), t) };
   }
   function cardBLaneRect(t) {
@@ -329,12 +345,16 @@
     const cap = T.captions.find((c) => t >= c.t0 && t < c.t1);
     if (!cap) return;
     const fa = Math.min(clamp((t - cap.t0) / 0.15), clamp((cap.t1 - t) / 0.15));
+    // het vak blijft staan als de volgende caption direct aansluit; alleen de tekst wisselt
+    const prevJoin = T.captions.some((c) => Math.abs(c.t1 - cap.t0) < 1e-3);
+    const nextJoin = T.captions.some((c) => Math.abs(c.t0 - cap.t1) < 1e-3);
+    const fb = Math.min(prevJoin ? 1 : clamp((t - cap.t0) / 0.15), nextJoin ? 1 : clamp((cap.t1 - t) / 0.15));
     const size = 34, maxW = W - pad * 2 - 56;
-    const lines = wrap(cap.text, maxW, size, 400);
+    const lines = wrapBalanced(cap.text, maxW, size, 400);
     const lw = Math.max(...lines.map((l) => measure(l, size)));
     const bh = lines.length * 46 + 30, bw = lw + 56;
     const bx = W / 2 - bw / 2, by = H - 52 - bh;
-    ctx.save(); ctx.globalAlpha = 0.94 * fa;
+    ctx.save(); ctx.globalAlpha = 0.94 * fb;
     rrect(bx, by, bw, bh, 12); ctx.fillStyle = C.captionBg; ctx.fill(); ctx.restore();
     lines.forEach((l, i) => text(l, W / 2, by + 15 + 34 + i * 46 - 4, { size, color: C.captionInk, align: 'center', alpha: fa }));
   }
@@ -374,7 +394,7 @@
     const laneOut = 1 - clamp(toChartF * 2.5);
     const laneA = F('laneA.title', t) * laneOut;
     const laneB = F('laneB.title', t) * laneOut;
-    drawLaneTitle(L.laneA, 'Advertentie', 'Google Ads · betaal je per klik', laneA, C.ink);
+    drawLaneTitle(L.laneA, 'Advertentie', 'Google Ads · huur je per klik', laneA, C.ink);
     drawLaneTitle(L.laneB, 'Organisch', 'SEO · bouw je op', laneB, C.accent);
 
     // budgetbalk wordt de schakelaar
@@ -421,7 +441,9 @@
         const bx0 = xOf(CH.band[0]), bx1 = xOf(CH.band[1]);
         ctx.fillRect(bx0, P0.y0, (bx1 - bx0) * (RM ? 1 : clamp(raw('band.in', t) * 1.6)), P0.y1 - P0.y0);
         ctx.restore();
-        text('opbouw · bron: Google', (xOf(CH.band[0]) + xOf(CH.band[1])) / 2, P0.y1 + 78, { size: 22, weight: 600, color: C.accent, align: 'center', alpha: bandA });
+        const bl = '4 mnd tot 1 jaar · bron: Google', bw2 = measure(bl, 24, 600);
+        const bcx = clamp((xOf(CH.band[0]) + xOf(CH.band[1])) / 2, pad + bw2 / 2, W - pad - bw2 / 2);
+        text(bl, bcx, P0.y1 + 78, { size: 24, weight: 600, color: C.accent, align: 'center', alpha: bandA });
       }
       // assen
       ctx.save(); ctx.globalAlpha = axA; ctx.strokeStyle = C.ink2; ctx.lineWidth = 3;
@@ -429,7 +451,7 @@
       ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(P0.x0, P0.y0); ctx.lineTo(P0.x0, P0.y1); ctx.stroke();
       ctx.restore();
       text('bezoekers', P0.x0 + 14, P0.y0 + 6, { size: 23, color: C.ink2, alpha: axA });
-      const ticks = [[0, kind === 'tall' ? '' : 'start'], [4, '4 mnd'], [12, '1 jaar'], [24, '2 jaar']];
+      const ticks = [[0, kind === 'wide' ? 'start' : ''], [4, '4 mnd'], [12, '1 jaar'], [24, '2 jaar']];
       for (const [mm, lab] of ticks) {
         ctx.save(); ctx.globalAlpha = axA; ctx.strokeStyle = C.ink2; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(xOf(mm), P0.y1); ctx.lineTo(xOf(mm), P0.y1 + 12); ctx.stroke(); ctx.restore();
@@ -466,12 +488,17 @@
         ctx.lineWidth = 3; ctx.strokeStyle = C.surface; ctx.stroke(); ctx.restore();
         chipA = chipRect('A', xOf(m), ya); chipB = chipRect('B', xOf(m), yOf(org(m)));
         separate(chipA, chipB);
+        for (const c of [chipA, chipB]) c.y = Math.min(c.y, P0.y1 - c.h - 6); // label blijft boven de as
+        separate(chipA, chipB);
+      }
+      // verbinding schakelaar -> advertentielijn op het omslagpunt
+      if (axA > 0) {
+        const sx = xOf(CH.switchMonth), ya0 = L.pill.y + L.pill.h, ya1 = L.plot.y0 + 4; // alleen tot de plotrand, nooit door ankertekst
+        const hi = Math.min(1, offP * 2 + 0.35);
+        ctx.save(); ctx.globalAlpha = axA * hi; ctx.strokeStyle = C.ink2; ctx.lineWidth = 2; ctx.setLineDash([4, 6]);
+        ctx.beginPath(); ctx.moveTo(sx, ya0); ctx.lineTo(sx, ya1); ctx.stroke(); ctx.restore();
       }
       // ankers in de grafiek
-      const s3a = F('anchor.s3a', t) * (1 - F('band.in', t));
-      drawAnchor(T.anchors.s3a, L.plotAnchor.x, L.plotAnchor.y, 'left', s3a, kind === 'wide' ? 56 : 46);
-      const s3c = F('anchor.s3c', t) * (1 - F('anchor.s3c.out', t));
-      drawAnchor(T.anchors.s3c, L.plotAnchor.x, L.plotAnchor.y, 'left', s3c, kind === 'wide' ? 56 : 46, C.accent);
       const s4a = F('anchor.s4a', t) * (1 - toSerpF), s4b = F('anchor.s4b', t) * (1 - toSerpF);
       drawAnchor(T.anchors.s4, L.plotAnchor.x, L.plotAnchor.y, 'left', [s4a, s4b], kind === 'wide' ? 56 : 46);
     }
@@ -486,14 +513,16 @@
         const r = lerpRect({ ...slot, y: slot.y + (1 - inP) * 16 }, lane, split);
         const swap = split < 0.5;
         const ta = RM ? 1 : (split > 0 && split < 1 ? Math.abs(1 - 2 * split) : 1);
-        drawCard(key, r, { alpha: inA, box: split, lw: swap ? slot.lw : lane.lw, textAlpha: ta });
+        // tijdens de uitleg van de advertentie staat kaart B op de achtergrond
+        const dim = key === 'B' ? Math.max(lerp(1, 0.3, split), F('laneB.title', t)) : 1;
+        drawCard(key, r, { alpha: inA * dim, box: split, lw: swap ? slot.lw : lane.lw, textAlpha: ta });
         if (key === 'A' && !inS1) drawClicks(r, t);
       } else if (t < M.toSerp[0]) {
         const target = (key === 'A' ? chipA : chipB) || chipRect(key, xOf(0), key === 'A' ? yOf(CH.adsLevel) : yOf(org(0)));
         const r = lerpRect(lane, target, toChart);
         ctx.save(); ctx.globalAlpha = 1;
         rrect(r.x, r.y, r.w, r.h, lerp(16, r.h / 2, toChart)); ctx.fillStyle = C.surface; ctx.fill();
-        ctx.lineWidth = 2; ctx.strokeStyle = key === 'B' ? C.accent : C.rule; if (key === 'A') ctx.setLineDash([10, 7]); ctx.stroke(); ctx.restore();
+        ctx.lineWidth = 2; ctx.strokeStyle = key === 'B' ? C.accent : C.ink2; if (key === 'A') ctx.setLineDash([10, 7]); ctx.stroke(); ctx.restore();
         if (toChart < 0.5) drawCard(key, r, { alpha: 1, box: 0, lw: lane.lw, textAlpha: 1 - toChart * 2 });
         drawChipContent(key, r, clamp(toChart * 2 - 1));
       } else {
@@ -516,8 +545,8 @@
     drawAnchor([T.anchors.s5[0], ''], an.x, an.y, an.align, [s5, 0], anchorSize);
     drawAnchor(['', T.anchors.s5[1]], an.x, an.y, an.align, [0, s5], anchorSize, C.accent);
     // tags op de kaarten in de payoff
-    drawTag(L.slotA, 'huur je per klik', F('tagA.in', t), 'A');
-    drawTag(L.slotB, 'bouw je op', F('tagB.in', t), 'B');
+    drawTag(L.slotA, 'Google Ads · huur je per klik', F('tagA.in', t), 'A');
+    drawTag(L.slotB, 'SEO · bouw je op', F('tagB.in', t), 'B');
     const sg = F('sign.in', t);
     if (sg > 0) {
       const sy = kind === 'wide' ? an.y + anchorSize * 2.6 : kind === 'square' ? an.y - anchorSize - 6 : L.serp.y + L.serp.h + 70;
@@ -531,13 +560,13 @@
 
   function drawTag(slot, label, a, key) {
     if (a <= 0) return;
-    const w = measure(label, 23, 600) + 36, h = 42;
-    const x = slot.x + slot.w - w - 18, y = slot.y + 14 + (RM ? 0 : (1 - a) * 8);
+    const w = measure(label, 28, 600) + 40, h = 50;
+    const x = slot.x + slot.w - w - 14, y = slot.y + 10 + (RM ? 0 : (1 - a) * 8);
     ctx.save(); ctx.globalAlpha = a;
     rrect(x, y, w, h, h / 2); ctx.fillStyle = key === 'B' ? C.accentSoft : C.surface; ctx.fill();
     ctx.lineWidth = 2; ctx.strokeStyle = key === 'B' ? C.accent : C.ink2; if (key === 'A') ctx.setLineDash([8, 6]); ctx.stroke();
     ctx.restore();
-    text(label, x + 18, y + 29, { size: 23, weight: 600, color: key === 'B' ? C.accent : C.ink, alpha: a });
+    text(label, x + 20, y + 34, { size: 28, weight: 600, color: key === 'B' ? C.accent : C.ink, alpha: a });
   }
 
   function drawClicks(card, t) {
