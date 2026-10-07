@@ -1,12 +1,1 @@
-build/
-review/v*/
-review/v*_sheet.png
-review/trans/
-review/after/
-review/trans_sheet.png
-review/after2/
-review/rm9/
-review/w390/
-review/*_before_*.png
-review/fix1*_pair.png
-review/w390_*.png
+films/*/build/

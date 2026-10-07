@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Explainer</title>
+<style>
+  html, body { margin: 0; background: #F4EFE6; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+  // URL: /engine/film.html?film=<map in films/>&f=wide|tall|square[&rm=1][&t=sec]
+  const qs = new URLSearchParams(location.search);
+  const FILM_DIR = '../films/' + qs.get('film') + '/';
+  const load = (src) => new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('niet gevonden: ' + src)); document.body.appendChild(s); });
+  // Volgorde: merk en tijdlijn, dan fonts (de layout meet tekst bij het laden), dan engine en scènes.
+  window.ready = load('../brand/brand.js')
+    .then(() => load(FILM_DIR + 'timeline.js'))
+    .then(() => Promise.all(window.BRAND.fonts.map((f) => new FontFace(f.family, `url(../brand/${f.file})`, { weight: f.weight }).load().then((ff) => document.fonts.add(ff)))))
+    .then(() => load('core.js'))
+    .then(() => load('components.js'))
+    .then(() => load(FILM_DIR + 'scenes.js'))
+    .then(() => load('audio.js'))
+    .then(() => { document.body.style.background = window.BRAND.color.ground; window.seek(+(qs.get('t') || 0)); return true; });
+</script>
+</body>
+</html>
