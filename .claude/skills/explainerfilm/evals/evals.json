@@ -1,0 +1,20 @@
+{
+  "skill_name": "explainerfilm",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "maak een explainer van 30 seconden over interne links. Voor klanten bij wie we het websiteonderhoud doen: die denken vaak dat een nieuwe pagina vanzelf in Google komt zodra hij online staat. Na het kijken moeten ze snappen waarom we nieuwe pagina's altijd vanuit bestaande pagina's linken.",
+      "expected_output": "films/<slug>/ met BRIEF, STORYBOARD, DECISIONS, SOURCES, directions.html, timeline.js, scenes.js, 4 mp4's, captions.srt, contact.png, review/ en VERIFY.md zonder FAALT",
+      "files": [],
+      "assertions": [
+        "engine/verify.py eindigt met exitcode 0 (geen FAALT)",
+        "out/ bevat master_16x9, cut_9x16, cut_1x1 en master_16x9_reduced_motion als mp4",
+        "duur van de master ligt binnen 1 s van de gevraagde lengte",
+        "captions en ankers bevatten geen gedachtestreepjes (— of –)",
+        "elke caption met een getal heeft een regel in SOURCES.md",
+        "review/ bevat minstens één voor/na-paar",
+        "DECISIONS.md noemt het merk als aanname zolang brand/BRAND.md dat doet"
+      ]
+    }
+  ]
+}
