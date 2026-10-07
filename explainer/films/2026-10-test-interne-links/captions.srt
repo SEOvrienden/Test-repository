@@ -1,0 +1,39 @@
+1
+00:00:00,300 --> 00:00:03,438
+Nieuwe pagina online. Staat hij nu in Google?
+
+2
+00:00:03,438 --> 00:00:06,250
+Google komt binnen via Home.
+
+3
+00:00:06,250 --> 00:00:08,750
+Die zijn met links verbonden.
+
+4
+00:00:08,750 --> 00:00:12,500
+Google volgt die links, van pagina naar pagina.
+
+5
+00:00:12,500 --> 00:00:15,625
+Naar de nieuwe pagina loopt geen link.
+
+6
+00:00:15,625 --> 00:00:19,375
+Dus Google komt er zo niet langs.
+
+7
+00:00:19,375 --> 00:00:22,500
+Nu één link erbij, vanaf Diensten.
+
+8
+00:00:22,500 --> 00:00:25,000
+Google volgt hem en vindt de pagina.
+
+9
+00:00:25,000 --> 00:00:27,813
+Een nieuwe pagina heeft een link nodig.
+
+10
+00:00:27,813 --> 00:00:29,900
+Die link leggen wij altijd.
